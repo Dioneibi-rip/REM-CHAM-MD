@@ -100,6 +100,17 @@ global.maxwarn = '3';
 global.jadi = 'rembots' 
 global.RubyJadibts = true
 
+//Enlaces
+var canal = 'https://chat.whatsapp.com/Bns5M5EQ1Yq2d4rt6o9iNE' 
+var canal2 = 'https://chat.whatsapp.com/Bns5M5EQ1Yq2d4rt6o9iNE'  
+var git = 'https://github.com/nevi67' 
+var youtube = 'https://www.youtube.com' 
+var github = 'https://github.com/nevi67/VermeilBot-MD' 
+var facebook = 'https://www.facebook.com' 
+let tiktok = 'https://tiktok.com'
+
+global.redes = [canal, canal2, git, youtube, github, facebook, tiktok].getRandom()
+
 global.icono = [ 
 'https://qu.ax/yyCo.jpeg',
 'https://qu.ax/yyCo.jpeg',
