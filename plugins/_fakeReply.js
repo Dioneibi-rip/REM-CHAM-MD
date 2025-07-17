@@ -59,7 +59,7 @@ handler.all = async function (m) {
     forwardedNewsletterMessageInfo: {
       newsletterJid: "120363419364337473@newsletter",
       serverMessageId: 100,
-      newsletterName: name,
+      newsletterName: name_canal,
    }, 
    externalAdReply: {
     showAdAttribution: true, 
