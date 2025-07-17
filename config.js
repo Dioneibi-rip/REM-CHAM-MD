@@ -100,6 +100,14 @@ global.maxwarn = '3';
 global.jadi = 'rembots' 
 global.RubyJadibts = true
 
+global.icono = [ 
+'https://qu.ax/yyCo.jpeg',
+'https://qu.ax/yyCo.jpeg',
+'https://qu.ax/qJch.jpeg',
+'https://qu.ax/qJch.jpeg',
+'https://qu.ax/CHRS.jpeg',
+'https://qu.ax/CHRS.jpeg',
+].getRandom()
 
 // ──────────────────────────────────────────────╮
 // Ruta del archivo actual
