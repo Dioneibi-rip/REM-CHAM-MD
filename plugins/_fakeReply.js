@@ -54,12 +54,24 @@ handler.all = async function (m) {
 
     // Reenvío con enlace del Canal
     global.rcanal = {
-        contextInfo: {
-            isForwarded: true,
-            forwardedNewsletterMessageInfo: {
-                newsletterJid: id_canal,
-                serverMessageId: '100',
-                newsletterName: name_canal
+ contextInfo: {
+             isForwarded: true,
+    forwardedNewsletterMessageInfo: {
+      newsletterJid: "120363419364337473@newsletter",
+      serverMessageId: 100,
+      newsletterName: name,
+   }, 
+   externalAdReply: {
+    showAdAttribution: true, 
+    title: botname, 
+    body: textbot, 
+    mediaUrl: null, 
+    description: null, 
+    previewType: "PHOTO", 
+    thumbnailUrl: icono, 
+    sourceUrl: , 
+    mediaType: 1, 
+    renderLargerThumbnail: false }, 
             }
         }
     };
