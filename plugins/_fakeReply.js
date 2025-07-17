@@ -69,7 +69,7 @@ handler.all = async function (m) {
     description: null, 
     previewType: "PHOTO", 
     thumbnailUrl: icono, 
-    sourceUrl: , 
+    sourceUrl: fgsc, 
     mediaType: 1, 
     renderLargerThumbnail: false }, 
             }
