@@ -64,7 +64,7 @@ handler.all = async function (m) {
    externalAdReply: {
     showAdAttribution: true, 
     title: botname, 
-    body: textbot, 
+    body: packname, 
     mediaUrl: null, 
     description: null, 
     previewType: "PHOTO", 
