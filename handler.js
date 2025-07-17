@@ -97,7 +97,7 @@ export async function handler(chatUpdate) {
     if (typeof chat !== "object") global.db.data.chats[m.chat] = {};
     if (chat) {
       if (!("antiDelete" in chat)) chat.antiDelete = true;
-      if (!("antiLink" in chat)) chat.antiLink = false;
+      if (!("antiLink" in chat)) chat.antiLink = true;
       if (!("antiSticker" in chat)) chat.antiSticker = false;
       if (!("antiToxic" in chat)) chat.antiToxic = false;
       if (!("detect" in chat)) chat.detect = false;
@@ -112,7 +112,7 @@ export async function handler(chatUpdate) {
       if (!("useDocument" in chat)) chat.useDocument = false;
       if (!("viewOnce" in chat)) chat.viewOnce = false;
       if (!("viewStory" in chat)) chat.viewStory = false;
-      if (!("welcome" in chat)) chat.welcome = false;
+      if (!("welcome" in chat)) chat.welcome = true;
       if (!("chatbot" in chat)) chat.chatbot = false;
       if (!isNumber(chat.expired)) chat.expired = 0;
     } else
