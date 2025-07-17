@@ -100,46 +100,6 @@ global.maxwarn = '3';
 global.jadi = 'rembots' 
 global.RubyJadibts = true
 
-const iconUrls = [
-  "https://files.catbox.moe/ahp3bc.jpeg", "https://files.catbox.moe/uscoxy.png",
-  "https://files.catbox.moe/uc272d.webp", "https://files.catbox.moe/wvz4n8.png",
-  "https://files.catbox.moe/edsflw.jpg", "https://files.catbox.moe/g27mli.png",
-  "https://files.catbox.moe/ilkgfh.webp", "https://files.catbox.moe/c0mxk7.png",
-  "https://files.catbox.moe/k25pcl.jpg",  "https://files.catbox.moe/5qglcn.jpg",
-  "https://files.catbox.moe/nvhomc.jpeg",  "https://files.catbox.moe/d81jgr.jpg",
-  "https://files.catbox.moe/k25pcl.jpg",  "https://files.catbox.moe/6x9q51.jpg",
-  "https://files.catbox.moe/i7vsnr.jpg",  "https://files.catbox.moe/e9zgbu.jpg",
-  "https://files.catbox.moe/y2pyj7.png", "https://files.catbox.moe/jm6j5b.jpeg",
-  "https://files.catbox.moe/88fn6r.png", "https://files.catbox.moe/iph9xr.jpeg",
-  "https://files.catbox.moe/zem8ot.png", "https://files.catbox.moe/k8griq.jpeg",
-  "https://files.catbox.moe/r4fme5.png", "https://files.catbox.moe/104xtw.jpeg",
-  "https://files.catbox.moe/0buw2b.png", "https://files.catbox.moe/pjuo2b.jpg",
-  "https://files.catbox.moe/guwjzo.png",  "https://files.catbox.moe/7bn1pf.jpg",
-  "https://files.catbox.moe/n4c1es.png", "https://files.catbox.moe/fe6pw6.jpeg",
-  "https://files.catbox.moe/gmfmlc.png"
-]
-
-// Función para obtener el buffer de una imagen
-async function getBuffer(url, options = {}) {
-  try {
-    const res = await fetch(url, options);
-    if (!res.ok) throw new Error(`Failed to fetch: ${res.statusText}`);
-    return await res.buffer();
-  } catch (e) {
-    console.error('Error in getBuffer:', e);
-    return null;
-  }
-}
-
-// Asignación de icono global de forma asíncrona
-(async () => {
-  const iconUrl = pickRandom(iconUrls);
-  global.icono = await getBuffer(iconUrl);
-})()
-
-function pickRandom(list) {
-  return list[Math.floor(Math.random() * list.length)];
-}
 
 // ──────────────────────────────────────────────╮
 // Ruta del archivo actual
