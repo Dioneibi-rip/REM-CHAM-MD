@@ -55,7 +55,7 @@ handler.all = async function (m) {
     // Reenvío con enlace del Canal
 global.rcanal = {
 contextInfo: {
-isForwarded: false,
+isForwarded: true,
 forwardedNewsletterMessageInfo: {
 newsletterJid: "120363263466636910@newsletter",
 serverMessageId: 100,
