@@ -98,6 +98,9 @@ global.error = '❌';
 global.xmoji = '🔥';
 global.multiplier = 69;
 global.maxwarn = '3';
+global.jadi = 'rembots' 
+global.RubyJadibts = true
+
 
 // ──────────────────────────────────────────────╮
 // Ruta del archivo actual
