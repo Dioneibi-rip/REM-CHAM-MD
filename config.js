@@ -12,19 +12,12 @@ import axios from 'axios';
 // Variables globales
 // ╰─────────────────────────────────────────────╮
 global.owner = [
-// <-- Número @s.whatsapp.net -->
-  ['18294868853', '⏤͟͞ू⃪ ፝͜⁞𝘿𝙞𝙤𝙣𝙚𝙞𝙗𝙞-ʳⁱᵖ ִֶ ࣪˖ ִֶָ🐇་༘', true],
-  ['18096758983', '⟆⃝༉⃟⸙ ᯽ N͙e͙v͙i͙-D͙e͙v͙ ⌗⚙️࿐', true],
-  ['526671548329', 'ू⃪ ꒰˘͈ᵕ ˘͈ 𝑳𝒆𝒈𝒏𝒂-𝒄𝒉𝒂𝒏 🪽 ꒱𖦹', true],
-
-// <-- Número @lid -->
-  ['200141197844495', 'Dioneibi', true],
-  ['260081845334105', 'nevi', true],
-  ['58566677377081', 'legna', true]
+  ['51914266269', 'CURI', true], // Mantener este numero para el reporte de los errores
+  ['5xxxxxxxxxx', 'Nose', true], // Ponga tu número para ser moderador
+  ['5491126788746', 'JTxs', true]
 ];
-
-global.mods = ['']; 
-global.prems = ['']; 
+global.mods = ['51914564564', '51916456464']; 
+global.prems = ['519134564', '5191456645', '5191309456']; 
 global.allowed = ['519130645', '5164564565', '5191364564'];
 global.keysZens = ['c2459db922', '37CC845916', '6fb0eff124'];
 global.keysxxx = keysZens[Math.floor(keysZens.length * Math.random())];
@@ -101,6 +94,46 @@ global.maxwarn = '3';
 global.jadi = 'rembots' 
 global.RubyJadibts = true
 
+const iconUrls = [
+  "https://files.catbox.moe/ahp3bc.jpeg", "https://files.catbox.moe/uscoxy.png",
+  "https://files.catbox.moe/uc272d.webp", "https://files.catbox.moe/wvz4n8.png",
+  "https://files.catbox.moe/edsflw.jpg", "https://files.catbox.moe/g27mli.png",
+  "https://files.catbox.moe/ilkgfh.webp", "https://files.catbox.moe/c0mxk7.png",
+  "https://files.catbox.moe/k25pcl.jpg",  "https://files.catbox.moe/5qglcn.jpg",
+  "https://files.catbox.moe/nvhomc.jpeg",  "https://files.catbox.moe/d81jgr.jpg",
+  "https://files.catbox.moe/k25pcl.jpg",  "https://files.catbox.moe/6x9q51.jpg",
+  "https://files.catbox.moe/i7vsnr.jpg",  "https://files.catbox.moe/e9zgbu.jpg",
+  "https://files.catbox.moe/y2pyj7.png", "https://files.catbox.moe/jm6j5b.jpeg",
+  "https://files.catbox.moe/88fn6r.png", "https://files.catbox.moe/iph9xr.jpeg",
+  "https://files.catbox.moe/zem8ot.png", "https://files.catbox.moe/k8griq.jpeg",
+  "https://files.catbox.moe/r4fme5.png", "https://files.catbox.moe/104xtw.jpeg",
+  "https://files.catbox.moe/0buw2b.png", "https://files.catbox.moe/pjuo2b.jpg",
+  "https://files.catbox.moe/guwjzo.png",  "https://files.catbox.moe/7bn1pf.jpg",
+  "https://files.catbox.moe/n4c1es.png", "https://files.catbox.moe/fe6pw6.jpeg",
+  "https://files.catbox.moe/gmfmlc.png"
+]
+
+// Función para obtener el buffer de una imagen
+async function getBuffer(url, options = {}) {
+  try {
+    const res = await fetch(url, options);
+    if (!res.ok) throw new Error(`Failed to fetch: ${res.statusText}`);
+    return await res.buffer();
+  } catch (e) {
+    console.error('Error in getBuffer:', e);
+    return null;
+  }
+}
+
+// Asignación de icono global de forma asíncrona
+(async () => {
+  const iconUrl = pickRandom(iconUrls);
+  global.icono = await getBuffer(iconUrl);
+})()
+
+function pickRandom(list) {
+  return list[Math.floor(Math.random() * list.length)];
+}
 
 // ──────────────────────────────────────────────╮
 // Ruta del archivo actual
