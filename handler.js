@@ -599,4 +599,294 @@ export async function participantsUpdate({ id, participants, action }) {
         for (let user of participants) {
           let pp, ppgp;
           try {
-            pp = await this.profilePictureUrl(u
+            pp = await this.profilePictureUrl(user, "image");
+            ppgp = await this.profilePictureUrl(id, "image");
+          } catch (error) {
+            console.error(`Error retrieving profile picture: ${error}`);
+            pp = "https://i.pinimg.com/564x/92/05/f0/9205f0b8b38e296f91cd09690a0ab3b2.jpg"; // Assign default image URL
+            ppgp = "https://i.pinimg.com/564x/92/05/f0/9205f0b8b38e296f91cd09690a0ab3b2.jpg"; // Assign default image URL
+          } finally {
+            let text = (
+              chat.sBye ||
+              this.bye ||
+              conn.bye ||
+              "Hola, @user"
+            ).replace("@user", "@" + user.split("@")[0]);
+
+            let nthMember = groupMetadata.participants.length;
+            let secondText = `
+╭───[ 𝙰𝙳𝙸𝙾𝚂 ]───
+│ 𝙰𝚍𝚒𝚘𝚜, ${nthMember}𝚍𝚎 𝚎𝚜𝚝𝚎 𝚐𝚛𝚞𝚙𝚘
+│
+│ 𝚓𝚊𝚖𝚊𝚜 𝚚𝚞𝚎𝚛𝚒𝚖𝚘𝚜 𝚟𝚎𝚛𝚝𝚎
+╰────────═┅═────────`;
+
+            let leaveApiUrl = `https://i.pinimg.com/564x/92/05/f0/9205f0b8b38e296f91cd09690a0ab3b2.jpg${encodeURIComponent(
+              await this.getName(user),
+            )}&guildName=${encodeURIComponent(await this.getName(id))}&guildIcon=${encodeURIComponent(
+              ppgp,
+            )}&memberCount=${encodeURIComponent(
+              nthMember.toString(),
+            )}&avatar=${encodeURIComponent(pp)}&background=${encodeURIComponent(
+              "https://i.pinimg.com/564x/92/05/f0/9205f0b8b38e296f91cd09690a0ab3b2.jpg",
+            )}`;
+
+            try {
+              let leaveResponse = await fetch(leaveApiUrl);
+              let leaveBuffer = await leaveResponse.buffer();
+
+              this.sendMessage(id, {
+                text: text,
+                contextInfo: {
+                  mentionedJid: [user],
+                  externalAdReply: {
+                    title: "𝚁𝙴𝙼-𝙱𝙾𝚃",
+                    body: "𝙰𝙳𝙸𝙾𝚂 𝙳𝙴 𝙴𝚂𝚃𝙴 𝙶𝚁𝚄𝙿𝙸𝚃𝙾",
+                    thumbnailUrl: "https://i.pinimg.com/564x/75/d1/e5/75d1e55eaca123a2815cf465d5c0d219.jpg",
+                    sourceUrl:
+                      "https://github.com/davidprospero123/REM-CHAM-MD",
+                    mediaType: 1,
+                    renderLargerThumbnail: true,
+                  },
+                },
+              });
+            } catch (error) {
+              console.error(
+                `Error al generar la imagen de despedida: ${error}`,
+              );
+            }
+          }
+        }
+      }
+      break;
+    case "promote":
+      const promoteText = (
+        chat.sPromote ||
+        this.spromote ||
+        conn.spromote ||
+        `${emoji.promote} @user *AHORA ES ADMIN*`
+      ).replace("@user", "@" + participants[0].split("@")[0]);
+
+      if (chat.detect) {
+        this.sendMessage(id, {
+          text: promoteText.trim(),
+          mentions: [participants[0]],
+        });
+      }
+      break;
+    case "demote":
+      const demoteText = (
+        chat.sDemote ||
+        this.sdemote ||
+        conn.sdemote ||
+        `${emoji.demote} @user *YA NO ES ADMIN*`
+      ).replace("@user", "@" + participants[0].split("@")[0]);
+
+      if (chat.detect) {
+        this.sendMessage(id, {
+          text: demoteText.trim(),
+          mentions: [participants[0]],
+        });
+      }
+      break;
+  }
+}
+
+/**
+ * Handle groups update
+ * @param {import("@whiskeysockets/baileys").BaileysEventMap<unknown>["groups.update"]} groupsUpdate
+ */
+export async function groupsUpdate(groupsUpdate) {
+  if (opts["self"]) return;
+  for (const groupUpdate of groupsUpdate) {
+    const id = groupUpdate.id;
+    if (!id) continue;
+    let chats = global.db.data.chats[id] || {};
+    const emoji = {
+      desc: "📝",
+      subject: "📌",
+      icon: "🖼️",
+      revoke: "🔗",
+      announceOn: "🔒",
+      announceOff: "🔓",
+      restrictOn: "🚫",
+      restrictOff: "✅",
+    };
+
+    let text = "";
+    if (!chats.detect) continue;
+
+    if (groupUpdate.desc) {
+      text = (
+        chats.sDesc ||
+        this.sDesc ||
+        conn.sDesc ||
+        `*${emoji.desc} DESCRIPCION CAMBIADA POR*\n@desc`
+      ).replace("@desc", groupUpdate.desc);
+    } else if (groupUpdate.subject) {
+      text = (
+        chats.sSubject ||
+        this.sSubject ||
+        conn.sSubject ||
+        `*${emoji.subject} EL TEMA FUE CAMBIADO A*\n@subject`
+      ).replace("@subject", groupUpdate.subject);
+    } else if (groupUpdate.icon) {
+      text = (
+        chats.sIcon ||
+        this.sIcon ||
+        conn.sIcon ||
+        `*${emoji.icon} EL ICONO FUE CAMBIADO*`
+      ).replace("@icon", groupUpdate.icon);
+    } else if (groupUpdate.revoke) {
+      text = (
+        chats.sRevoke ||
+        this.sRevoke ||
+        conn.sRevoke ||
+        `*${emoji.revoke} EL LINK DEL GRUPO FUE ACTUALIZADO*\n@revoke`
+      ).replace("@revoke", groupUpdate.revoke);
+    } else if (groupUpdate.announce === true) {
+      text =
+        chats.sAnnounceOn ||
+        this.sAnnounceOn ||
+        conn.sAnnounceOn ||
+        `*${emoji.announceOn} GRUPO CERRADO!*`;
+    } else if (groupUpdate.announce === false) {
+      text =
+        chats.sAnnounceOff ||
+        this.sAnnounceOff ||
+        conn.sAnnounceOff ||
+        `*${emoji.announceOff} GRUPO ABIERTO!*`;
+    } else if (groupUpdate.restrict === true) {
+      text =
+        chats.sRestrictOn ||
+        this.sRestrictOn ||
+        conn.sRestrictOn ||
+        `*${emoji.restrictOn} GRUPO RESTRINGIDO ALOS MIEMBROS!*`;
+    } else if (groupUpdate.restrict === false) {
+      text =
+        chats.sRestrictOff ||
+        this.sRestrictOff ||
+        conn.sRestrictOff ||
+        `*${emoji.restrictOff} GRUPO SOLO PARA ADMINS!*`;
+    }
+
+    if (!text) continue;
+    await this.sendMessage(id, { text, mentions: this.parseMention(text) });
+  }
+}
+
+/**
+Delete Chat
+ */
+export async function deleteUpdate(message) {
+  try {
+    if (
+      typeof process.env.antidelete === "undefined" ||
+      process.env.antidelete.toLowerCase() === "false"
+    )
+      return;
+
+    const { fromMe, id, participant } = message;
+    if (fromMe) return;
+    let msg = this.serializeM(this.loadMessage(id));
+    if (!msg) return;
+    let chat = global.db.data.chats[msg.chat] || {};
+
+    await this.reply(
+      conn.user.id,
+      `
+            ≡ BORRASTE UN MENSAJE 
+            ┌─⊷  𝘼𝙉𝙏𝙄 𝘿𝙀𝙇𝙀𝙏𝙀 
+            ▢ *NOMBRE :* @${participant.split`@`[0]} 
+            └─────────────
+            `.trim(),
+      msg,
+      {
+        mentions: [participant],
+      },
+    );
+    this.copyNForward(conn.user.id, msg, false).catch((e) =>
+      console.log(e, msg),
+    );
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+/*
+ Polling Update 
+*/
+export async function pollUpdate(message) {
+  for (const { key, update } of message) {
+    if (message.pollUpdates) {
+      const pollCreation = await this.serializeM(this.loadMessage(key.id));
+      if (pollCreation) {
+        const pollMessage = await getAggregateVotesInPollMessage({
+          message: pollCreation.message,
+          pollUpdates: pollCreation.pollUpdates,
+        });
+        message.pollUpdates[0].vote = pollMessage;
+
+        await console.log(pollMessage);
+        this.appenTextMessage(
+          message,
+          message.pollUpdates[0].vote ||
+            pollMessage.filter((v) => v.voters.length !== 0)[0]?.name,
+          message.message,
+        );
+      }
+    }
+  }
+}
+
+/*
+Update presence
+*/
+export async function presenceUpdate(presenceUpdate) {
+  const id = presenceUpdate.id;
+  const nouser = Object.keys(presenceUpdate.presences);
+  const status = presenceUpdate.presences[nouser]?.lastKnownPresence;
+  const user = global.db.data.users[nouser[0]];
+
+  if (user?.afk && status === "composing" && user.afk > -1) {
+    if (user.banned) {
+      user.afk = -1;
+      user.afkReason = "USUARIO BANEADO DE AFK";
+      return;
+    }
+
+    await console.log("AFK");
+    const username = nouser[0].split("@")[0];
+    const timeAfk = new Date() - user.afk;
+    const caption = `\n@${username} AHORA ESTAR AFK.\n\nRAZON: ${
+      user.afkReason ? user.afkReason : "SIN RAZON"
+    }\nPOR EL PASADO ${timeAfk.toTimeString()}.\n`;
+
+    this.reply(id, caption, null, {
+      mentions: this.parseMention(caption),
+    });
+    user.afk = -1;
+    user.afkReason = "";
+  }
+}
+
+/**
+dfail
+ */
+// Definición global y centralizada de la función de error.
+global.dfail = (type, m, conn) => {
+    // Llama al manejador de errores externo.
+    // La variable 'global.comando' se asigna más abajo antes de que se llame a fail().
+    failureHandler(type, conn, m, global.comando);
+};
+
+const command = m.text.slice(usedPrefix.length).trim().split(' ')[0].toLowerCase();
+
+global.comando = command
+
+let file = global.__filename(import.meta.url, true);
+watchFile(file, async () => {
+  unwatchFile(file);
+  console.log(chalk.redBright("Update handler.js"));
+  if (global.reloadHandler) console.log(await global.reloadHandler());
+});
