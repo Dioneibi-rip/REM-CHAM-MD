@@ -1,32 +1,38 @@
-let handler = async (m, { conn,usedPrefix, command, text}) => {
-if(isNaN(text) && !text.match(/@/g)){
+const handler = async (m, { conn, text, participants, isAdmin, isBotAdmin }) => {
 
-}else if(isNaN(text)) {
-var number = text.split`@`[1]
-}else if(!isNaN(text)) {
-var number = text
-}
-if(!text && !m.quoted) return conn.reply(m.chat, `✳️ Usa este comando \n *${usedPrefix + command}* @tag  (or reply to a message)`, m)
-if(number.length > 13 || (number.length < 11 && number.length > 0)) return conn.reply(m.chat, `✳️ Numero incorrecto`, m)
-try {
-if(text) {
-var user = number + '@s.whatsapp.net'
-} else if(m.quoted.sender) {
-var user = m.quoted.sender
-} else if(m.mentionedJid) {
-var user = number + '@s.whatsapp.net'
-} 
-} catch (e) {
-} finally {
-conn.groupParticipantsUpdate(m.chat, [user], 'promote')
-m.reply(`✅ Usuario promovido`)
-}}
-handler.help = ['promote']
-handler.tags = ['group']
-handler.command = ['promote', 'promover'] 
-handler.group = true
-handler.admin = true
-handler.botAdmin = true
-handler.fail = null
+  let user;
 
-export default handler
+  if (m.mentionedJid && m.mentionedJid.length) {
+    user = m.mentionedJid[0];
+  } else if (m.quoted?.sender) {
+    user = m.quoted.sender;
+  } else {
+    return conn.reply(m.chat, `🍃 ᥫ᭡ 𝖣𝖾𝖻𝖾𝗌 𝗆𝖾𝗇𝖼𝗂𝗈𝗇𝖺𝗋 𝖺 𝗎𝗇 𝗎𝗌𝗎𝖺𝗋𝗂𝗈 𝗈 𝗋𝖾𝗌𝗉𝗈𝗇𝖽𝖾𝗋 𝖺 𝗌𝗎 𝗆𝖾𝗇𝗌𝖺𝗃𝖾.\n\n*𝗘𝗷𝗲𝗺𝗽𝗹𝗼:* .promote @usuario`, m);
+  }
+
+  const groupData = await conn.groupMetadata(m.chat);
+  const isTargetAdmin = groupData.participants.find(p => p.id === user)?.admin;
+
+  if (isTargetAdmin) {
+    return conn.reply(m.chat, `👑 ᴇsᴇ ᴜsᴜᴀʀɪᴏ ʏᴀ ᴇs ᴀᴅᴍɪɴ.`, m);
+  }
+
+  try {
+    await conn.groupParticipantsUpdate(m.chat, [user], 'promote');
+    await conn.reply(m.chat, `✨ ᴇʟ ᴜsᴜᴀʀɪᴏ @${user.split('@')[0]} ᴀʜᴏʀᴀ ᴇs ᴀᴅᴍɪɴ 💙`, m, {
+      mentions: [user]
+    });
+  } catch (e) {
+    console.error(e);
+    conn.reply(m.chat, `❌ 𝖤𝗋𝗋𝗈𝗋 𝖺𝗅 𝗉𝗋𝗈𝗆𝗈𝗏𝖾𝗋 𝖺𝗅 𝗎𝗌𝗎𝖺𝗋𝗂𝗈.`, m);
+  }
+};
+
+handler.help = ['promote'];
+handler.tags = ['grupo'];
+handler.command = ['promote', 'darpija', 'promover'];
+handler.group = true;
+handler.admin = true;
+handler.botAdmin = true;
+
+export default handler;
