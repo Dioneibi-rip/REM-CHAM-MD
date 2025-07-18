@@ -116,14 +116,17 @@ let tiktok = 'https://tiktok.com'
 global.redes = [canal, canal2, git, youtube, github, facebook, tiktok].getRandom()
 
 
-global.icono = [ 
-'https://qu.ax/RsvOR.jpg',
-'https://qu.ax/PtdyH.jpg',
-'https://qu.ax/UvXvG.jpg',
-'https://qu.ax/govcr.jpg',
-'https://qu.ax/oVdPe.jpg',
-'https://qu.ax/SXPJd.jpg',
-].getRandom()
+const iconos = [ 
+  'https://qu.ax/RsvOR.jpg',
+  'https://qu.ax/PtdyH.jpg',
+  'https://qu.ax/UvXvG.jpg',
+  'https://qu.ax/govcr.jpg',
+  'https://qu.ax/oVdPe.jpg',
+  'https://qu.ax/SXPJd.jpg',
+]
+
+global.icono = iconos[Math.floor(Math.random() * iconos.length)]
+
 
 // ──────────────────────────────────────────────╮
 // Ruta del archivo actual
