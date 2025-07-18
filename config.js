@@ -98,6 +98,14 @@ global.maxwarn = '3';
 global.jadi = 'rembots' 
 global.RubyJadibts = true
 
+global.icono = [ 
+'https://telegra.ph/file/3251e9ba74374d7e64c84.jpg', 
+'https://telegra.ph/file/27fde01b560b679316f9a.jpg',  
+'https://telegra.ph/file/58865c5c6c7300cbdf663.jpg', 
+'https://telegra.ph/file/908f4317b71644d1a531b.jpg', 
+'https://telegra.ph/file/88a0602e8cb345886aabe.jpg'
+].getRandom()
+
 // Definir función para obtener un elemento aleatorio de un array
 Array.prototype.getRandom = function() {
   return this[Math.floor(Math.random() * this.length)];
