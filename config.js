@@ -117,7 +117,7 @@ global.redes = [canal, canal2, git, youtube, github, facebook, tiktok].getRandom
 
 
 global.icono = [ 
-'https://qu.ax/yyCo.jpeg',
+'https://files.catbox.moe/u9k9xj.jpg',
 'https://qu.ax/yyCo.jpeg',
 'https://qu.ax/qJch.jpeg',
 'https://qu.ax/qJch.jpeg',
