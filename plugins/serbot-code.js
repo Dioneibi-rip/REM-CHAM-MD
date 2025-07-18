@@ -42,7 +42,7 @@ let rtx2 = `✐ Cσɳҽxισɳ SυႦ-Bσƚ Mσԃҽ Cσԃҽ\n
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
-const remJBOptions = {}
+const RubyJBOptions = {}
 if (global.conns instanceof Array) console.log()
 else global.conns = []
 let handler = async (m, { conn, args, usedPrefix, command, isOwner }) => {
@@ -52,7 +52,7 @@ if (new Date - global.db.data.users[m.sender].Subs < 120000) return conn.reply(m
 const subBots = [...new Set([...global.conns.filter((conn) => conn.user && conn.ws.socket && conn.ws.socket.readyState !== ws.CLOSED).map((conn) => conn)])]
 const subBotsCount = subBots.length
 if (subBotsCount === 90) {
-return m.reply('՞߹ - ߹՞ No se han encontrado espacios para *Sub-Bots* disponibles.`)
+return m.reply(`🤖 No se han encontrado espacios para *Sub-Bots* disponibles.`)
 }
 /*if (Object.values(global.conns).length === 30) {
 return m.reply(`${emoji2} No se han encontrado espacios para *Sub-Bots* disponibles.`)
@@ -63,14 +63,14 @@ let pathrembots = path.join(`./${jadi}/`, id)
 if (!fs.existsSync(pathrembots)){
 fs.mkdirSync(pathrembots, { recursive: true })
 }
-remJBOptions.pathrembots = pathrembots
-remJBOptions.m = m
-remJBOptions.conn = conn
-remJBOptions.args = args
-remJBOptions.usedPrefix = usedPrefix
-remJBOptions.command = command
-remJBOptions.fromCommand = true
-rembots(remJBOptions)
+RubyJBOptions.pathrembots = pathrembots
+RubyJBOptions.m = m
+RubyJBOptions.conn = conn
+RubyJBOptions.args = args
+RubyJBOptions.usedPrefix = usedPrefix
+RubyJBOptions.command = command
+RubyJBOptions.fromCommand = true
+rembots(RubyJBOptions)
 global.db.data.users[m.sender].Subs = new Date * 1
 } 
 handler.help = ['qr', 'code']
@@ -96,7 +96,7 @@ fs.mkdirSync(pathrembots, { recursive: true })}
 try {
 args[0] && args[0] != undefined ? fs.writeFileSync(pathCreds, JSON.stringify(JSON.parse(Buffer.from(args[0], "base64").toString("utf-8")), null, '\t')) : ""
 } catch {
-conn.reply(m.chat, `🌹 Use correctamente el comando » ${usedPrefix + command} code`, m)
+conn.reply(m.chat, `🌀 Use correctamente el comando » ${usedPrefix + command} code`, m)
 return
 }
 
@@ -115,7 +115,7 @@ printQRInTerminal: false,
 auth: { creds: state.creds, keys: makeCacheableSignalKeyStore(state.keys, pino({level: 'silent'})) },
 msgRetry,
 msgRetryCache,
-browser: mcode ? ['Ubuntu', 'Chrome', '110.0.5585.95'] : ['REM-BOT (Sub Bot)', 'Chrome','2.0.0'],
+browser: mcode ? ['Ubuntu', 'Chrome', '110.0.5585.95'] : ['Rem-Bot (Sub Bot)', 'Chrome','2.0.0'],
 version: version,
 generateHighQualityLinkPreview: true
 };
@@ -135,7 +135,7 @@ if (store) {
 //const msg = store.loadMessage(key.remoteJid, key.id)
 //return msg.message && undefined
 } return {
-conversation: 'Ruby Hoshino Bott',
+conversation: 'Ruby Hoshino Bot',
 }}}*/
 
 let sock = makeWASocket(connectionOptions)
@@ -302,6 +302,6 @@ return minutes + ' m y ' + seconds + ' s '
 }
 
 async function joinChannels(conn) {
-for (const channelId of Object.values(global.id_canal)) {
+for (const channelId of Object.values(global.ch)) {
 await conn.newsletterFollow(channelId).catch(() => {})
 }}
