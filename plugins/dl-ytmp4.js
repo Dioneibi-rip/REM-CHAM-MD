@@ -10,7 +10,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
   let youtubeLink = args[0]
 
-  await conn.reply(m.chat, `⌛ 𝙀𝙎𝙋𝙀𝙍𝘼...\n\n🧸 𝙍𝙚𝙢 𝙚𝙨𝙩𝙖́ 𝙗𝙖𝙟𝙖𝙣𝙙𝙤 𝙩𝙪 𝙫𝙞𝙙𝙚𝙤...\n\n🔗 *Enlace:* ${youtubeLink}`, m)
+  await conn.reply(m.chat, `⌛ 𝙀𝙎𝙋𝙀𝙍𝘼.. 𝙨𝙚 𝙚𝙨𝙩𝙖́ 𝙘𝙖𝙧𝙜𝙖𝙣𝙙𝙤 𝙩𝙪 𝙫𝙞𝙙𝙚𝙤...\n\n🔗 *Enlace:* ${youtubeLink}`, m, rcanal)
 
   try {
     if (typeof youtubeLink !== 'string' || !youtubeLink.startsWith('http')) {
