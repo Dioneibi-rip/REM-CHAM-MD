@@ -115,8 +115,6 @@ let tiktok = 'https://tiktok.com'
 // Ahora sí puedes usar getRandom
 global.redes = [canal, canal2, git, youtube, github, facebook, tiktok].getRandom()
 
-console.log(global.redes)  // Te muestra un enlace aleatorio
-
 
 global.icono = [ 
 'https://qu.ax/yyCo.jpeg',
