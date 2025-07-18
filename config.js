@@ -120,7 +120,7 @@ global.icono = [
 'https://files.catbox.moe/u9k9xj.jpg',
 'https://files.catbox.moe/hab8qa.jpg',
 'https://files.catbox.moe/vh2dyg.jpg',
-'https://qu.ax/qJch.jpeg',
+'https://files.catbox.moe/2rue22.jpg',
 'https://qu.ax/CHRS.jpeg',
 'https://qu.ax/CHRS.jpeg',
 ].getRandom()
