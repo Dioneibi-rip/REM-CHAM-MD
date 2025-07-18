@@ -55,26 +55,26 @@ handler.all = async function (m) {
     // Reenvío con enlace del Canal
 global.rcanal = {
   contextInfo: {
-    isForwarded: false,
+    mentionedJid: [],
+    isForwarded: true,
+    forwardingScore: 999,
     forwardedNewsletterMessageInfo: {
       newsletterJid: "120363263466636910@newsletter",
-      serverMessageId: -1, // <- ESTO permite que se vea en todos los clientes
       newsletterName: 'vermeil Bot Channel 🚩',
+      serverMessageId: -1, // fuerza visualización
     },
-    externalAdReply: { 
+    externalAdReply: {
       showAdAttribution: true,
-      title: packname,
+      title: global.packname,
       body: '🍟 ¡Super Bot De WhatsApp!',
-      mediaUrl: null,
-      description: null,
-      previewType: "PHOTO",
-      thumbnailUrl: icono,
-      sourceUrl: redes,
+      thumbnail: await (await fetch(global.icono)).buffer(),
+      sourceUrl: global.redes,
       mediaType: 1,
-      renderLargerThumbnail: false
-    },
+      renderLargerThumbnail: true
+    }
   }
 }
+
 
 
 export default handler;
