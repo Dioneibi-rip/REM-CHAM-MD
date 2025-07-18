@@ -877,12 +877,9 @@ dfail
 global.dfail = (type, m, conn) => {
     // Llama al manejador de errores externo.
     // La variable 'global.comando' se asigna más abajo antes de que se llame a fail().
-    failureHandler(type, conn, m, global.comando);
+    failureHandler(type, conn, m);
 };
 
-const command = m.text.slice(usedPrefix.length).trim().split(' ')[0].toLowerCase();
-
-global.comando = command
 
 let file = global.__filename(import.meta.url, true);
 watchFile(file, async () => {
