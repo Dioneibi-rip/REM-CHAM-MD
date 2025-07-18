@@ -55,6 +55,12 @@ handler.all = async function (m) {
     // Reenvío con enlace del Canal
 global.rcanal = {
   contextInfo: {
+    isForwarded: false,
+    forwardedNewsletterMessageInfo: {
+      newsletterJid: "120363263466636910@newsletter",
+      serverMessageId: -1, // <- ESTO permite que se vea en todos los clientes
+      newsletterName: 'vermeil Bot Channel 🚩',
+    },
     externalAdReply: { 
       showAdAttribution: true,
       title: packname,
@@ -65,7 +71,7 @@ global.rcanal = {
       thumbnailUrl: icono,
       sourceUrl: redes,
       mediaType: 1,
-      renderLargerThumbnail: true
+      renderLargerThumbnail: false
     },
   }
 }
