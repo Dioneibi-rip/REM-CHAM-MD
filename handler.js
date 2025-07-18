@@ -24,16 +24,6 @@ const delay = (ms) =>
 const cleanJid = jid => jid?.split(':')[0] || '';
 const normalizeJid = jid => jid?.replace(/[^0-9]/g, '');
 
-const miniaturas = [
-  'https://qu.ax/RsvOR.jpg',
-  'https://qu.ax/PtdyH.jpg',
-  'https://qu.ax/UvXvG.jpg',
-  'https://qu.ax/govcr.jpg',
-  'https://qu.ax/oVdPe.jpg',
-  'https://qu.ax/SXPJd.jpg',
-]
-const miniaturaRandom = miniaturas[Math.floor(Math.random() * miniaturas.length)]
-
 /**
  * Manejo principal del mensaje
  */
