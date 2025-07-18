@@ -98,7 +98,12 @@ global.maxwarn = '3';
 global.jadi = 'rembots' 
 global.RubyJadibts = true
 
-//Enlaces
+// Definir función para obtener un elemento aleatorio de un array
+Array.prototype.getRandom = function() {
+  return this[Math.floor(Math.random() * this.length)];
+}
+
+// Enlaces
 var canal = 'https://chat.whatsapp.com/Bns5M5EQ1Yq2d4rt6o9iNE' 
 var canal2 = 'https://chat.whatsapp.com/Bns5M5EQ1Yq2d4rt6o9iNE'  
 var git = 'https://github.com/nevi67' 
@@ -107,7 +112,11 @@ var github = 'https://github.com/nevi67/VermeilBot-MD'
 var facebook = 'https://www.facebook.com' 
 let tiktok = 'https://tiktok.com'
 
+// Ahora sí puedes usar getRandom
 global.redes = [canal, canal2, git, youtube, github, facebook, tiktok].getRandom()
+
+console.log(global.redes)  // Te muestra un enlace aleatorio
+
 
 global.icono = [ 
 'https://qu.ax/yyCo.jpeg',
