@@ -127,14 +127,19 @@ No pude traerte nada.`, m);
   ];
 
   const caption = `
-🦈 *Objetivo atrapado.*
+┈۪۪۪۪۪۪۪۪ٜ̈᷼─۪۪۪۪ٜ࣪᷼┈۪۪۪۪۪۪۪۪ٜ݊᷼⁔᮫ּׅ̫ׄ࣪︵᮫ּ๋ׅׅ۪۪۪۪ׅ࣪࣪͡⌒🌀𔗨⃪̤̤̤ٜ۫۫۫҈҈҈҈҉҉᷒ᰰ꤬۫۫۫𔗨̤̤̤𐇽─۪۪۪۪ٜ᷼┈۪۪۪۪۪۪۪۪ٜ̈᷼─۪۪۪۪ٜ࣪᷼┈۪۪۪۪۪۪۪۪ٜ݊᷼𔗨̤̤̤ٜ۫۫۫💜⃪҈҈҈҈҉҉᷒ᰰ꤬۫۫۫𔗨̤̤̤𐇽⁔᮫ּׅ̫ׄ࣪︵᮫ּ๋ׅׅ۪۪۪۪ׅ࣪࣪͡⌒─۪۪۪۪ٜ᷼┈۪۪۪۪۪۪۪۪ٜ̈᷼─۪۪۪۪࣪᷼
+₊‧꒰ 🎧꒱ 𝙀𝙇𝙇𝙀𝙉 𝙅𝙊𝙀 𝘽𝙊𝙏 — 𝙋𝙇𝘼𝙔 𝙈𝙊𝘿𝙀 ✧˖°
+︶֟፝ᰳ࡛۪۪۪۪۪⏝̣ ͜͝ ۫۫۫۫۫۫︶   ︶֟፝ᰳ࡛۪۪۪۪۪⏝̣ ͜͝ ۫۫۫۫۫۫︶   ︶֟፝ᰳ࡛۪۪۪۪۪⏝̣ ͜͝ ۫۫۫۫۫۫︶
 
-🎧 *Título:* ${video.title}
-⏱️ *Duración:* ${video.timestamp}
-👀 *Vistas:* ${video.views.toLocaleString()}
-👤 *Subido por:* ${video.author.name}
-📅 *Hace:* ${video.ago}
-🔗 *URL:* ${video.url}`;
+> ૢ⃘꒰🎧⃝︩֟፝𐴲ⳋᩧ᪲ `*Título:* ${video.title}`
+> ૢ⃘꒰⏱️⃝︩֟፝𐴲ⳋᩧ᪲ `*Duración:* ${video.timestamp}`
+> ૢ⃘꒰👀⃝︩֟፝𐴲ⳋᩧ᪲ `*Vistas:* ${video.views.toLocaleString()}`
+> ૢ⃘꒰⏱️⃝︩֟፝𐴲ⳋᩧ᪲ `*Duración:* ${video.timestamp}`
+> ૢ⃘꒰👤⃝︩֟፝𐴲ⳋᩧ᪲ `*Subido por:* ${video.author.name}`
+> ૢ⃘꒰📅⃝︩֟፝𐴲ⳋᩧ᪲ `*Hace:* ${video.ago}`
+> ૢ⃘꒰🔗⃝︩֟፝𐴲ⳋᩧ᪲ `*URL:* ${video.url}`;`
+⌣᮫ֶຸ࣪ᷭ⌣〫᪲꒡᳝۪︶᮫໋࣭〭〫𝆬࣪࣪𝆬࣪꒡ֶ〪࣪ ׅ۫ெ᮫〪〪⃨〫᪲࣪˚̥ׅ੭ֶ֟ৎ᮫໋ׅ̣𝆬  ּ֢̊࣪⡠᮫ ໋🦈᮫ຸ〪〪〪〫ᷭ ݄࣪⢄ꠋּ֢ ࣪ ֶׅ੭ֶ̣֟ৎ᮫˚̥࣪ெ᮫〪〪⃨〫᪲ ࣪꒡᮫໋〭࣪𝆬࣪︶〪᳝۪ꠋּ꒡ׅ⌣᮫ֶ࣪᪲⌣᮫ຸ᳝〫֩ᷭ
+     ᷼͝ ᮫໋⏝᮫໋〪ׅ〫𝆬⌣ׄ𝆬᷼᷼᷼᷼᷼᷼᷼᷼᷼⌣᷑︶᮫᷼͡︶ׅ ໋𝆬⋰᩠〫 ᮫ׄ ׅ𝆬 ⠸᮫ׄ ׅ ⋱〫 ۪۪ׄ᷑𝆬︶᮫໋᷼͡︶ׅ 𝆬⌣᮫〫ׄ᷑᷼᷼᷼᷼᷼᷼᷼᷼᷼⌣᜔᮫ׄ⏝᜔᮫๋໋〪ׅ〫 ᷼͝`;
 
   await conn.sendMessage(m.chat, {
     image: { url: video.thumbnail },
