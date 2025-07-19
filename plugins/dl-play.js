@@ -122,8 +122,8 @@ No pude traerte nada.`, m);
   }
 
   const buttons = [
-    { buttonId: `${usedPrefix}play audio ${video.url}`, buttonText: { displayText: '🎧 Solo Audio' }, type: 1 },
-    { buttonId: `${usedPrefix}play video ${video.url}`, buttonText: { displayText: '🎬 Video Completo' }, type: 1 }
+    { buttonId: `${usedPrefix}play audio ${video.url}`, buttonText: { displayText: '🎧 𝘼𝙐𝘿𝙄𝙊' }, type: 1 },
+    { buttonId: `${usedPrefix}play video ${video.url}`, buttonText: { displayText: '🎬 𝙑𝙄𝘿𝙀𝙊' }, type: 1 }
   ];
 
   const caption = `
