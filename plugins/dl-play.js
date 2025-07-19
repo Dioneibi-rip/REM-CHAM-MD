@@ -47,19 +47,20 @@ const handler = async (m, { conn, text, command }) => {
     console.error("⚠️ Error cargando miniatura:", e.message);
   }
 
+  // 🔊 AUDIO
   if (command === "play") {
     try {
       await m.react("🎶");
 
-      const apiUrl = `https://api.stellarwa.xyz/dow/ytmp3?url=${encodeURIComponent(video.url)}&apikey=stellar-bFA8UWSA`;
+      const apiUrl = `https://api.vreden.my.id/api/ytplaymp3?query=${encodeURIComponent(text)}`;
       const res = await axios.get(apiUrl);
-      const data = res.data;
+      const data = res.data.result;
 
-      if (!data.status || !data.data?.dl) throw new Error("No se pudo descargar el audio.");
+      if (!data?.download?.url) throw new Error("No se pudo descargar el audio.");
 
-      let { dl: audioUrl, thumbnail, title } = data.data;
-      if (!title || title === "-") title = "Audio Estelar 💙";
-
+      const audioUrl = data.download.url;
+      const title = data.metadata.title || "Audio Estelar 💙";
+      const thumbnail = data.metadata.thumbnail;
       const tmpPath = `${os.tmpdir()}/${title}.mp3`;
 
       const response = await axios({
@@ -81,9 +82,9 @@ const handler = async (m, { conn, text, command }) => {
           externalAdReply: {
             showAdAttribution: true,
             mediaType: 2,
-            mediaUrl: video.url,
+            mediaUrl: data.metadata.url,
             title: title,
-            sourceUrl: video.url,
+            sourceUrl: data.metadata.url,
             thumbnail: await (await conn.getFile(thumbnail)).data,
           }
         }
@@ -98,28 +99,27 @@ const handler = async (m, { conn, text, command }) => {
     }
   }
 
+  // 🎬 VIDEO
   if (command === "play2" || command === "playvid") {
     try {
-      const res = await fetch(`https://api.sylphy.xyz/download/ytmp4?url=${encodeURIComponent(video.url)}&apikey=Sylphiette's`);
-      const json = await res.json();
+      await m.react("🎥");
 
-      if (!json.status || !json.res?.url) {
-        return m.reply("❌ No se pudo obtener el video.");
-      }
+      const res = await axios.get(`https://api.vreden.my.id/api/ytplaymp4?query=${encodeURIComponent(text)}`);
+      const data = res.data.result;
 
-      const head = await fetch(json.res.url, { method: "HEAD" });
+      if (!data?.download?.url) throw new Error("No se pudo obtener el video.");
+
+      const head = await fetch(data.download.url, { method: "HEAD" });
       const size = parseInt(head.headers.get("content-length") || "0");
       const asDoc = (size / (1024 * 1024)) > SIZE_LIMIT_MB;
 
       await conn.sendMessage(m.chat, {
-        video: { url: json.res.url },
+        video: { url: data.download.url },
         mimetype: "video/mp4",
-        fileName: `${video.title}.mp4`,
+        fileName: `${data.metadata.title}.mp4`,
         caption: "🎬 Aquí tienes tu video ~ 💙",
         ...(asDoc ? { asDocument: true } : {})
       }, { quoted: m });
-
-      await m.react("🎥");
 
     } catch (err) {
       console.error(err);
