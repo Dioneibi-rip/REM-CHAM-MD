@@ -1,54 +1,39 @@
-import fetch from 'node-fetch'
+const font2 = {
+  a: '🅐', b: '🅑', c: '🅒', d: '🅓', e: '🅔', f: '🅕', g: '🅖',
+  h: '🅗', i: '🅘', j: '🅙', k: '🅚', l: '🅛', m: '🅜', n: '🅝',
+  o: '🅞', p: '🅟', q: '🅠', r: '🅡', s: '🅢', t: '🅣', u: '🅤',
+  v: '🅥', w: '🅦', x: '🅧', y: '🅨', z: '🅩'
+}
 
-let handler = async (m, { conn, args, usedPrefix, command }) => {
-  if (!args[0]) {
-    return conn.reply(m.chat, `╭─⊷ 𝙐𝙎𝙊 𝙄𝙉𝘾𝙊𝙍𝙍𝙀𝘾𝙏𝙊
-│
-├ ❏ *Ejemplo:* 
-└─▸ ${usedPrefix + command} https://youtu.be/ejemplo`, m)
+const handler = async (m, { conn, text }) => {
+  if (!text.includes('|')) {
+    return m.reply(`❌ Formato incorrecto.\nUsa:\n.reactch https://whatsapp.com/channel/abc/123|Hola Mundo`)
   }
 
-  let youtubeLink = args[0]
+  let [link, ...messageParts] = text.split('|')
+  link = link.trim()
+  const msg = messageParts.join('|').trim().toLowerCase()
 
-  await conn.reply(m.chat, `⌛ 𝙀𝙎𝙋𝙀𝙍𝘼.. 𝙨𝙚 𝙚𝙨𝙩𝙖́ 𝙘𝙖𝙧𝙜𝙖𝙣𝙙𝙤 𝙩𝙪 𝙫𝙞𝙙𝙚𝙤...\n\n🔗 *Enlace:* ${youtubeLink}`, m, rcanal)
+  if (!link.startsWith("https://whatsapp.com/channel/")) {
+    return m.reply("❌ El enlace no es válido.\nDebe comenzar con: https://whatsapp.com/channel/")
+  }
+
+  const emoji = msg.split('').map(c => c === ' ' ? '―' : (font2[c] || c)).join('')
 
   try {
-    if (typeof youtubeLink !== 'string' || !youtubeLink.startsWith('http')) {
-      throw new Error('URL inválida proporcionada')
-    }
-
-    const apiKey = 'stellar-bFA8UWSA'
-    const fetchUrl = `https://api.stellarwa.xyz/dow/ytmp4?url=${encodeURIComponent(youtubeLink)}&apikey=${apiKey}`
-    const response = await fetch(fetchUrl)
-    const data = await response.json()
-
-    if (!data.status || !data.data?.dl) {
-      return conn.reply(m.chat, `❌ _Error:_ ${data.message || 'No se encontró el video'}`, m)
-    }
-
-    const { title, dl: videoUrl, thumbnail } = data.data
-    const caption = `╭─⊷ 𝙑𝙄𝘿𝙀𝙊 𝙀𝙉𝘾𝙊𝙉𝙏𝙍𝘼𝘿𝙊
-│
-├ 🎥 *Título:* ${title}
-└🔗 *Fuente:* ${youtubeLink}`
-
-    await conn.sendMessage(m.chat, {
-      video: { url: videoUrl },
-      mimetype: 'video/mp4',
-      fileName: `${title}.mp4`,
-      caption: caption,
-      thumbnail: await fetch(thumbnail).then(res => res.buffer())
-    }, { quoted: m })
-
-  } catch (error) {
-    console.error('Error:', error)
-    conn.reply(m.chat, `❌ _Error:_ Ocurrió un problema al procesar la solicitud`, m)
+    const [, , , , channelId, messageId] = link.split('/')
+    const res = await conn.newsletterMetadata("invite", channelId)
+    await conn.newsletterReactMessage(res.id, messageId, emoji)
+    m.reply(`✅ Reacción enviada como: *${emoji}*\nCanal: *${res.name}*`)
+  } catch (e) {
+    console.error(e)
+    m.reply("❌ Error\nNo se pudo reaccionar. Revisa el enlace o tu conexión.")
   }
 }
 
-handler.help = ['ytmp4 <url>']
-handler.tags = ['dl']
-handler.command = /^video|dlmp4|getvid|yt(v|mp4)?$/i
-handler.register = true
+handler.command = ['reactch', 'rch']
+handler.tags = ['tools']
+handler.help = ['reactch <link>|<texto>']
+handler.owner = true
 
 export default handler
