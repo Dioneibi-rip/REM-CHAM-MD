@@ -24,7 +24,6 @@ const handler = async (m, { conn, text, command }) => {
   }
 
   const video = search.all[0];
-  const title = video.title || "Audio Estelar 💙";
 
   const caption = `
 ╭── ❍⃟💙 𝙍𝙚𝙢 - 𝙋𝙡𝙖𝙮 💙 ❍⃟──
@@ -47,6 +46,7 @@ const handler = async (m, { conn, text, command }) => {
     console.error("⚠️ Error cargando miniatura:", e.message);
   }
 
+  // 🔊 AUDIO
   if (command === "play") {
     try {
       await m.react("🎶");
@@ -55,10 +55,13 @@ const handler = async (m, { conn, text, command }) => {
       const res = await axios.get(apiUrl);
       const data = res.data?.result;
 
-      if (!data?.download?.url) throw new Error("No se pudo descargar el audio.");
+      if (!data?.download?.url) throw new Error("No se pudo obtener el enlace del audio");
 
       const audioUrl = data.download.url;
-      const tmpPath = `${os.tmpdir()}/${data.download.filename || "audio"}.mp3`;
+      const filename = data.download.filename || "audio.mp3";
+      const title = data.metadata?.title || "Audio Estelar 💙";
+      const thumbnail = data.metadata?.thumbnail;
+      const tmpPath = `${os.tmpdir()}/${filename}`;
 
       const response = await axios({
         url: audioUrl,
@@ -74,15 +77,15 @@ const handler = async (m, { conn, text, command }) => {
           url: tmpPath,
         },
         mimetype: "audio/mp4",
-        fileName: data.download.filename,
+        fileName: filename,
         contextInfo: {
           externalAdReply: {
             showAdAttribution: true,
             mediaType: 2,
             mediaUrl: video.url,
-            title: data.metadata.title,
+            title: title,
             sourceUrl: video.url,
-            thumbnail: await (await conn.getFile(data.metadata.thumbnail)).data,
+            thumbnail: await (await conn.getFile(thumbnail)).data,
           }
         }
       };
@@ -91,36 +94,43 @@ const handler = async (m, { conn, text, command }) => {
       await m.react("✅");
 
     } catch (err) {
-      console.error(err);
+      console.error("❌ Error al descargar el audio:", err);
       return m.reply("❌ Rem no pudo descargar el audio. Intenta más tarde.");
     }
   }
 
+  // 📹 VIDEO
   if (command === "play2" || command === "playvid") {
     try {
-      const res = await axios.get(`https://api.vreden.my.id/api/ytmp4?url=${encodeURIComponent(video.url)}`);
+      await m.react("📽️");
+
+      const apiUrl = `https://api.vreden.my.id/api/ytmp4?url=${encodeURIComponent(video.url)}`;
+      const res = await axios.get(apiUrl);
       const data = res.data?.result;
 
       if (!data?.download?.url) {
         return m.reply("❌ No se pudo obtener el video.");
       }
 
-      const head = await fetch(data.download.url, { method: "HEAD" });
+      const videoUrl = data.download.url;
+      const filename = data.download.filename || "video.mp4";
+
+      const head = await fetch(videoUrl, { method: "HEAD" });
       const size = parseInt(head.headers.get("content-length") || "0");
       const asDoc = (size / (1024 * 1024)) > SIZE_LIMIT_MB;
 
       await conn.sendMessage(m.chat, {
-        video: { url: data.download.url },
+        video: { url: videoUrl },
         mimetype: "video/mp4",
-        fileName: data.download.filename,
+        fileName: filename,
         caption: "🎬 Aquí tienes tu video ~ 💙",
         ...(asDoc ? { asDocument: true } : {})
       }, { quoted: m });
 
-      await m.react("🎥");
+      await m.react("✅");
 
     } catch (err) {
-      console.error(err);
+      console.error("❌ Error al descargar el video:", err);
       return m.reply("❌ Error al descargar el video.");
     }
   }
