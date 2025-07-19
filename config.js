@@ -98,7 +98,7 @@ global.maxwarn = '3';
 global.jadi = 'rembots' 
 global.RubyJadibts = true
 
-global.icono = [ 
+const iconos = [ 
   'https://qu.ax/RsvOR.jpg',
   'https://qu.ax/PtdyH.jpg',
   'https://qu.ax/UvXvG.jpg',
@@ -132,7 +132,10 @@ global.icono = [
   'https://qu.ax/ZjPbX.jpg',
   'https://qu.ax/MNKqO.jpg',
   'https://qu.ax/SXPJd.jpg',
-].getRandom()
+]
+
+global.icono = iconos[Math.floor(Math.random() * iconos.length)]
+
 
 // Definir función para obtener un elemento aleatorio de un array
 Array.prototype.getRandom = function() {
