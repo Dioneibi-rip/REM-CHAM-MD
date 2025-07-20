@@ -25,7 +25,7 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
     externalAdReply: {
       title: '🖤 Ellen Joe - objetivo encontrado.',
       body: `✦ Espera tranquila, ${name}. Esta pieza es mía.`,
-      thumbnail: icono,
+      thumbnail: 'https://files.catbox.moe/j85zw5.jpg',
       sourceUrl: redes,
       mediaType: 1,
       renderLargerThumbnail: false
