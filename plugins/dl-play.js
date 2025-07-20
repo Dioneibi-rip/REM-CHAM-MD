@@ -8,6 +8,7 @@ const SIZE_LIMIT_MB = 100;
 const MIN_AUDIO_SIZE_BYTES = 50000;
 const newsletterJid = '120363418071540900@newsletter';
 const newsletterName = '⸙ְ̻࠭ꪆ🦈 𝐄llen 𝐉ᴏᴇ 𖥔 Sᥱrvice';
+const icono = 'https://files.catbox.moe/j85zw5.jpg';
 
 const handler = async (m, { conn, args, usedPrefix, command }) => {
   const name = conn.getName(m.sender);
@@ -25,7 +26,7 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
     externalAdReply: {
       title: '🖤 Ellen Joe - objetivo encontrado.',
       body: `✦ Espera tranquila, ${name}. Esta pieza es mía.`,
-      thumbnail: 'https://files.catbox.moe/j85zw5.jpg',
+      thumbnail: icono,
       sourceUrl: redes,
       mediaType: 1,
       renderLargerThumbnail: false
