@@ -32,10 +32,10 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
   };
 
   if (!args[0]) {
-    return conn.reply(m.chat, `🦈 *¿Viniste a pedirme algo sin saber qué?*
-Di lo que quieres... o vete.
+    return conn.reply(m.chat, `🦈 *¿᥎іᥒіs𝗍ᥱ ᥲ ⍴ᥱძіrmᥱ ᥲᥣg᥆ sіᥒ sᥲᑲᥱr 𝗊ᥙᥱ́?*
+ძі ᥣ᥆ 𝗊ᥙᥱ 𝗊ᥙіᥱrᥱs... ᥆ ᥎ᥱ𝗍ᥱ.
 
-🎧 Ejemplo:
+🎧 ᥱȷᥱm⍴ᥣ᥆:
 ${usedPrefix}play moonlight - kali uchis`, m, { contextInfo });
   }
 
@@ -48,13 +48,13 @@ ${usedPrefix}play moonlight - kali uchis`, m, { contextInfo });
     search = await yts(queryOrUrl);
     video = search.videos?.[0];
   } catch (e) {
-    return conn.reply(m.chat, `🖤 *Qué patético...*
-No logré encontrar nada con eso.`, m, { contextInfo });
+    return conn.reply(m.chat, `🖤 *𝗊ᥙᥱ́ ⍴ᥲ𝗍ᥱ́𝗍іᥴ᥆...*
+ᥒ᥆ ᥣ᥆grᥱ́ ᥱᥒᥴ᥆ᥒ𝗍rᥲr ᥒᥲძᥲ ᥴ᥆ᥒ ᥣ᥆ 𝗊ᥙᥱ ⍴ᥱძіs𝗍ᥱ`, m, { contextInfo });
   }
 
   if (!video) {
-    return conn.reply(m.chat, `🦈 *Tu pista murió antes de empezar.*
-Nada encontrado "${queryOrUrl}"`, m, { contextInfo });
+    return conn.reply(m.chat, `🦈 *ᥱs𝗍ᥲ ᥴ᥆sᥲ mᥙrі᥆́ ᥲᥒ𝗍ᥱs ძᥱ ᥱm⍴ᥱzᥲr.*
+ᥒᥲძᥲ ᥱᥒᥴ᥆ᥒ𝗍rᥲძ᥆ ᥴ᥆ᥒ "${queryOrUrl}"`, m, { contextInfo });
   }
 
   if (isMode) {
@@ -112,8 +112,8 @@ Nada encontrado "${queryOrUrl}"`, m, { contextInfo });
         }
         throw new Error("ogmp3... silencioso.");
       } catch (e2) {
-        await conn.reply(m.chat, `💔 *Fallé. Pero tú más.*
-No pude traerte nada.`, m);
+        await conn.reply(m.chat, `💔 *𝖿ᥲᥣᥣᥱ́. ⍴ᥱr᥆ 𝗍ᥙ́ mᥲ́s.*
+ᥒ᥆ ⍴ᥙძᥱ 𝗍rᥲᥱr𝗍ᥱ ᥒᥲძᥲ.`, m);
         await m.react("❌");
       }
     }
