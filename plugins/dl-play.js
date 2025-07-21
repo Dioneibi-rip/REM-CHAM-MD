@@ -3,12 +3,10 @@ import { ogmp3 } from '../lib/youtubedl.js';
 import yts from "yt-search";
 import axios from 'axios';
 
-// Configuración
 const SIZE_LIMIT_MB = 100;
 const MIN_AUDIO_SIZE_BYTES = 50000;
 const newsletterJid = '120363418071540900@newsletter';
 const newsletterName = '⸙ְ̻࠭ꪆ🦈 𝐄llen 𝐉ᴏᴇ 𖥔 Sᥱrvice';
-const icono = 'https://files.catbox.moe/j85zw5.jpg';
 
 const handler = async (m, { conn, args, usedPrefix, command }) => {
   const name = conn.getName(m.sender);
@@ -24,9 +22,9 @@ const handler = async (m, { conn, args, usedPrefix, command }) => {
       serverMessageId: -1
     },
     externalAdReply: {
-      title: '🖤 Ellen Joe - objetivo encontrado.',
-      body: `✦ Espera tranquila, ${name}. Esta pieza es mía.`,
-      thumbnail: icono,
+      title: '🖤 ⏤͟͟͞͞𝙀𝙇𝙇𝙀𝙉 - 𝘽𝙊𝙏 ᨶ႒ᩚ',
+      body: `✦ 𝙀𝙨𝙥𝙚𝙧𝙖𝙣𝙙𝙤 𝙩𝙪 𝙨𝙤𝙡𝙞𝙘𝙞𝙩𝙪𝙙, ${name}. ♡~٩( ˃▽˂ )۶~♡`,
+      thumbnail: icons,
       sourceUrl: redes,
       mediaType: 1,
       renderLargerThumbnail: false
@@ -56,7 +54,7 @@ No logré encontrar nada con eso.`, m, { contextInfo });
 
   if (!video) {
     return conn.reply(m.chat, `🦈 *Tu pista murió antes de empezar.*
-Nada encontrado para: "${queryOrUrl}"`, m, { contextInfo });
+Nada encontrado "${queryOrUrl}"`, m, { contextInfo });
   }
 
   if (isMode) {
@@ -145,7 +143,7 @@ No pude traerte nada.`, m);
   await conn.sendMessage(m.chat, {
     image: { url: video.thumbnail },
     caption,
-    footer: 'Dime cómo lo quieres... o no digas nada.',
+    footer: 'Dime cómo lo quieres... o no digas nada ┐(￣ー￣)┌.',
     buttons,
     headerType: 4
   }, { quoted: m });
