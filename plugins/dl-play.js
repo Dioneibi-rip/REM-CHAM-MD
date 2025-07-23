@@ -1,7 +1,7 @@
 import yts from "yt-search";
 const limit = 100;
 const handler = async (m, { conn, text, command }) => {
-  if (!text) return m.reply("🌴 Ingresa el nombre de un video o una URL de YouTube.");
+  if (!text) return m.reply("💙 *Escribe el nombre de una canción o pega un enlace de YouTube.*\n\n*Ejemplos:*\n.play colors yoko kanno\n.play https://youtu.be/HhJ-EWRMAJE");
   m.react("🌱")
   let res = await yts(text);
   if (!res || !res.all || res.all.length === 0) {
@@ -11,15 +11,13 @@ const handler = async (m, { conn, text, command }) => {
   let video = res.all[0];
 
   const cap = `
-\`\`\`⊜─⌈ 📻 ◜YouTube Play◞ 📻 ⌋─⊜\`\`\`
-
-≡ 🌿 \`Título\` : » ${video.title}
-≡ 🌾 \`Author\` : » ${video.author.name}
-≡ 🌱 \`Duración\` : » ${video.duration.timestamp}
-≡ 🌴 \`Vistas\` : » ${video.views}
-≡ ☘️ \`URL\`      : » ${video.url}
-
-тнe вeѕт wнaтѕapp вy ι'м ғz
+╭── ❍⃟💙 𝙍𝙚𝙢 - 𝙋𝙡𝙖𝙮 💙 ❍⃟──
+│ 🫧 *Título:* ${video.title}
+│ 🫧 *Duración:* ${video.duration.timestamp}
+│ 🫧 *Vistas:* ${video.views.toLocaleString()}
+│ 🫧 *Autor:* ${video.author.name}
+│ 🫧 *URL:* ${video.url}
+╰───────────────💙
 `;
 
   // Descargar y enviar el thumbnail correctamente
