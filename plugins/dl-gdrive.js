@@ -17,7 +17,6 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
     let { name, download } = result.data;
 
-    // Detectar el MIME a partir del nombre del archivo
     let mimetype = mime.lookup(name) || 'application/octet-stream';
 
     await m.reply(`
