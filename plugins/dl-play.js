@@ -22,7 +22,11 @@ const handler = async (m, { conn, text, command }) => {
 
 тнe вeѕт wнaтѕapp вy ι'м ғz
 `;
-  await conn.sendFile(m.chat, await (await fetch(video.thumbnail)).buffer(), "image.jpg", cap, m);
+
+  // Corregido: obtener el buffer del thumbnail correctamente
+  const thumbRes = await fetch(video.thumbnail);
+  const thumbBuffer = await thumbRes.buffer();
+  await conn.sendFile(m.chat, thumbBuffer, "image.jpg", cap, m);
 
   if (command === "play") {
     try {
@@ -39,7 +43,7 @@ const handler = async (m, { conn, text, command }) => {
       if (!api.status || !api.data || !api.data.dl) return m.reply("No se pudo obtener el video.");
       const dl = api.data.dl;
       const resVid = await fetch(dl);
-      const cont = resVid.headers.get('Content-Length');
+      const cont = resVid.headers.get('content-length');
       const bytes = parseInt(cont, 10);
       const sizemb = bytes / (1024 * 1024);
       const doc = sizemb >= limit;
