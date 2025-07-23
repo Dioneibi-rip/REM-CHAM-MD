@@ -2,7 +2,7 @@ import yts from "yt-search";
 const limit = 100;
 const handler = async (m, { conn, text, command }) => {
   if (!text) return m.reply("💙 *Escribe el nombre de una canción o pega un enlace de YouTube.*\n\n*Ejemplos:*\n.play colors yoko kanno\n.play https://youtu.be/HhJ-EWRMAJE");
-  m.react("🌱")
+  m.react("💠")
   let res = await yts(text);
   if (!res || !res.all || res.all.length === 0) {
     return m.reply("No se encontraron resultados para tu búsqueda.");
