@@ -1,8 +1,7 @@
 import axios from 'axios';
 const baileys = (await import("@whiskeysockets/baileys")).default;
 const { proto } = baileys;
-const { generateWAMessageFromContent } = baileys;
-const { generateWAMessageContent } = baileys;
+const { generateWAMessageFromContent, generateWAMessageContent } = baileys;
 
 let handler = async (message, { conn, text }) => {
     if (!text) {
@@ -24,47 +23,22 @@ let handler = async (message, { conn, text }) => {
             return conn.reply(message.chat, ' *No se pudo descargar el video. :c*', message);
         }
 
-        // Buscar resoluciones disponibles
-        const video1080 = response.find(v => v.resolution.includes('1080'));
-        const video720 = response.find(v => v.resolution.includes('720'));
-
-        if (!video1080 && !video720) {
-            return conn.reply(message.chat, ' *No se encontraron calidades compatibles (720p o 1080p).*', message);
-        }
-
         const cards = [];
 
-        if (video1080) {
-            const hdVideoMessage = await createVideoMessage(video1080.url);
-            cards.push({
-                body: proto.Message.InteractiveMessage.Body.fromObject({
-                    text: null
-                }),
-                footer: proto.Message.InteractiveMessage.Footer.fromObject({
-                    text: `𝘾𝘼𝙇𝙄𝘿𝘼𝘿 1080𝙥\n\n📥 Video en alta calidad.`
-                }),
-                header: proto.Message.InteractiveMessage.Header.fromObject({
-                    hasMediaAttachment: true,
-                    videoMessage: hdVideoMessage
-                }),
-                nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.fromObject({
-                    buttons: []
-                })
-            });
-        }
+        for (const item of response) {
+            const quality = item.resolution;
+            const url = item.url;
 
-        if (video720) {
-            const sdVideoMessage = await createVideoMessage(video720.url);
+            const videoMessage = await createVideoMessage(url);
+
             cards.push({
-                body: proto.Message.InteractiveMessage.Body.fromObject({
-                    text: null
-                }),
+                body: proto.Message.InteractiveMessage.Body.fromObject({ text: null }),
                 footer: proto.Message.InteractiveMessage.Footer.fromObject({
-                    text: `𝘾𝘼𝙇𝙄𝘿𝘼𝘿 720𝙥\n\n📥 Video en calidad media.`
+                    text: `𝘾𝘼𝙇𝙄𝘿𝘼𝘿 ${quality.toUpperCase()}`
                 }),
                 header: proto.Message.InteractiveMessage.Header.fromObject({
                     hasMediaAttachment: true,
-                    videoMessage: sdVideoMessage
+                    videoMessage: videoMessage
                 }),
                 nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.fromObject({
                     buttons: []
@@ -82,9 +56,7 @@ let handler = async (message, { conn, text }) => {
                             deviceListMetadataVersion: 2
                         },
                         interactiveMessage: proto.Message.InteractiveMessage.fromObject({
-                            body: proto.Message.InteractiveMessage.Body.create({
-                                text: null
-                            }),
+                            body: proto.Message.InteractiveMessage.Body.create({ text: null }),
                             footer: proto.Message.InteractiveMessage.Footer.create({
                                 text: ' `𝙁 𝘼 𝘾 𝙀 𝘽 𝙊 𝙊 𝙆  𝘿 𝙊 𝙒 𝙉 𝙇 𝙊 𝘼 𝘿 𝙀 𝙍`'
                             }),
@@ -105,7 +77,7 @@ let handler = async (message, { conn, text }) => {
         await conn.relayMessage(message.chat, responseMessage.message, { messageId: responseMessage.key.id });
 
     } catch (error) {
-        await conn.reply(message.chat, `*Error:* ${error.toString()}`, message);
+        await conn.reply(message.chat, '❌ Error al descargar el video: ' + error.toString(), message);
     }
 };
 
