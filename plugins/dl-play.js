@@ -20,7 +20,6 @@ const handler = async (m, { conn, text, command }) => {
 ╰───────────────💙
 `;
 
-  // Descargar y enviar el thumbnail correctamente
   try {
     const thumbRes = await fetch(video.thumbnail);
     const thumbBuffer = Buffer.from(await thumbRes.arrayBuffer());
@@ -31,7 +30,6 @@ const handler = async (m, { conn, text, command }) => {
 
   if (command === "play") {
     try {
-      // Cambiada la API para audio
       const api = await (await fetch(`https://dark-core-api.vercel.app/api/download/YTMP3?key=api&url=${encodeURIComponent(video.url)}`)).json();
       if (!api.status || !api.download) return m.reply("No se pudo obtener el audio.");
       await conn.sendFile(m.chat, api.download, `${api.title || video.title}.mp3`, "", m);
@@ -41,7 +39,6 @@ const handler = async (m, { conn, text, command }) => {
     }
   } else if (command === "play2" || command === "playvid") {
     try {
-      // API para video sigue siendo stellarwa.xyz
       const api = await (await fetch(`https://api.stellarwa.xyz/dow/ytmp4?url=${video.url}&apikey=stellar-o7UYR5SC`)).json();
       if (!api.status || !api.data || !api.data.dl) return m.reply("No se pudo obtener el video.");
       const dl = api.data.dl;
