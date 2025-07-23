@@ -1,8 +1,8 @@
 import yts from "yt-search";
 const limit = 100;
 const handler = async (m, { conn, text, command }) => {
-  if (!text) return m.reply("💙 *Escribe el nombre de una canción o pega un enlace de YouTube.*\n\n*Ejemplos:*\n.play colors yoko kanno\n.play https://youtu.be/HhJ-EWRMAJE");
-  m.react("🕑")
+  if (!text) return m.reply("🌴 Ingresa el nombre de un video o una URL de YouTube.");
+  m.react("🌱")
   let res = await yts(text);
   if (!res || !res.all || res.all.length === 0) {
     return m.reply("No se encontraron resultados para tu búsqueda.");
@@ -22,7 +22,7 @@ const handler = async (m, { conn, text, command }) => {
 тнe вeѕт wнaтѕapp вy ι'м ғz
 `;
 
-  // Corrección: usar arrayBuffer() y Buffer.from()
+  // Descargar y enviar el thumbnail correctamente
   try {
     const thumbRes = await fetch(video.thumbnail);
     const thumbBuffer = Buffer.from(await thumbRes.arrayBuffer());
@@ -33,15 +33,17 @@ const handler = async (m, { conn, text, command }) => {
 
   if (command === "play") {
     try {
-      const api = await (await fetch(`https://api.stellarwa.xyz/dow/ytmp3?url=${video.url}&apikey=stellar-o7UYR5SC`)).json();
-      if (!api.status || !api.data || !api.data.dl) return m.reply("No se pudo obtener el audio.");
-      await conn.sendFile(m.chat, api.data.dl, `${video.title}.mp3`, "", m);
-      await m.react("✔");
+      // Cambiada la API para audio
+      const api = await (await fetch(`https://dark-core-api.vercel.app/api/download/YTMP3?key=api&url=${encodeURIComponent(video.url)}`)).json();
+      if (!api.status || !api.download) return m.reply("No se pudo obtener el audio.");
+      await conn.sendFile(m.chat, api.download, `${api.title || video.title}.mp3`, "", m);
+      await m.react("✔️");
     } catch (error) {
       return m.reply("❌ Error descargando audio: " + error.message);
     }
   } else if (command === "play2" || command === "playvid") {
     try {
+      // API para video sigue siendo stellarwa.xyz
       const api = await (await fetch(`https://api.stellarwa.xyz/dow/ytmp4?url=${video.url}&apikey=stellar-o7UYR5SC`)).json();
       if (!api.status || !api.data || !api.data.dl) return m.reply("No se pudo obtener el video.");
       const dl = api.data.dl;
