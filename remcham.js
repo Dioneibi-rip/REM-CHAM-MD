@@ -1,22 +1,4 @@
 process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "1";
-
-// 🟢 INICIO - Servidor web para mantener Replit activo
-import express from 'express';
-import { createServer } from 'http';
-
-const app = express();
-const PORT = process.env.PORT || process.env.SERVER_PORT || 3000;
-
-app.get('/', (req, res) => {
-  res.send('✅ Bot REM-CHAM está activo y funcionando 24/7');
-});
-
-createServer(app).listen(PORT, () => {
-  console.log(`✅ Servidor web activo en el puerto ${PORT}`);
-});
-// 🔴 FIN - Servidor Express
-
-// 🔄 Resto de tu index.js
 import "./config.js";
 import { createRequire } from "module";
 import path, { join } from "path";
@@ -60,6 +42,7 @@ import readline from "readline";
 import fs from "fs";
 const { CONNECTING } = ws;
 const { chain } = lodash;
+const PORT = process.env.PORT || process.env.SERVER_PORT || 3000;
 
 protoType();
 serialize();
