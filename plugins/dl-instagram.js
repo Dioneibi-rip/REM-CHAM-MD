@@ -15,7 +15,7 @@ let handler = async (m, { conn, args }) => {
 
     await conn.sendMessage(m.chat, {
       video: { url: videoLink },
-      caption: `🎬 ＴＩＴＵＬＯ: Descarga de Instagram\n👍 ʟɪᴋᴇꜱ: Desconocido\n💬 ᴄᴏᴍᴇɴᴛᴀʀɪᴏꜱ: Desconocido`,
+      caption: `🎬 ᴀǫᴜɪ́ ᴛɪᴇɴᴇ sᴜ ᴅᴇsᴄᴀʀɢᴀ ᴅᴇ ɪɴsᴛᴀɢʀᴀᴍ (⁎˃ᴗ˂⁎)`,
       mimetype: 'video/mp4',
       fileName: 'igdl.mp4'
     }, { quoted: m });
