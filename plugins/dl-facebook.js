@@ -1,4 +1,3 @@
-// Este codigo fue echo por Gabriel Curi, si vas cargar mis plugins dame creditos crack Saludos
 import axios from 'axios';
 const baileys = (await import("@whiskeysockets/baileys")).default;
 const { proto } = baileys;
@@ -19,18 +18,59 @@ let handler = async (message, { conn, text }) => {
     }
 
     try {
-        const { data: response } = await axios.get(`https://rembotapi.vercel.app/api/facebookdl?url=${encodeURIComponent(text)}`);
+        const { data: response } = await axios.get(`https://api.dorratz.com/fbvideo?url=${encodeURIComponent(text)}`);
 
-        if (!response.success) {
+        if (!Array.isArray(response) || response.length === 0) {
             return conn.reply(message.chat, ' *No se pudo descargar el video. :c*', message);
         }
 
-        const hdUrl = response.hd;
-        const sdUrl = response.sd;
-        const title = response.title;
+        // Buscar resoluciones disponibles
+        const video1080 = response.find(v => v.resolution.includes('1080'));
+        const video720 = response.find(v => v.resolution.includes('720'));
 
-        const hdVideoMessage = await createVideoMessage(hdUrl);
-        const sdVideoMessage = await createVideoMessage(sdUrl);
+        if (!video1080 && !video720) {
+            return conn.reply(message.chat, ' *No se encontraron calidades compatibles (720p o 1080p).*', message);
+        }
+
+        const cards = [];
+
+        if (video1080) {
+            const hdVideoMessage = await createVideoMessage(video1080.url);
+            cards.push({
+                body: proto.Message.InteractiveMessage.Body.fromObject({
+                    text: null
+                }),
+                footer: proto.Message.InteractiveMessage.Footer.fromObject({
+                    text: `𝘾𝘼𝙇𝙄𝘿𝘼𝘿 1080𝙥\n\n📥 Video en alta calidad.`
+                }),
+                header: proto.Message.InteractiveMessage.Header.fromObject({
+                    hasMediaAttachment: true,
+                    videoMessage: hdVideoMessage
+                }),
+                nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.fromObject({
+                    buttons: []
+                })
+            });
+        }
+
+        if (video720) {
+            const sdVideoMessage = await createVideoMessage(video720.url);
+            cards.push({
+                body: proto.Message.InteractiveMessage.Body.fromObject({
+                    text: null
+                }),
+                footer: proto.Message.InteractiveMessage.Footer.fromObject({
+                    text: `𝘾𝘼𝙇𝙄𝘿𝘼𝘿 720𝙥\n\n📥 Video en calidad media.`
+                }),
+                header: proto.Message.InteractiveMessage.Header.fromObject({
+                    hasMediaAttachment: true,
+                    videoMessage: sdVideoMessage
+                }),
+                nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.fromObject({
+                    buttons: []
+                })
+            });
+        }
 
         const responseMessage = generateWAMessageFromContent(
             message.chat,
@@ -53,38 +93,7 @@ let handler = async (message, { conn, text }) => {
                                 hasMediaAttachment: false
                             }),
                             carouselMessage: proto.Message.InteractiveMessage.CarouselMessage.fromObject({
-                                cards: [
-                                    {
-                                        body: proto.Message.InteractiveMessage.Body.fromObject({
-                                            text: null
-                                        }),
-                                        footer: proto.Message.InteractiveMessage.Footer.fromObject({
-                                            text: `𝘾𝘼𝙇𝙄𝘿𝘼𝘿 𝘼𝙇𝙏𝘼\n\n𝚃𝚒𝚝𝚞𝚕𝚘: ${title}`
-                                        }),
-                                        header: proto.Message.InteractiveMessage.Header.fromObject({
-                                            hasMediaAttachment: true,
-                                            videoMessage: hdVideoMessage
-                                        }),
-                                        nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.fromObject({
-                                            buttons: []
-                                        })
-                                    },
-                                    {
-                                        body: proto.Message.InteractiveMessage.Body.fromObject({
-                                            text: null
-                                        }),
-                                        footer: proto.Message.InteractiveMessage.Footer.fromObject({
-                                            text: `𝘾𝘼𝙇𝙄𝘿𝘼𝘿 𝘽𝘼𝙅𝘼\n\n𝚃𝚒𝚝𝚞𝚕𝚘: ${title}`
-                                        }),
-                                        header: proto.Message.InteractiveMessage.Header.fromObject({
-                                            hasMediaAttachment: true,
-                                            videoMessage: sdVideoMessage
-                                        }),
-                                        nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.fromObject({
-                                            buttons: []
-                                        })
-                                    }
-                                ]
+                                cards
                             })
                         })
                     }
@@ -96,7 +105,7 @@ let handler = async (message, { conn, text }) => {
         await conn.relayMessage(message.chat, responseMessage.message, { messageId: responseMessage.key.id });
 
     } catch (error) {
-        await conn.reply(message.chat, error.toString(), message);
+        await conn.reply(message.chat, `*Error:* ${error.toString()}`, message);
     }
 };
 
