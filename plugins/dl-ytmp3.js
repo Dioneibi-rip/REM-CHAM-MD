@@ -9,7 +9,6 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
   const loading = '⏳';
   const errorEmoji = '❌';
 
-  // Validar entrada
   if (!args[0]) return m.reply(`${emoji} ᴘᴏʀ ғᴀᴠᴏʀ, ɪɴɢʀᴇsᴀ ᴜɴ ᴇɴʟᴀᴄᴇ ᴅᴇ *YᴏᴜTᴜʙᴇ*.\n\n*Ejemplo:* ${usedPrefix + command} https://youtube.com/watch?v=dQw4w9WgXcQ`);
 
   if (!isValidYouTubeUrl(args[0])) return m.reply(`${emoji} ᴇʟ ᴇɴʟᴀᴄᴇ ɴᴏ ᴘᴀʀᴇᴄᴇ sᴇʀ ᴠᴀ́ʟɪᴅᴏ ᴅᴇ YᴏᴜTᴜʙᴇ 💙`);
@@ -26,7 +25,6 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       throw new Error('La API no devolvió un enlace válido de audio.');
     }
 
-    // Enviar el audio directamente
     await conn.sendMessage(m.chat, {
       audio: { url: data.res.url },
       mimetype: 'audio/mpeg',
