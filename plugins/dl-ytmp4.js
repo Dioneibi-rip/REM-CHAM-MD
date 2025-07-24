@@ -1,39 +1,51 @@
-const font2 = {
-  a: '🅐', b: '🅑', c: '🅒', d: '🅓', e: '🅔', f: '🅕', g: '🅖',
-  h: '🅗', i: '🅘', j: '🅙', k: '🅚', l: '🅛', m: '🅜', n: '🅝',
-  o: '🅞', p: '🅟', q: '🅠', r: '🅡', s: '🅢', t: '🅣', u: '🅤',
-  v: '🅥', w: '🅦', x: '🅧', y: '🅨', z: '🅩'
-}
+import axios from 'axios';
 
-const handler = async (m, { conn, text }) => {
-  if (!text.includes('|')) {
-    return m.reply(`❌ Formato incorrecto.\nUsa:\n.reactch https://whatsapp.com/channel/abc/123|Hola Mundo`)
-  }
+const isValidYouTubeUrl = (url) => {
+  return /^https?:\/\/(www\.)?(youtube\.com|youtu\.be)\/.+$/.test(url);
+};
 
-  let [link, ...messageParts] = text.split('|')
-  link = link.trim()
-  const msg = messageParts.join('|').trim().toLowerCase()
+let handler = async (m, { conn, args, usedPrefix, command }) => {
+  const emoji = '💙';
+  const loading = '⏳';
+  const success = '✅';
+  const errorEmoji = '❌';
 
-  if (!link.startsWith("https://whatsapp.com/channel/")) {
-    return m.reply("❌ El enlace no es válido.\nDebe comenzar con: https://whatsapp.com/channel/")
-  }
+  if (!args[0]) return m.reply(`${emoji} ᴘᴏʀ ғᴀᴠᴏʀ, ɪɴɢʀᴇsᴀ ᴜɴ ᴇɴʟᴀᴄᴇ ᴅᴇ *YᴏᴜTᴜʙᴇ*.\n\n*Ejemplo:* ${usedPrefix + command} https://youtube.com/watch?v=dQw4w9WgXcQ`);
 
-  const emoji = msg.split('').map(c => c === ' ' ? '―' : (font2[c] || c)).join('')
+  if (!isValidYouTubeUrl(args[0])) return m.reply(`${emoji} ᴇʟ ᴇɴʟᴀᴄᴇ ɴᴏ ᴘᴀʀᴇᴄᴇ sᴇʀ ᴠᴀ́ʟɪᴅᴏ ᴅᴇ YᴏᴜTᴜʙᴇ 💙`);
 
   try {
-    const [, , , , channelId, messageId] = link.split('/')
-    const res = await conn.newsletterMetadata("invite", channelId)
-    await conn.newsletterReactMessage(res.id, messageId, emoji)
-    m.reply(`✅ Reacción enviada como: *${emoji}*\nCanal: *${res.name}*`)
-  } catch (e) {
-    console.error(e)
-    m.reply("❌ Error\nNo se pudo reaccionar. Revisa el enlace o tu conexión.")
+    await m.react(loading);
+
+    const ytURL = encodeURIComponent(args[0]);
+    const apiURL = `https://api.stellarwa.xyz/dow/ytmp4?url=${ytURL}&apikey=stellar-o7UYR5SC`;
+
+    const { data } = await axios.get(apiURL);
+
+    if (!data.status || !data.data?.dl) {
+      throw new Error('La API no devolvió un enlace válido de video.');
+    }
+
+    const { title, dl } = data.data;
+
+    await conn.sendMessage(m.chat, {
+      video: { url: dl },
+      mimetype: 'video/mp4',
+      fileName: `${title}.mp4`
+    }, { quoted: m });
+
+    await m.react(success);
+
+  } catch (err) {
+    console.error(err);
+    await m.react(errorEmoji);
+    m.reply(`❌ ᴏᴄᴜʀʀɪᴏ́ ᴜɴ ᴇʀʀᴏʀ:\n${err.message || err}`);
   }
-}
+};
 
-handler.command = ['reactch', 'rch']
-handler.tags = ['tools']
-handler.help = ['reactch <link>|<texto>']
-handler.owner = true
+handler.help = ['ytmp4 <url>'];
+handler.tags = ['downloader'];
+handler.command = ['ytmp4'];
+handler.limit = 1;
 
-export default handler
+export default handler;
