@@ -18,11 +18,11 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
     const song = results[0];
 
     const caption = `
-╭───── 𓆩🎧𓆪 ─────
-│🎶 *Título:* ${song.title}
-│⏱️ *Duración:* ${song.duration}
-│📈 *Popularidad:* ${song.popularity}
-│🔗 *Spotify:* ${song.url}
+╭─❏ *⛧ DESCARGA - SPOTIFY 🎵*
+│🎶 *𝑻𝒊𝒕𝒖𝒍𝒐:* ${song.title}
+│⏱️ *𝑫𝒖𝒓𝒂𝒄𝒊𝒐́𝒏:* ${song.duration}
+│📈 *𝒑𝒐𝒑𝒖𝒍𝒂𝒓𝒊𝒅𝒂𝒅:* ${song.popularity}
+│🔗 *𝑬𝒏𝒍𝒂𝒄𝒆:* ${song.url}
 ╰───────────────────`.trim();
 
     await conn.sendMessage(m.chat, {
