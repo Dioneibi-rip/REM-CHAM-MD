@@ -2,7 +2,7 @@ import fetch from 'node-fetch';
 
 let handler = async (m, { conn, text, args, usedPrefix, command }) => {
   if (!args[0]) {
-    return m.reply(`*🎧 𝗣𝗢𝗥 𝗙𝗔𝗩𝗢𝗥 𝗜𝗡𝗚𝗥𝗘𝗦𝗔 𝗘𝗟 𝗘𝗡𝗟𝗔𝗖𝗘 𝗗𝗘 𝗦𝗣𝗢𝗧𝗜𝗙𝗬*
+    return m.reply(`*🎧 *ᴘᴏʀғᴀᴠᴏʀ ɪɴɢʀᴇsᴇ ᴇʟ ᴇɴʟᴀᴄᴇ ᴅᴇ sᴘᴏᴛɪғʏ**
 > Ejemplo:
 ${usedPrefix + command} https://open.spotify.com/track/30SdJAyFsYxAMBfJmNNPqI`);
   }
