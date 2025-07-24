@@ -1,65 +1,67 @@
 import axios from 'axios';
-import path from 'path';
 
-let handler = async (message, { conn, args, usedPrefix, text, command }) => {
+let handler = async (m, { conn, args, usedPrefix, command }) => {
+  if (!args[0]) 
+    return conn.reply(m.chat, `❌ *Por favor, ingresa un enlace válido de MediaFire para descargar.*\n\nEjemplo:\n${usedPrefix + command} https://www.mediafire.com/file/iojnikfucf67q74/Base_Bot_Simpel.zip/file`, m);
+
   try {
-    if (!text) {
-      return message.reply(`${usedPrefix + command} https://www.mediafire.com/file/example`);
+    // Reacción de espera
+    await conn.sendReaction(m.chat, '⌛', m.key);
+
+    const url = args[0];
+    const response = await axios.get(`https://api.siputzx.my.id/api/d/mediafire?url=${encodeURIComponent(url)}`);
+    const res = response.data;
+
+    if (!res.status) {
+      await conn.sendReaction(m.chat, '❌', m.key);
+      return conn.reply(m.chat, '⚠️ No se pudo descargar el archivo. Verifica el enlace e intenta de nuevo.', m);
     }
-    const response = await axios.get(`https://remcham-bot.vercel.app/api/mediafire?url=${text}`);
-    const { data } = response.data;
-    if (!response.data.success) {
-      return message.reply('Error: No se pudo obtener los detalles del archivo.');
-    }
-    const {
-      url,
-      filename,
-      filesizeH,
-      ext,
-      filetype,
-      uploadDate
-    } = data;
-    const downloadingMessage = `🌩️ *_ꜱᴜ ᴅᴇꜱᴄᴀʀɢᴀ ᴇꜱᴛᴀ ᴄᴏᴍᴇɴᴢᴀɴᴅᴏ...._*`;
-    const imageUrl = 'https://i.pinimg.com/736x/e4/7c/be/e47cbe22aae75ef2f22962cc022d6bac.jpg';
-    const responseImg = await axios.get(imageUrl, { responseType: 'arraybuffer' });
-    await conn.sendFile(message.chat, responseImg.data, 'thumbnail.png', downloadingMessage, message);
-    const caption = `*_ＤＥＳＣＡＲＧＡ ＥＸＩＴＯＳＡ..._*\n*_ᴀʀᴄʜɪᴠᴏ_*: ${filename}\n*_ᴛᴀᴍᴀÑᴏ_*: ${filesizeH}\n*_ᴛɪᴘᴏ_*: ${filetype}\n*_ᴇxᴛᴇɴᴄɪᴏɴ_*: ${ext}\n*_ᴘᴜʙʟɪᴄᴀᴅᴏ ᴇʟ_*: ${uploadDate}`;
-    const fileData = await axios({
-      method: 'get',
-      url,
-      responseType: 'arraybuffer'
-    });
-    const fileExtension = path.extname(filename).toLowerCase();
-    const mimeTypes = {
-      '.mp4': 'video/mp4',
-      '.pdf': 'application/pdf',
-      '.zip': 'application/zip',
-      '.rar': 'application/x-rar-compressed',
-      '.7z': 'application/x-7z-compressed',
-      '.jpg': 'image/jpeg',
-      '.jpeg': 'image/jpeg',
-      '.png': 'image/png',
-      '.apk': 'application/vnd.android.package-archive'
-    };
-    let mimetype = mimeTypes[fileExtension] || 'application/octet-stream';
-    await conn.sendFile(message.chat, fileData.data, filename, caption, message, null, { mimetype, asDocument: true });
+
+    const d = res.data;
+
+    // Mensaje decorativo y brillante
+    const caption = `
+✨✨═══════════════✨✨
+          📦 *MEDIAFIRE DESCARGAS* 📦
+✨✨═══════════════✨✨
+
+📁 *Nombre:* ${d.fileName}
+📦 *Tipo:* ${d.fileType}
+🗃️ *Extensión:* .${d.fileExtension}
+💾 *Tamaño:* ${d.fileSize}
+📅 *Subido:* ${d.uploadDate}
+💡 *Compatibilidad:* ${d.compatibility}
+
+🔎 *Descripción:*
+${d.description}
+
+🌐 *Enlace oficial:*
+${d.url}
+
+═══════════════
+*¡Descarga segura y rápida!*
+✨ Gracias por usar nuestro bot ✨
+`;
+
+    await conn.sendMessage(m.chat, {
+      document: { url: d.url },
+      fileName: d.fileName,
+      mimetype: d.mimeType,
+      caption
+    }, { quoted: m });
+
+    // Reacción de éxito
+    await conn.sendReaction(m.chat, '✅', m.key);
+
   } catch (error) {
-    return message.reply(`Error: ${error.message}`);
+    console.error(error);
+    await conn.sendReaction(m.chat, '❌', m.key);
+    conn.reply(m.chat, '❌ Hubo un error al procesar la descarga de MediaFire, intenta nuevamente.', m);
   }
 };
 
-handler.help = ['mediafire'];
+handler.help = ['mediafire <url>'];
 handler.tags = ['downloader'];
-handler.command = /^(mediafire|mf)$/i;
+handler.command = ['mediafire', 'mf'];
 
 export default handler;
-
-function formatBytes(bytes) {
-  if (bytes === 0) return '0 Bytes';
-
-  const k = 1024;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-  const i = Math.floor(Math.log(bytes) / Math.log (k));
-
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-}
