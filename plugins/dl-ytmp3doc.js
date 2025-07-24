@@ -1,45 +1,47 @@
-import fetch from 'node-fetch'
+import axios from 'axios';
+
+const isValidYouTubeUrl = (url) => {
+  return /^https?:\/\/(www\.)?(youtube\.com|youtu\.be)\/.+$/.test(url);
+};
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
-  if (!args[0]) return conn.reply(m.chat, `*_Uso incorrecto_*\n\n*Ejemplo:*\n${usedPrefix + command} https://youtu.be/ejemplo`, m)
-  let youtubeLink = args[0]
-  console.log('URL to fetch:', youtubeLink)
-  await conn.loadingMsg(m.chat, '💙 𝘿𝙀𝙎𝘾𝘼𝙍𝙂𝘼𝙉𝘿𝙊', `✅ 𝘿𝙀𝙎𝘾𝘼𝙍𝙂𝘼 𝙀𝙓𝙄𝙏𝙊𝙎𝘼`, [
-    "▰▱▱▱▱ ᴄᴀʀɢᴀɴᴅᴏ ...",
-    "▰▰▱▱▱ ᴄᴀʀɢᴀɴᴅᴏ ...",
-    "▰▰▰▱▱ ᴄᴀʀɢᴀɴᴅᴏ ...",
-    "▰▰▰▰▱ ᴄᴀʀɢᴀɴᴅᴏ ...",
-    "▰▰▰▰▰ ᴄᴀʀɢᴀɴᴅᴏ ..."
-  ], m)  
+  const emoji = '💙';
+  const loading = '⏳';
+  const errorEmoji = '❌';
+
+  if (!args[0]) return m.reply(`${emoji} ᴘᴏʀ ғᴀᴠᴏʀ, ɪɴɢʀᴇsᴀ ᴜɴ ᴇɴʟᴀᴄᴇ ᴅᴇ *YᴏᴜTᴜʙᴇ*.\n\n*Ejemplo:* ${usedPrefix + command} https://youtube.com/watch?v=dQw4w9WgXcQ`);
+
+  if (!isValidYouTubeUrl(args[0])) return m.reply(`${emoji} ᴇʟ ᴇɴʟᴀᴄᴇ ɴᴏ ᴘᴀʀᴇᴄᴇ sᴇʀ ᴠᴀ́ʟɪᴅᴏ ᴅᴇ YᴏᴜTᴜʙᴇ 💙`);
+
   try {
-    if (typeof youtubeLink !== 'string' || !youtubeLink.startsWith('http')) {
-      throw new Error('URL inválida proporcionada')
+    await m.react(loading);
+
+    const ytURL = encodeURIComponent(args[0]);
+    const apiURL = `https://api.sylphy.xyz/download/ytmp3?url=${ytURL}&apikey=sylph-30fc019324`;
+
+    const { data } = await axios.get(apiURL);
+
+    if (!data.status || !data.res || !data.res.url) {
+      throw new Error('La API no devolvió un enlace válido de audio.');
     }
-    const fetchUrl = `https://rembotapi.vercel.app/api/yt?url=${encodeURIComponent(youtubeLink)}`
-    console.log('Fetch URL:', fetchUrl)
-    const response = await fetch(fetchUrl)
-    const data = await response.json()
-    if (!data.status) {
-      return conn.reply(m.chat, `❌ _Error:_ ${data.message || 'No se encontró el video'}`, m)
-    }
-    const { title, audioUrl, thumbnail } = data.data
-    const caption = ` *📌 Titulo:* ${title}`
+
+    // Enviar el audio como documento
     await conn.sendMessage(m.chat, {
-      document: { url: audioUrl },
-      mimetype: 'audio/mp3',
-      fileName: `${title}.mp3`,
-      caption: caption,
-      thumbnail: await fetch(thumbnail.url).then(res => res.buffer())
-    }, { quoted: m })
-  } catch (error) {
-    console.error('Error:', error)
-    conn.reply(m.chat, `❌ _Error:_ Ocurrió un problema al procesar la solicitud`, m)
+      document: { url: data.res.url },
+      mimetype: 'audio/mpeg',
+      fileName: `${data.res.title}.mp3`
+    }, { quoted: m });
+
+  } catch (err) {
+    console.error(err);
+    await m.react(errorEmoji);
+    m.reply(`❌ ᴏᴄᴜʀʀɪᴏ́ ᴜɴ ᴇʀʀᴏʀ:\n${err.message || err}`);
   }
-}
+};
 
-handler.help = ['yt mp3 <url>']
-handler.tags = ['dl']
-handler.command = ['ytmp3doc', 'ytaudio']
-handler.register = true
+handler.help = ['ytmp3doc <url>'];
+handler.tags = ['downloader'];
+handler.command = ['ytmp3doc'];
+handler.limit = 1;
 
-export default handler
+export default handler;
