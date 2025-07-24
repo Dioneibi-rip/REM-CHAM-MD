@@ -8,16 +8,16 @@ const handler = async (m, { conn, isAdmin, groupMetadata }) => {
   });
 
   if (isAdmin) {
-    return m.reply(`${emoji} ʏᴀ ᴇʀᴇs ᴀᴅᴍɪɴ, ɴᴏ ɴᴇᴄᴇsɪᴛᴀs ᴘᴇᴅɪʀʟᴏ 💙`);
+    return m.reply(`${emoji} ʏᴀ ᴇʀᴇs ᴀᴅᴍɪɴ, ɴᴏ ɴᴇᴄᴇsɪᴛᴀs ᴘᴇᴅɪʀʟᴏ`);
   }
 
   try {
     await conn.groupParticipantsUpdate(m.chat, [m.sender], 'promote');
     await m.react(done);
-    m.reply(`${emoji} ᴀʜᴏʀᴀ ᴇʀᴇs ᴀᴅᴍɪɴ ᴅᴇʟ ɢʀᴜᴘᴏ ᴊᴇғᴇᴄɪᴛᴏ 💙`);
+    m.reply(`${emoji} ᴀʜᴏʀᴀ ᴇʀᴇs ᴀᴅᴍɪɴ ᴅᴇʟ ɢʀᴜᴘᴏ ᴊᴇғᴇᴄɪᴛᴏ`);
   } catch (err) {
     await m.react(error);
-    m.reply(`${emoji} ᴏᴄᴜʀʀɪᴏ́ ᴜɴ ᴇʀʀᴏʀ ᴀʟ ɪɴᴛᴇɴᴛᴀʀ ᴘʀᴏᴍᴏᴄɪᴏɴᴀʀᴛᴇ, sᴏʀʀʏ💙`);
+    m.reply(`${emoji} ᴏᴄᴜʀʀɪᴏ́ ᴜɴ ᴇʀʀᴏʀ ᴀʟ ɪɴᴛᴇɴᴛᴀʀ ᴘʀᴏᴍᴏᴄɪᴏɴᴀʀᴛᴇ, sᴏʀʀʏ`);
   }
 };
 
