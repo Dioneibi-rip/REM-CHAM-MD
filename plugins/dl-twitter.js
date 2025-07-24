@@ -1,29 +1,46 @@
-import fg from 'api-dylux';
+import axios from 'axios';
 
-let handler = async (message, { conn, args, usedPrefix, command }) => {
-  if (!args[0]) throw `📌 𝙴𝚓𝚎𝚖𝚙𝚕𝚘: \n*${usedPrefix + command}* https://twitter.com/fernandavasro/status/1569741835555291139?t=ADxk8P3Z3prq8USIZUqXCg&s=19`;
-
-  message.react(rwait);
+let handler = async (m, { conn, args, usedPrefix, command }) => {
+  if (!args[0]) return conn.reply(m.chat, `❌ *Ingresa un enlace de Twitter para descargar*.\n\nEjemplo:\n${usedPrefix + command} https://twitter.com/9GAG/status/1661175429859012608`, m);
 
   try {
-    let { SD, HD, desc, thumb, audio } = await fg.twitter(args[0]);
-    
-    let template = `
-┌─⊷ *_𝚃𝚆𝙸𝚃𝚃𝙴𝚁 𝙳𝙻_*
-├─📜 𝙳𝚎𝚜𝚌𝚛𝚒𝚙𝚌𝚒𝚘𝚗: ${desc}
-├─ 𝚁𝙴𝙼-𝙱𝙾𝚃 𝚋𝚢 𝚌𝚞𝚛𝚒
-└────────────────────`;
+    const url = args[0];
+    const response = await axios.get(`https://api.siputzx.my.id/api/d/twitter?url=${encodeURIComponent(url)}`);
+    const res = response.data;
 
-    conn.sendFile(message.chat, HD, 'twitter.mp4', template, message);
-    message.react(done);
+    if (!res.status) return conn.reply(m.chat, '⚠️ No se pudo descargar el video, verifica el enlace.', m);
+
+    const { imgUrl, downloadLink, videoTitle, videoDescription } = res.data;
+
+    // Mensaje decorado
+    const caption = `
+╭─❏ *🐦 𝗧𝗪𝗜𝗧𝗧𝗘𝗥 𝗗𝗟 𝗕𝗢𝗧 🐦*
+│
+│ *𝑻𝒊𝒕𝒖𝒍𝒐:* ${videoTitle || 'Desconocido'}
+│ *𝑫𝒆𝒔𝒄𝒓𝒊𝒑𝒄𝒊ó𝒏:* ${videoDescription || 'Sin descripción'}
+│
+╰─────❏
+
+*🔗 Enlace de descarga:* [Aquí](${downloadLink})
+`;
+
+    // Envía video con miniatura y caption
+    await conn.sendMessage(m.chat, {
+      video: { url: downloadLink },
+      caption,
+      jpegThumbnail: Buffer.from(await (await axios.get(imgUrl, { responseType: 'arraybuffer' })).data),
+      mimetype: 'video/mp4',
+      fileName: `twitter-video.mp4`
+    }, { quoted: m });
+
   } catch (error) {
-    message.reply(`✳️ 𝚅𝚎𝚛𝚒𝚏𝚒𝚌𝚊 𝚋𝚒𝚎𝚗 𝚝𝚞 𝚎𝚗𝚕𝚊𝚌𝚎 𝚍𝚎 𝚃𝚠𝚒𝚝𝚝𝚎𝚛`);
-  } 
-}
+    console.error(error);
+    conn.reply(m.chat, '❌ Hubo un error al descargar el video de Twitter, intenta nuevamente.', m);
+  }
+};
 
-handler.help = ['twitter'].map(command => command + ' <url>');
+handler.help = ['twitter <url>'];
 handler.tags = ['downloader'];
-handler.command = /^(twitter|tw)$/i;
-handler.diamond = true;
+handler.command = ['twitter', 'tw', 'twtdl'];
 
 export default handler;
