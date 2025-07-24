@@ -38,7 +38,7 @@ let handler = async function (m, { conn, text, usedPrefix, command }) {
   │📝 𝚄𝚝𝚒𝚕𝚒𝚣𝚊 *${usedPrefix}𝚑𝚎𝚕𝚙* 𝚙𝚊𝚛𝚊 𝚟𝚎𝚛 𝚎𝚕 𝚖𝚎𝚗ú 𝚍𝚎 𝚌𝚘𝚖𝚊𝚗𝚍𝚘𝚜.
   │
   │💻 *𝚁𝙴𝙿𝙾𝚂𝙸𝚃𝙾𝚁𝙸𝙾 𝙶𝙸𝚃𝙷𝚄𝙱:* 
-  │https://github.com/davidprospero123/REM-CHAM
+  │https://github.com/Dioneibi-rip/REM-CHAM-MD
   │🌐 𝙿𝙰𝙶𝙸𝙽𝙰 𝚆𝙴𝙱:
   │https://same-z1fhajpbv8n-latest.netlify.app/
   │
