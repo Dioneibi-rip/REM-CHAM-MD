@@ -1,26 +1,50 @@
+let handler = async (m, { conn, args }) => {
+  if (!args[0]) return conn.reply(m.chat, '❯❯〘 ⚠️ ¡Necesitas proporcionar un nombre de usuario de Instagram! ⚠️〙❮❮', m);
 
-import fg from 'api-dylux'
-let handler= async (m, { conn, args, text, usedPrefix, command }) => {
-	
-    if (!args[0]) throw `✳️ 𝙸𝚗𝚐𝚛𝚎𝚜𝚊 𝚎𝚕 𝚗𝚘𝚖𝚋𝚛𝚎 𝚍𝚎𝚕 𝚞𝚜𝚞𝚊𝚛𝚒𝚘\n\n📌𝙴𝚓𝚎𝚖𝚙𝚕𝚘: ${usedPrefix + command} Josecuri_12` 
-    let res = await fg.igStalk(args[0])
-    let te = `
-┌──「 *𝚂𝚃𝙰𝙻𝙺 𝙸𝙽𝚂𝚃𝙰𝙶𝚁𝙰𝙼* 
-├─ *🔖𝙽𝚞𝚖𝚎𝚛𝚘:* ${res.name} 
-├─ *🔖𝙽𝚘𝚖𝚋𝚛𝚎:* ${res.username}
-├─ *👥𝚂𝚎𝚐𝚞𝚒𝚍𝚘𝚛𝚎𝚜:* ${res.followersH}
-├─ *🫂𝚂𝚎𝚐𝚞𝚒𝚍𝚘𝚜:* ${res.followingH}
-├─ *📌𝙱𝚒𝚘:* ${res.description}
-├─ *🏝️𝙿𝚘𝚜𝚝𝚜:* ${res.postsH}
-├─────────────
-├─ *🔗 𝙻𝚒𝚗𝚔* : https://instagram.com/${res.username.replace(/^@/, '')}
-└────────────`
+  try {
+    await conn.sendMessage(m.chat, { react: { text: `🙇🏻‍♀️`, key: m.key } });
 
-     await conn.sendFile(m.chat, res.profilePic, 'tt.png', te, m)
-     
-}
-handler.help = ['igstalk']
-handler.tags = ['downloader']
-handler.command = ['igstalk'] 
+    const apiUrl = `https://okarun-api.com.br/api/instagram/user?username=${args[0]}&apikey=Suakey`;
+    const response = await fetch(apiUrl).then(res => res.json());
 
-export default handler
+    if (response && response.status && response.resultado) {
+      const data = response.resultado;
+
+      const texto = `
+❯❯ ${conn.user.name} - INSTAGRAM STALK ❮❮
+
+*❒᭄➭ Nombre de usuario:* ${data.usuario}
+*❒᭄➭ Nombre completo:* ${data.nome || 'No informado'}
+*❒᭄➭ Publicaciones:* ${data.publicacoes || 0}
+*❒᭄➭ Seguidores:* ${data.seguidores || 0}
+*❒᭄➭ Siguiendo:* ${data.seguindo || 0}
+*❒᭄➭ Biografía:* ${data.bio || 'No disponible'}
+*❒᭄➭ Categoría:* ${data.categoria || 'No disponible'}
+*❒᭄➭ Cuenta verificada:* ${data.verificado ? 'Sí' : 'No'}
+*❒᭄➭ Tasa de engagement:* ${data.taxa_engajamento ? data.taxa_engajamento + '%' : 'No disponible'}
+*❒᭄➭ Media de me gusta:* ${data.media_curtidas || 0}
+*❒᭄➭ Media de comentarios:* ${data.media_comentarios || 0}
+
+*❒᭄➭ Creador de la API:* ${response.criador || 'No informado'}
+`;
+
+      await conn.sendMessage(m.chat, {
+        image: { url: data.foto_perfil },
+        caption: texto,
+      }, { quoted: m });
+
+    } else {
+      await conn.sendMessage(m.chat, { text: '❯❯〘 ⚠️ No se pudo encontrar información para este usuario. ⚠️〙❮❮' }, { quoted: m });
+    }
+
+  } catch (error) {
+    console.log(error);
+    await conn.sendMessage(m.chat, { text: '❯❯〘 ⚠️ Ocurrió un error al intentar obtener los datos del Instagram. ⚠️〙❮❮' }, { quoted: m });
+  }
+};
+
+handler.help = ['igstalk <usuario>'];
+handler.tags = ['stalker'];
+handler.command = ['igstalk'];
+
+export default handler;
