@@ -14,14 +14,12 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
     // Mensaje decorado
     const caption = `
-╭─❏ *🐦 𝗧𝗪𝗜𝗧𝗧𝗘𝗥 𝗗𝗟 𝗕𝗢𝗧 🐦*
+╭─❏ *ᥫ᭡ 𝗧𝗪𝗜𝗧𝗧𝗘𝗥 𝗗𝗘𝗦𝗖𝗔𝗥𝗚𝗔𝗦 𝗕𝗢𝗧 ᥫ᭡*
 │
 │ *𝑻𝒊𝒕𝒖𝒍𝒐:* ${videoTitle || 'Desconocido'}
 │ *𝑫𝒆𝒔𝒄𝒓𝒊𝒑𝒄𝒊ó𝒏:* ${videoDescription || 'Sin descripción'}
 │
 ╰─────❏
-
-*🔗 Enlace de descarga:* [Aquí](${downloadLink})
 `;
 
     // Envía video con miniatura y caption
