@@ -60,8 +60,8 @@ ${about}
 │
 │────────────────────
 │ 𝚈𝙾 𝚂𝙾𝚈 𝚁𝙴𝙼 𝙲𝙷𝙰𝙼 :3
-│ 𝚆𝚎𝚋: https://remcham-md.vercel.app
-│ 𝙶𝚒𝚝𝙷𝚞𝚋: github.com/davidprospero123/REM-CHAM-MD
+│ 𝚆𝚎𝚋: https://same-z1fhajpbv8n-latest.netlify.app/
+│ 𝙶𝚒𝚝𝙷𝚞𝚋: https://github.com/Dioneibi-rip/REM-CHAM-MD
 ╰────────────────────
 `.trim();
 
@@ -75,7 +75,7 @@ ${about}
       externalAdReply: {
         title: botname,
         body: null,
-        sourceUrl: 'https://github.com/davidprospero123/REM-CHAM-MD',
+        sourceUrl: 'https://github.com/Dioneibi-rip/REM-CHAM-MD',
         mediaType: 1,
         thumbnail
       }
