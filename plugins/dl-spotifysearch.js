@@ -1,111 +1,69 @@
-import axios from 'axios';
 import fetch from 'node-fetch';
 
 let handler = async (m, { conn, text, usedPrefix, command }) => {
 
-    if (!text) throw `╰⊱❗️⊱ *ACCIÓN MAL USADA* ⊱❗️⊱╮\n\n🍟 *DEBE DE USAR EL COMANDO COMO EN ESTE EJEMPLO:*\n${usedPrefix + command} *tu foto*`
+  if (!text) {
+    return m.reply(`╭┈────「 *🎧 SPOTIFY* 」─
+│✦ Ejemplo de uso:
+│${usedPrefix + command} murder in my mind
+╰───────────────────`);
+  }
 
-    try {
+  try {
+    m.react('🎵');
 
-        m.react('⌛️')
+    // 1. Buscar canciones en la API de DorratZ
+    const res = await fetch(`https://api.dorratz.com/spotifysearch?query=${encodeURIComponent(text)}`);
+    const json = await res.json();
+    const results = json.data;
 
-        let songInfo = await spotifyxv(text);
-        if (!songInfo.length) throw `No se encontró la canción.`;
-        let song = songInfo[0];
-        const res = await fetch(`https://apis-starlights-team.koyeb.app/starlight/spotifydl?url=${song.url}`);
-        const data = await res.json();
-        if (!data || !data.music) throw "No se pudo obtener el enlace de descarga.";
+    if (!json.status || !results || results.length === 0) throw 'No se encontró ninguna canción.';
 
-        const info = `🪼 *Titulo:*\n${data.title}\n\n🪩 *Artista:*\n${data.artist}\n\n🦋 *Álbum:*\n${song.album}\n\n⏳ *Duración:*\n${song.duracion}\n\n🔗 *Enlace:*\n${data.spotify}\n\n${wm}`;
+    // 2. Seleccionar el primer resultado
+    const song = results[0];
 
-        await conn.sendMessage(m.chat, { text: info, contextInfo: { forwardingScore: 9999999, isForwarded: true, 
+    const caption = `
+╭───── 𓆩🎧𓆪 ─────
+│🎶 *Título:* ${song.title}
+│⏱️ *Duración:* ${song.duration}
+│📈 *Popularidad:* ${song.popularity}
+│🔗 *Spotify:* ${song.url}
+╰───────────────────`.trim();
+
+    // 3. Enviar mensaje con tarjeta enriquecida
+    await conn.sendMessage(m.chat, {
+      text: caption,
+      contextInfo: {
+        forwardingScore: 999999,
+        isForwarded: true,
         externalAdReply: {
-            showAdAttribution: true,
-            containsAutoReply: true,
-            renderLargerThumbnail: true,
-            title: 'Spotify Music',
-            mediaType: 1,
-            thumbnailUrl: data.thumbnail,
-            mediaUrl: data.music,
-            sourceUrl: data.music
-        }}}, { quoted: m });
+          title: song.title,
+          body: 'Spotify Preview Player',
+          thumbnailUrl: 'https://i.scdn.co/image/ab67616d00001e0289a8f5a97d278fba63fa3f82', // imagen genérica de Spotify
+          mediaUrl: song.preview,
+          mediaType: 2,
+          renderLargerThumbnail: true,
+          showAdAttribution: true,
+          sourceUrl: song.url
+        }
+      }
+    }, { quoted: m });
 
-        await conn.sendMessage(m.chat, { audio: { url: data.music }, fileName: `${data.title}.mp3`, mimetype: 'audio/mpeg' }, { quoted: m });
-        m.react('✅')
+    // 4. Enviar preview de la canción como audio (no es descarga completa)
+    await conn.sendMessage(m.chat, {
+      audio: { url: song.preview },
+      fileName: `${song.title}.mp3`,
+      mimetype: 'audio/mpeg'
+    }, { quoted: m });
 
-    } catch (e1) {
-        m.react('❌')
-        m.reply(`❌ Ocurrio un error inesperado: ${e1.message || e1}`);
-    }
+    m.react('✅');
+
+  } catch (e) {
+    console.error(e);
+    m.react('❌');
+    m.reply('❌ Error al obtener la canción. Asegúrate de escribir bien el nombre.');
+  }
 };
 
-handler.command = ['spotifysearch', 'music'];
+handler.command = ['spotify', 'spotifysearch'];
 export default handler;
-
-async function spotifyxv(query) {
-    let token = await tokens();
-    let response = await axios({
-        method: 'get',
-        url: 'https://api.spotify.com/v1/search?q=' + encodeURIComponent(query) + '&type=track',
-        headers: {
-            Authorization: 'Bearer ' + token,
-        },
-    });
-    const tracks = response.data.tracks.items;
-    const results = tracks.map((track) => ({
-        name: track.name,
-        artista: track.artists.map((artist) => artist.name),
-        album: track.album.name,
-        duracion: timestamp(track.duration_ms),
-        url: track.external_urls.spotify,
-        imagen: track.album.images.length ? track.album.images[0].url : '',
-    }));
-    return results;
-}
-
-async function tokens() {
-    const response = await axios({
-        method: 'post',
-        url: 'https://accounts.spotify.com/api/token',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            Authorization: 'Basic ' + Buffer.from('acc6302297e040aeb6e4ac1fbdfd62c3:0e8439a1280a43aba9a5bc0a16f3f009').toString('base64'),
-        },
-        data: 'grant_type=client_credentials',
-    });
-    return response.data.access_token;
-}
-
-function timestamp(time) {
-    const minutes = Math.floor(time / 60000);
-    const seconds = Math.floor((time % 60000) / 1000);
-    return minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
-}
-
-async function getBuffer(url, options) {
-    try {
-        options = options || {};
-        const res = await axios({
-            method: 'get',
-            url,
-            headers: {
-                DNT: 1,
-                'Upgrade-Insecure-Request': 1,
-            },
-            ...options,
-            responseType: 'arraybuffer',
-        });
-        return res.data;
-    } catch (err) {
-        return err;
-    }
-}
-
-async function getTinyURL(text) {
-    try {
-        let response = await axios.get(`https://tinyurl.com/api-create.php?url=${text}`);
-        return response.data;
-    } catch (error) {
-        return text;
-    }
-}
