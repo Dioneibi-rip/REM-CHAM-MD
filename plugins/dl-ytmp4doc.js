@@ -1,46 +1,52 @@
-import fetch from 'node-fetch'
+import axios from 'axios';
+
+const isValidYouTubeUrl = (url) => {
+  return /^https?:\/\/(www\.)?(youtube\.com|youtu\.be)\/.+$/.test(url);
+};
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
-  if (!args[0]) return conn.reply(m.chat, `*_Uso incorrecto_*\n\n*Ejemplo:*\n${usedPrefix + command} https://youtu.be/ejemplo`, m)
-  let youtubeLink = args[0]
-  console.log('URL to fetch:', youtubeLink)
-  await conn.loadingMsg(m.chat, '💙 𝘿𝙀𝙎𝘾𝘼𝙍𝙂𝘼𝙉𝘿𝙊', `✅ 𝘿𝙀𝙎𝘾𝘼𝙍𝙂𝘼 𝙀𝙓𝙄𝙏𝙊𝙎𝘼`, [
-    "▰▱▱▱▱ ᴄᴀʀɢᴀɴᴅᴏ ...",
-    "▰▰▱▱▱ ᴄᴀʀɢᴀɴᴅᴏ ...",
-    "▰▰▰▱▱ ᴄᴀʀɢᴀɴᴅᴏ ...",
-    "▰▰▰▰▱ ᴄᴀʀɢᴀɴᴅᴏ ...",
-    "▰▰▰▰▰ ᴄᴀʀɢᴀɴᴅᴏ ..."
-  ], m)  
+  const emoji = '💙';
+  const loading = '⏳';
+  const done = '✅';
+  const errorEmoji = '❌';
+
+  if (!args[0]) return m.reply(`${emoji} ᴘᴏʀ ғᴀᴠᴏʀ, ɪɴɢʀᴇsᴀ ᴜɴ ᴇɴʟᴀᴄᴇ ᴅᴇ *YᴏᴜTᴜʙᴇ*.\n\n*Ejemplo:* ${usedPrefix + command} https://youtube.com/watch?v=dQw4w9WgXcQ`);
+
+  if (!isValidYouTubeUrl(args[0])) return m.reply(`${emoji} ᴇʟ ᴇɴʟᴀᴄᴇ ɴᴏ ᴘᴀʀᴇᴄᴇ sᴇʀ ᴠᴀ́ʟɪᴅᴏ ᴅᴇ YᴏᴜTᴜʙᴇ 💙`);
 
   try {
-    if (typeof youtubeLink !== 'string' || !youtubeLink.startsWith('http')) {
-      throw new Error('URL inválida proporcionada')
-    }
-    const fetchUrl = `https://rembotapi.vercel.app/api/yt?url=${encodeURIComponent(youtubeLink)}`
-    console.log('Fetch URL:', fetchUrl)
-    const response = await fetch(fetchUrl)
-    const data = await response.json()
+    await m.react(loading);
 
-    if (!data.status) {
-      return conn.reply(m.chat, `❌ _Error:_ ${data.message || 'No se encontró el video'}`, m)
+    const ytURL = encodeURIComponent(args[0]);
+    const apiURL = `https://api.stellarwa.xyz/dow/ytmp4?url=${ytURL}&apikey=stellar-o7UYR5SC`;
+
+    const { data } = await axios.get(apiURL);
+
+    if (!data.status || !data.data || !data.data.url) {
+      throw new Error('La API no devolvió un enlace válido de video.');
     }
-    const { title, videoUrl, thumbnail } = data.data
-    const caption = ` *📌 Titulo:* ${title}`
+
+    const { title, url } = data.data;
+
     await conn.sendMessage(m.chat, {
-      document: { url: videoUrl },
+      video: { url },
+      caption: `💙 ᴠɪᴅᴇᴏ ᴅᴇsᴄᴀʀɢᴀᴅᴏ:\n🎬 *${title || 'Sin título'}*`,
       mimetype: 'video/mp4',
-      fileName: `${title}.mp4`,
-      caption: caption,
-      thumbnail: await fetch(thumbnail.url).then(res => res.buffer())
-    }, { quoted: m })
-  } catch (error) {
-    console.error('Error:', error)
-    conn.reply(m.chat, `❌ _Error:_ Ocurrió un problema al procesar la solicitud`, m)
-  }
-}
+      fileName: `${title || 'video'}.mp4`
+    }, { quoted: m });
 
-handler.help = ['yt mp4 <url>']
-handler.tags = ['dl']
-handler.command = ['ytmp4doc', 'ytdoc']
-handler.register = true
-export default handler
+    await m.react(done);
+
+  } catch (err) {
+    console.error(err);
+    await m.react(errorEmoji);
+    m.reply(`❌ ᴏᴄᴜʀʀɪᴏ́ ᴜɴ ᴇʀʀᴏʀ:\n${err.message || err}`);
+  }
+};
+
+handler.help = ['ytmp4 <url>'];
+handler.tags = ['downloader'];
+handler.command = ['ytmp4'];
+handler.limit = 1;
+
+export default handler;
