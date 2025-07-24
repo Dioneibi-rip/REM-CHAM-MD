@@ -1,46 +1,44 @@
 import fetch from 'node-fetch';
 
-let handler = async (m, { conn, text, args, usedPrefix, command }) => {
-  if (!text) return conn.reply(m.chat, `*💚 𝙸𝚗𝚐𝚛𝚎𝚜𝚊 𝚕𝚘 𝚚𝚞𝚎 𝚍𝚎𝚜𝚎𝚊𝚜 𝚋𝚞𝚜𝚌𝚊𝚛 𝚎𝚗 𝚂𝚙𝚘𝚝𝚒𝚏𝚢.*\n\nEjemplo:\n${usedPrefix + command} phonky town`, m);
-
-  await m.react("💚");
+let handler = async (m, { conn, args, usedPrefix, command }) => {
+  if (!args[0]) {
+    return m.reply(`*𓆩🎶𓆪 𝗣𝗢𝗥 𝗙𝗔𝗩𝗢𝗥 𝗘𝗦𝗖𝗥𝗜𝗕𝗘 𝗘𝗟 𝗡𝗢𝗠𝗕𝗥𝗘 𝗗𝗘 𝗟𝗔 𝗖𝗔𝗡𝗖𝗜𝗢́𝗡 𝗢 𝗔𝗥𝗧𝗜𝗦𝗧𝗔*
+> Ejemplo:
+${usedPrefix + command} phonk`);
+  }
 
   try {
-    let res = await fetch(`https://api.dorratz.com/spotifysearch?query=${encodeURIComponent(text)}`);
+    let query = args.join(' ');
+    let res = await fetch(`https://api.dorratz.com/spotifysearch?query=${encodeURIComponent(query)}`);
     let json = await res.json();
 
-    if (!json.status || !json.data || json.data.length === 0) {
-      await m.react("❌");
-      return conn.reply(m.chat, "❌ No se encontraron resultados en Spotify.", m);
-    }
+    if (!json.status || !json.data.length) throw '*❌ 𝗡𝗢 𝗦𝗘 𝗘𝗡𝗖𝗢𝗡𝗧𝗥𝗔𝗥𝗢𝗡 𝗥𝗘𝗦𝗨𝗟𝗧𝗔𝗗𝗢𝗦*';
 
-    let track = json.data[0]; // Primer resultado relevante
-    let { title, duration, popularity, preview, url } = track;
+    for (let i = 0; i < Math.min(json.data.length, 5); i++) {
+      let song = json.data[i];
 
-    let caption = `
-╭─❏ *⛧ RESULTADO SPOTIFY 🎧*
-│𖠁 *𝑻𝒊𝒕𝒖𝒍𝒐:* ${title}
-│𖠁 *𝑫𝒖𝒓𝒂𝒄𝒊𝒐́𝒏:* ${duration}
-│𖠁 *𝑷𝒐𝒑𝒖𝒍𝒂𝒓𝒊𝒅𝒂𝒅:* ${popularity}
-│𖠁 *𝑬𝒏𝒍𝒂𝒄𝒆:* ${url}
-╰─────────────❏`;
-
-    await conn.sendMessage(m.chat, {
-      text: caption.trim()
-    }, { quoted: m });
-
-    if (preview) {
-      await conn.sendFile(m.chat, preview, `${title}.mp3`, null, m);
-    } else {
-      conn.reply(m.chat, '⚠️ Esta canción no tiene preview disponible para descargar.', m);
+      await conn.sendMessage(m.chat, {
+        audio: { url: song.preview },
+        mimetype: 'audio/mpeg',
+        ptt: false,
+        contextInfo: {
+          externalAdReply: {
+            title: song.title,
+            body: `🕒 Duración: ${song.duration} | ❤️ Popularidad: ${song.popularity}`,
+            thumbnailUrl: 'https://i.scdn.co/image/ab67616d0000b273b8ad5f4b3e14f50247341d2f', // Imagen genérica de Spotify
+            sourceUrl: song.url,
+            mediaType: 2,
+            showAdAttribution: true
+          }
+        }
+      }, { quoted: m });
     }
 
   } catch (e) {
     console.error(e);
-    await m.react("❌");
-    m.reply('❌ Error al buscar en Spotify.');
+    m.reply(`⚠️ 𝑶𝒐𝒉~ 𝒉𝒖𝒃𝒐 𝒖𝒏 𝒆𝒓𝒓𝒐𝒓 𝒂𝒍 𝒃𝒖𝒔𝒄𝒂𝒓 𝒍𝒂 𝒄𝒂𝒏𝒄𝒊𝒐́𝒏.\n\n${e}`);
   }
 };
 
-handler.command = /^spotify$/i;
+handler.command = /^spotifysearch$/i;
 export default handler;
