@@ -1,40 +1,38 @@
 import fetch from 'node-fetch';
 
-let handler = async (m, { conn, text }) => {
-  if (!text) throw `Ingresa el enlace de algún Track, Playlist o Álbum de Spotify.`; 
-  let isSpotifyUrl = text.match(/^(https:\/\/open\.spotify\.com\/(album|track|playlist)\/[a-zA-Z0-9]+)/i);
-  if (!isSpotifyUrl && !text) throw `Ingresa el enlace de algún Track, Playlist o Álbum de Spotify.`;
-  let user = global.db.data.users[m.sender];
-  await m.react('🕓');
+let handler = async (m, { conn, text, args, usedPrefix, command }) => {
+  if (!args[0]) {
+    return m.reply(`*🎧 𝗣𝗢𝗥 𝗙𝗔𝗩𝗢𝗥 𝗜𝗡𝗚𝗥𝗘𝗦𝗔 𝗘𝗟 𝗘𝗡𝗟𝗔𝗖𝗘 𝗗𝗘 𝗦𝗣𝗢𝗧𝗜𝗙𝗬*
+> Ejemplo:
+${usedPrefix + command} https://open.spotify.com/track/30SdJAyFsYxAMBfJmNNPqI`);
+  }
+
   try {
-    // Llama a la API de descarga de Spotify
-    let apiUrl = `https://api.siputzx.my.id/api/d/spotify?url=${encodeURIComponent(text)}`;
-    let apiRes = await fetch(apiUrl);
-    let json = await apiRes.json();
-    if (!json.status || !json.data || !json.data.download) throw 'No se pudo obtener la descarga.';
+    let url = args[0];
+    let res = await fetch(`https://api.stellarwa.xyz/dow/spotify?url=${url}&apikey=stellar-o7UYR5SC`);
+    let json = await res.json();
 
-    // Descarga y envía portada
-    let img = await fetch(json.data.image);
-    let imgBuffer = Buffer.from(await img.arrayBuffer());
-    let caption = `*°ᡣ𐭩 . ° 𝚂𝙿𝙾𝚃𝙸𝙵𝚈 𝙳𝙴𝚂𝙲𝙰𝚁𝙶𝙰*\n\n`
-      + `        ‹𝟹  *Título* : ${json.data.title}\n`
-      + `        ‹𝟹  *Artista* : ${json.data.artis}\n`
-      + `        ‹𝟹  *Duración* : ${(json.data.durasi / 1000 / 60).toFixed(2)} min\n`
-      + `        ‹𝟹  *Tipo* : ${json.data.type}\n`;
+    if (!json.status) throw `⚠️ No se pudo obtener la canción. Verifica el enlace.`;
 
-    await conn.sendFile(m.chat, imgBuffer, 'thumbnail.jpg', caption, m);
+    let { artist, title, duration, image, download } = json.data;
 
-    // Descarga y envía el MP3
-    await conn.sendFile(m.chat, json.data.download, `${json.data.title}.mp3`, null, m, false, { mimetype: 'audio/mpeg', asDocument: user.useDocument });
-    await m.react('✅');
+    await conn.sendMessage(m.chat, {
+      image: { url: image },
+      caption:
+`╭─❏ *⛧ DESCARGA - SPOTIFY 🎵*
+│𖠁 *𝑻𝒊𝒕𝒖𝒍𝒐:* ${title}
+│𖠁 *𝑨𝒓𝒕𝒊𝒔𝒕𝒂:* ${artist}
+│𖠁 *𝑫𝒖𝒓𝒂𝒄𝒊𝒐́𝒏:* ${duration}
+│𖠁 *𝑬𝒏𝒍𝒂𝒄𝒆:* ${url}
+╰─────────────❏`,
+    }, { quoted: m });
+
+    await conn.sendFile(m.chat, download, `${title}.mp3`, null, m);
   } catch (e) {
-    await m.react('✖️');
-    return m.reply('Ocurrió un error al intentar descargar el contenido.');
+    console.error(e);
+    m.reply(`❌ Error al descargar la canción.`);
   }
 };
 
-handler.tags = ['downloader'];
-handler.help = ['spotify'];
-handler.command = ['spotify'];
-handler.register = true;
+handler.command = /^spotify$/i;
 export default handler;
