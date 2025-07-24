@@ -3,23 +3,18 @@ import fetch from 'node-fetch';
 let handler = async (m, { conn, text, usedPrefix, command }) => {
 
   if (!text) {
-    return m.reply(`╭┈────「 *🎧 SPOTIFY* 」─
-│✦ Ejemplo de uso:
-│${usedPrefix + command} murder in my mind
-╰───────────────────`);
+    return m.reply(`💙 *ᴘᴏʀғᴀᴠᴏʀ, ᴅᴇʙᴇ ɪɴɢʀᴇsᴀʀ ᴜɴ ᴛᴇ́ʀᴍɪɴᴏ ᴅᴇ ʙᴜ́sǫᴜᴇᴅᴀ*`);
   }
 
   try {
     m.react('🎵');
 
-    // 1. Buscar canciones en la API de DorratZ
     const res = await fetch(`https://api.dorratz.com/spotifysearch?query=${encodeURIComponent(text)}`);
     const json = await res.json();
     const results = json.data;
 
     if (!json.status || !results || results.length === 0) throw 'No se encontró ninguna canción.';
 
-    // 2. Seleccionar el primer resultado
     const song = results[0];
 
     const caption = `
@@ -30,7 +25,6 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
 │🔗 *Spotify:* ${song.url}
 ╰───────────────────`.trim();
 
-    // 3. Enviar mensaje con tarjeta enriquecida
     await conn.sendMessage(m.chat, {
       text: caption,
       contextInfo: {
@@ -49,7 +43,6 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
       }
     }, { quoted: m });
 
-    // 4. Enviar preview de la canción como audio (no es descarga completa)
     await conn.sendMessage(m.chat, {
       audio: { url: song.preview },
       fileName: `${song.title}.mp3`,
@@ -65,5 +58,5 @@ let handler = async (m, { conn, text, usedPrefix, command }) => {
   }
 };
 
-handler.command = ['spotify', 'spotifysearch'];
+handler.command = ['spotifysearch'];
 export default handler;
