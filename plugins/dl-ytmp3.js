@@ -1,76 +1,48 @@
-import axios from "axios";
-import fs from "fs";
-import { pipeline } from "stream";
-import { promisify } from "util";
-import os from "os";
+import axios from 'axios';
 
-let streamPipeline = promisify(pipeline);
+const isValidYouTubeUrl = (url) => {
+  return /^https?:\/\/(www\.)?(youtube\.com|youtu\.be)\/.+$/.test(url);
+};
 
-let handler = async (m, { conn, command, text, usedPrefix }) => {
-  if (!text) {
-    return conn.reply(m.chat, `*_々 Ingresa un enlace de YouTube_*\n\n*Ejemplo:*\n${usedPrefix + command} https://youtu.be/HhJ-EWRMAJE`, m);
-  }
+let handler = async (m, { conn, args, usedPrefix, command }) => {
+  const emoji = '💙';
+  const loading = '⏳';
+  const errorEmoji = '❌';
+
+  // Validar entrada
+  if (!args[0]) return m.reply(`${emoji} ᴘᴏʀ ғᴀᴠᴏʀ, ɪɴɢʀᴇsᴀ ᴜɴ ᴇɴʟᴀᴄᴇ ᴅᴇ *YᴏᴜTᴜʙᴇ*.\n\n*Ejemplo:* ${usedPrefix + command} https://youtube.com/watch?v=dQw4w9WgXcQ`);
+
+  if (!isValidYouTubeUrl(args[0])) return m.reply(`${emoji} ᴇʟ ᴇɴʟᴀᴄᴇ ɴᴏ ᴘᴀʀᴇᴄᴇ sᴇʀ ᴠᴀ́ʟɪᴅᴏ ᴅᴇ YᴏᴜTᴜʙᴇ 💙`);
 
   try {
-    let videoUrl = encodeURIComponent(text.trim());
-    let apiKey = 'stellar-bFA8UWSA';
-    let apiUrl = `https://api.stellarwa.xyz/dow/ytmp3?url=${videoUrl}&apikey=${apiKey}`;
+    await m.react(loading);
 
-    await m.react("⏱");
+    const ytURL = encodeURIComponent(args[0]);
+    const apiURL = `https://api.sylphy.xyz/download/ytmp3?url=${ytURL}&apikey=sylph-30fc019324`;
 
-    let response = await axios.get(apiUrl);
-    let data = response.data;
+    const { data } = await axios.get(apiURL);
 
-    if (!data.status || !data.data?.dl) throw new Error("❌ Error al obtener datos del audio");
+    if (!data.status || !data.res || !data.res.url) {
+      throw new Error('La API no devolvió un enlace válido de audio.');
+    }
 
-    let { title, thumbnail, dl: audioUrl } = data.data;
+    // Enviar el audio directamente
+    await conn.sendMessage(m.chat, {
+      audio: { url: data.res.url },
+      mimetype: 'audio/mpeg',
+      fileName: `${data.res.title}.mp3`
+    }, { quoted: m });
 
-    if (!title || title === "-") title = "𝘼𝙐𝘿𝙄𝙊 𝙀𝙎𝙏𝙀𝙇𝙇𝘼𝙍 💙";
-
-    let tmpDir = os.tmpdir();
-    let fileName = `${title}.mp3`;
-    let filePath = `${tmpDir}/${fileName}`;
-
-    let audioResponse = await axios({
-      url: audioUrl,
-      method: 'GET',
-      responseType: 'stream'
-    });
-
-    let writableStream = fs.createWriteStream(filePath);
-    await streamPipeline(audioResponse.data, writableStream);
-
-    let doc = {
-      audio: {
-        url: filePath,
-      },
-      mimetype: "audio/mp4",
-      fileName: title,
-      contextInfo: {
-        externalAdReply: {
-          showAdAttribution: true,
-          mediaType: 2,
-          mediaUrl: text,
-          title: title,
-          sourceUrl: text,
-          thumbnail: await (await conn.getFile(thumbnail)).data,
-        },
-      },
-    };
-
-    await conn.sendMessage(m.chat, doc, { quoted: m });
-    await m.react("✅");
-
-  } catch (error) {
-    console.error(error);
-    await conn.reply(m.chat, `❌ No se pudo descargar el audio. Verifica el enlace o inténtalo más tarde.`, m);
-    await m.react("❌");
+  } catch (err) {
+    console.error(err);
+    await m.react(errorEmoji);
+    m.reply(`❌ ᴏᴄᴜʀʀɪᴏ́ ᴜɴ ᴇʀʀᴏʀ:\n${err.message || err}`);
   }
 };
 
-handler.help = ["ytmp3"].map((v) => v + " <url>");
-handler.tags = ["descargas"];
-handler.command = /^(ytmp3|yta)$/i;
-handler.register = true;
+handler.help = ['ytmp3 <url>'];
+handler.tags = ['downloader'];
+handler.command = ['ytmp3'];
+handler.limit = 1;
 
 export default handler;
