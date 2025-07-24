@@ -34,12 +34,16 @@ let handler = async (m, { conn, args }) => {
       }, { quoted: m });
 
     } else {
-      await conn.sendMessage(m.chat, { text: '❯❯〘 ⚠️ No se pudo encontrar información para este usuario. ⚠️〙❮❮' }, { quoted: m });
+      await conn.sendMessage(m.chat, {
+        text: `❯❯〘 ⚠️ No se pudo encontrar información para este usuario. ⚠️〙❮❮\n\n🪪 Estado de la API: ${response?.status}\n🛑 Mensaje: ${response?.message || 'Respuesta vacía o inesperada'}`
+      }, { quoted: m });
     }
 
   } catch (error) {
-    console.log(error);
-    await conn.sendMessage(m.chat, { text: '❯❯〘 ⚠️ Ocurrió un error al intentar obtener los datos del Instagram. ⚠️〙❮❮' }, { quoted: m });
+    console.error(error);
+    await conn.sendMessage(m.chat, {
+      text: `❯❯〘 ⚠️ Ocurrió un error al intentar obtener los datos del Instagram. ⚠️〙❮❮\n\n❌ *Error:* ${error.message}`
+    }, { quoted: m });
   }
 };
 
