@@ -73,7 +73,7 @@ global.APIKeys = {
 // ─────────────╮
 // Otras variables globales
 // ╰─────────────────────────────────────────────╮
-global.id_canal = '120363323192692909@newsletter'
+global.id_canal = '120363335626706839@newsletter'
 global.name_canal = '𝐑𝐄𝐌 - 𝐁𝐎𝐓 - 𝐁𝐘 - 𝐂𝐔𝐑𝐈'
 global.rcanal = 'https://whatsapp.com/channel/0029VaqEpTQBPzjbuTwGDN1U'
 global.canal = 'https://whatsapp.com/channel/0029VaqEpTQBPzjbuTwGDN1U'
