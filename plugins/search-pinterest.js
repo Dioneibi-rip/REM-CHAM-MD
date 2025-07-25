@@ -97,7 +97,7 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
       data: { url: img.image_large_url }
     }));
 
-    const caption = `🌸 *Imágenes encontradas para:* 『 ${text} 』\n🖼️ Aquí tienes tu álbum mágico, ${name}-chan~`;
+    const caption = `🌸 *Imágenes encontradas para:* 『 ${text} 』\n🖼️ ᥱs𝗍᥆ 𝖿ᥙᥱ ᥣ᥆ 𝗊ᥙᥱ ᥱᥒᥴ᥆ᥒ𝗍rᥱ, ${name}-ᥴһᥲᥒ~`;
 
     await sendAlbumMessage(m.chat, images, { caption, quoted: m });
     await m.react('✨');
