@@ -99,6 +99,9 @@ global.multiplier = 69;
 global.maxwarn = '3';
 global.jadi = 'rembots' 
 global.RubyJadibts = true
+global.ch = {
+ch1: '120363335626706839@newsletter',
+}
 
 const iconos = [ 
   'https://qu.ax/RsvOR.jpg',
