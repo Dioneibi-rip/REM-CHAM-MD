@@ -7,6 +7,7 @@ const isValidYouTubeUrl = (url) => {
 let handler = async (m, { conn, args, usedPrefix, command }) => {
   const emoji = '💙';
   const loading = '⏳';
+  const successEmoji = '✅';
   const errorEmoji = '❌';
 
   if (!args[0]) {
@@ -21,21 +22,21 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     await m.react(loading);
 
     const ytURL = encodeURIComponent(args[0]);
-    const apiURL = `https://api.sylphy.xyz/download/ytmp3?url=${ytURL}&apikey=sylph-30fc019324`;
+    const apiURL = `https://dark-core-api.vercel.app/api/download/YTMP3?key=api&url=${ytURL}`;
 
     const { data } = await axios.get(apiURL);
 
-    if (!data.status || !data.res || !data.res.url) {
-      throw new Error('La API no devolvió un enlace válido de audio.');
+    if (!data.status || !data.download) {
+      throw new Error('La API no devolvió un enlace de descarga válido.');
     }
 
     await conn.sendMessage(m.chat, {
-      audio: { url: data.res.url },
+      audio: { url: data.download },
       mimetype: 'audio/mpeg',
       ptt: true
     }, { quoted: m });
 
-    await m.react('✅');
+    await m.react(successEmoji);
 
   } catch (err) {
     console.error(err);
