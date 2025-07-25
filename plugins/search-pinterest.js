@@ -58,12 +58,12 @@ const handler = async (m, { conn, text, usedPrefix, command }) => {
 
   if (!text) {
     return conn.reply(m.chat,
-      `🌸 *Onii-chan... nani sagashitai no?* (✿◕‿◕)\n\n` +
+      `*ᴅᴇʙᴇs ɪɴɢʀᴇsᴀʀ ᴜɴ ᴛᴇxᴛᴏ ᴊᴜɴᴛᴏ ᴀʟ ᴄᴏᴍᴀɴᴅᴏ ᴘᴀʀᴀ ʜᴀᴄᴇʀ ʟᴀ ʙᴜ́sǫᴜᴇᴅᴀ* ✿◕‿◕)\n\n` +
       `💡 Uso correcto:\n\`${usedPrefix + command} Shinobu aesthetic\``, m);
   }
 
   await m.react('🔍');
-  conn.reply(m.chat, '⏳ *Buscando imágenes súper kawaii para ti, onii-chan... espera un momentito~* 💕', m, {
+  conn.reply(m.chat, '⏳ espera un momentito~* 💕', m, {
     contextInfo: {
       mentionedJid: [m.sender],
       forwardingScore: 999,
