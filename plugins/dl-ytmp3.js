@@ -9,9 +9,13 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
   const loading = '⏳';
   const errorEmoji = '❌';
 
-  if (!args[0]) return m.reply(`${emoji} ᴘᴏʀ ғᴀᴠᴏʀ, ɪɴɢʀᴇsᴀ ᴜɴ ᴇɴʟᴀᴄᴇ ᴅᴇ *YᴏᴜTᴜʙᴇ*.\n\n*Ejemplo:* ${usedPrefix + command} https://youtube.com/watch?v=dQw4w9WgXcQ`);
+  if (!args[0]) {
+    return m.reply(`${emoji} ᴘᴏʀ ғᴀᴠᴏʀ, ɪɴɢʀᴇsᴀ ᴜɴ ᴇɴʟᴀᴄᴇ ᴅᴇ *YᴏᴜTᴜʙᴇ*.\n\n*Ejemplo:* ${usedPrefix + command} https://youtube.com/watch?v=dQw4w9WgXcQ`);
+  }
 
-  if (!isValidYouTubeUrl(args[0])) return m.reply(`${emoji} ᴇʟ ᴇɴʟᴀᴄᴇ ɴᴏ ᴘᴀʀᴇᴄᴇ sᴇʀ ᴠᴀ́ʟɪᴅᴏ ᴅᴇ YᴏᴜTᴜʙᴇ 💙`);
+  if (!isValidYouTubeUrl(args[0])) {
+    return m.reply(`${emoji} ᴇʟ ᴇɴʟᴀᴄᴇ ɴᴏ ᴘᴀʀᴇᴄᴇ sᴇʀ ᴠᴀ́ʟɪᴅᴏ ᴅᴇ YᴏᴜTᴜʙᴇ 💙`);
+  }
 
   try {
     await m.react(loading);
@@ -28,8 +32,10 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     await conn.sendMessage(m.chat, {
       audio: { url: data.res.url },
       mimetype: 'audio/mpeg',
-      fileName: `${data.res.title}.mp3`
+      ptt: true
     }, { quoted: m });
+
+    await m.react('✅');
 
   } catch (err) {
     console.error(err);
@@ -38,9 +44,9 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
   }
 };
 
-handler.help = ['ytmp3 <url>'];
+handler.help = ['ytptt <url>'];
 handler.tags = ['downloader'];
-handler.command = ['ytmp3'];
+handler.command = ['ytaudio', 'mp3', 'ytmp3'];
 handler.limit = 1;
 
 export default handler;
