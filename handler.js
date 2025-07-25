@@ -621,7 +621,9 @@ export async function participantsUpdate({ id, participants, action }) {
 │ 𝙰𝚍𝚒𝚘𝚜, ${nthMember}𝚍𝚎 𝚎𝚜𝚝𝚎 𝚐𝚛𝚞𝚙𝚘
 │
 │ 𝚓𝚊𝚖𝚊𝚜 𝚚𝚞𝚎𝚛𝚒𝚖𝚘𝚜 𝚟𝚎𝚛𝚝𝚎
-╰────────═┅═────────`;
+╰────────═┅═────────
+> edita la despedida con el comando #setbye
+`;
 
             let leaveApiUrl = `https://i.pinimg.com/564x/92/05/f0/9205f0b8b38e296f91cd09690a0ab3b2.jpg${encodeURIComponent(
               await this.getName(user),
