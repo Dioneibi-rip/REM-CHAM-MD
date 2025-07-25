@@ -30,7 +30,7 @@ let handler = async (m, { conn, command, args, text, usedPrefix }) => {
         ['ʏᴛᴍᴘ4', `${usedPrefix}ytmp4 ${url}`],
         ['ʏᴛᴍᴘ4ᴅᴏᴄ', `${usedPrefix}ytmp4doc ${url}`],
         ['ʏᴛᴍᴘ3ᴅᴏᴄ', `${usedPrefix}ytmp3doc ${url}`]
-    ], null, [['ᴄᴀɴᴀʟ', 'https://whatsapp.com/channel/0029VaqEpTQBPzjbuTwGDN1U']], m);
+    ], null, [['ᴄᴀɴᴀʟ', 'https://whatsapp.com/channel/0029VakLbM76mYPPFL0IFI3P']], m);
 
     await m.react('✅');
 };
