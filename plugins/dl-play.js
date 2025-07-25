@@ -1,60 +1,42 @@
-import yts from "yt-search";
-const limit = 100;
-const handler = async (m, { conn, text, command }) => {
-  if (!text) return m.reply("💙 *Escribe el nombre de una canción o pega un enlace de YouTube.*\n\n*Ejemplos:*\n.play colors yoko kanno\n.play https://youtu.be/HhJ-EWRMAJE");
-  m.react("💠")
-  let res = await yts(text);
-  if (!res || !res.all || res.all.length === 0) {
-    return m.reply("No se encontraron resultados para tu búsqueda.");
-  }
+import yts from 'yt-search';
 
-  let video = res.all[0];
-
-  const cap = `
-╭── ❍⃟💙 𝙍𝙚𝙢 - 𝙋𝙡𝙖𝙮 💙 ❍⃟──
-│ 🫧 *Título:* ${video.title}
-│ 🫧 *Duración:* ${video.duration.timestamp}
-│ 🫧 *Vistas:* ${video.views.toLocaleString()}
-│ 🫧 *Autor:* ${video.author.name}
-│ 🫧 *URL:* ${video.url}
-╰───────────────💙
-`;
-
-  try {
-    const thumbRes = await fetch(video.thumbnail);
-    const thumbBuffer = Buffer.from(await thumbRes.arrayBuffer());
-    await conn.sendFile(m.chat, thumbBuffer, "image.jpg", cap, m);
-  } catch (e) {
-    await m.reply("No se pudo cargar la miniatura.");
-  }
-
-  if (command === "play") {
-    try {
-      const api = await (await fetch(`https://dark-core-api.vercel.app/api/download/YTMP3?key=api&url=${encodeURIComponent(video.url)}`)).json();
-      if (!api.status || !api.download) return m.reply("No se pudo obtener el audio.");
-      await conn.sendFile(m.chat, api.download, `${api.title || video.title}.mp3`, "", m);
-      await m.react("✔️");
-    } catch (error) {
-      return m.reply("❌ Error descargando audio: " + error.message);
+let handler = async (m, { conn, command, args, text, usedPrefix }) => {
+    if (!text) {
+        return conn.reply(m.chat, '*𝙸𝚗𝚐𝚛𝚎𝚜𝚊 𝚎𝚕 𝚗𝚘𝚖𝚋𝚛𝚎 𝚍𝚎 𝚕𝚘 𝚚𝚞𝚎 𝚚𝚞𝚒𝚎𝚛𝚎𝚜 𝚋𝚞𝚜𝚌𝚊𝚛*', m);
     }
-  } else if (command === "play2" || command === "playvid") {
-    try {
-      const api = await (await fetch(`https://api.stellarwa.xyz/dow/ytmp4?url=${video.url}&apikey=stellar-o7UYR5SC`)).json();
-      if (!api.status || !api.data || !api.data.dl) return m.reply("No se pudo obtener el video.");
-      const dl = api.data.dl;
-      const resVid = await fetch(dl, { method: "HEAD" });
-      const cont = resVid.headers.get('content-length');
-      const bytes = parseInt(cont || "0", 10);
-      const sizemb = bytes / (1024 * 1024);
-      const doc = sizemb >= limit;
-      await conn.sendFile(m.chat, dl, `${video.title}.mp4`, "", m, null, { asDocument: doc, mimetype: "video/mp4" });
-      await m.react("✔️");
-    } catch (error) {
-      return m.reply("❌ Error descargando video: " + error.message);
+
+    await m.react('🕓');
+    let res = await yts(text);
+    let play = res.videos[0];
+
+    if (!play) {
+        throw `Error: Vídeo no encontrado`;
     }
-  }
-}
-handler.help = ["play", "play2"];
-handler.tags = ["download"];
-handler.command = ["play", "play2", "playvid"];
+
+    let { title, thumbnail, ago, timestamp, views, videoId, url } = play;
+
+    let txt = '```𝚈𝚘𝚞𝚃𝚞𝚋𝚎 𝙳𝚎𝚜𝚌𝚊𝚛𝚐𝚊𝚜```\n';
+    txt += '===========================\n';
+    txt += `> *𝚃𝚒𝚝𝚞𝚕𝚘* : _${title}_\n`;
+    txt += `> *𝙲𝚛𝚎𝚊𝚍𝚘* : _${ago}_\n`;
+    txt += `> *𝙳𝚞𝚛𝚊𝚌𝚒𝚘𝚗* : _${timestamp}_\n`;
+    txt += `> *𝚅𝚒𝚜𝚒𝚝𝚊𝚜* : _${views.toLocaleString()}_\n`;
+    txt += `> *𝙻𝚒𝚗𝚔* : _https://www.youtube.com/watch?v=${videoId}_\n`;
+    txt += '===========================\n';
+    txt += '*𝙿𝚘𝚠𝚎𝚛𝚎𝚍 𝚋𝚢 𝙶𝚊𝚋𝚛𝚒𝚎𝚕 𝙲𝚞𝚛𝚒*';
+
+    await conn.sendButton2(m.chat, txt, '𝙍𝙀𝙈-𝘾𝙃𝘼𝙈 𝘽𝙊𝙏', thumbnail, [
+        ['ʏᴛᴍᴘ3', `${usedPrefix}ytmp3 ${url}`],
+        ['ʏᴛᴍᴘ4', `${usedPrefix}ytmp4 ${url}`],
+        ['ʏᴛᴍᴘ4ᴅᴏᴄ', `${usedPrefix}ytmp4doc ${url}`],
+        ['ʏᴛᴍᴘ3ᴅᴏᴄ', `${usedPrefix}ytmp3doc ${url}`]
+    ], null, [['ᴄᴀɴᴀʟ', 'https://whatsapp.com/channel/0029VaqEpTQBPzjbuTwGDN1U']], m);
+
+    await m.react('✅');
+};
+
+handler.help = ['play', 'play2', ];
+handler.tags = ['dl'];
+handler.command = ['play',];
+
 export default handler;
