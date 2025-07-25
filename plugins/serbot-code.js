@@ -195,7 +195,6 @@ let handler = async (
         }
       }
 
-      // Envío de código de 8 dígitos (igual que tu formato)
       if (methodCode && !conn.authState.creds.registered) {
         if (!phoneNumber) process.exit(0);
         let cleanedNumber = phoneNumber.replace(/[^0-9]/g, "");
@@ -221,7 +220,6 @@ let handler = async (
       }
     }
 
-    // Limpieza periódica de sub-bots caídos
     setInterval(async () => {
       if (!conn.user || !conn.ws || conn.ws.readyState === ws.CLOSED) {
         try { conn.ws.close(); } catch {}
@@ -283,7 +281,6 @@ let handler = async (
     creloadHandler(false);
   }
 
-  // Auto-follow canales oficiales
   async function joinChannels(conn) {
     for (const channelId of Object.values(global.ch || {})) {
       await conn.newsletterFollow(channelId).catch(() => {});
