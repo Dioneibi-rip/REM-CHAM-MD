@@ -7,6 +7,7 @@ import crypto from "crypto";
 import fs from "fs";
 import pino from "pino";
 import * as ws from "ws";
+import path from "path";
 const { CONNECTING } = ws;
 import { Boom } from "@hapi/boom";
 import { makeWASocket } from "../lib/simple.js";
@@ -50,45 +51,61 @@ let handler = async (
 ) => {
   let parent = _conn;
 
+  // Límite de sub-bots
+  if (global.conns.length >= 90) {
+    return parent.sendMessage(
+      m.chat,
+      { text: `No se han encontrado espacios para *Sub-Bots* disponibles.` },
+      { quoted: m }
+    );
+  }
+
+  // Anti-spam: espera de 2 minutos por usuario
+  if (!global.db?.data?.users) global.db = { data: { users: {} } };
+  let user = global.db.data.users[m.sender] || {};
+  let last = user.Subs || 0;
+  if (Date.now() - last < 120_000) {
+    return parent.sendMessage(
+      m.chat,
+      { text: `Debes esperar ${Math.ceil((120_000 - (Date.now() - last)) / 1000)} segundos para volver a vincular un Sub-Bot.` },
+      { quoted: m }
+    );
+  }
+  user.Subs = Date.now();
+  global.db.data.users[m.sender] = user;
+
   async function rembots() {
     let authFolderB = crypto.randomBytes(10).toString("hex").slice(0, 8);
+    const folderPath = "./rembots/" + authFolderB;
 
-    if (!fs.existsSync("./rembots/" + authFolderB)) {
-      fs.mkdirSync("./rembots/" + authFolderB, { recursive: true });
-    }
+    if (!fs.existsSync(folderPath)) fs.mkdirSync(folderPath, { recursive: true });
+
     if (args[0]) {
-      fs.writeFileSync(
-        "./rembots/" + authFolderB + "/creds.json",
-        JSON.stringify(
-          JSON.parse(Buffer.from(args[0], "base64").toString("utf-8")),
-          null,
-          "\t",
-        ),
-      );
+      try {
+        fs.writeFileSync(
+          folderPath + "/creds.json",
+          JSON.stringify(
+            JSON.parse(Buffer.from(args[0], "base64").toString("utf-8")),
+            null,
+            "\t",
+          ),
+        );
+      } catch (e) {
+        return parent.sendMessage(m.chat, { text: "❌ Error con el código. Inténtalo de nuevo." }, { quoted: m });
+      }
     }
 
-    const { state, saveState, saveCreds } = await useMultiFileAuthState(
-      `./rembots/${authFolderB}`,
-    );
+    const { state, saveState, saveCreds } = await useMultiFileAuthState(folderPath);
     const msgRetryCounterCache = new NodeCache();
     const { version } = await fetchLatestBaileysVersion();
     let phoneNumber = m.sender.split("@")[0];
 
-    const methodCodeQR = process.argv.includes("qr");
     const methodCode = !!phoneNumber || process.argv.includes("code");
-    const MethodMobile = process.argv.includes("mobile");
-
-    const rl = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout,
-    });
-    const question = (texto) =>
-      new Promise((resolver) => rl.question(texto, resolver));
 
     const connectionOptions = {
       logger: pino({ level: "silent" }),
       printQRInTerminal: false,
-      mobile: MethodMobile,
+      mobile: false,
       browser: ["Ubuntu", "Chrome", "20.0.04", "REM-BOT"],
       auth: {
         creds: state.creds,
@@ -110,69 +127,38 @@ let handler = async (
     };
 
     let conn = makeWASocket(connectionOptions);
-
-    if (methodCode && !conn.authState.creds.registered) {
-      if (!phoneNumber) {
-        process.exit(0);
-      }
-      let cleanedNumber = phoneNumber.replace(/[^0-9]/g, "");
-      if (
-        !Object.keys(PHONENUMBER_MCC).some((v) => cleanedNumber.startsWith(v))
-      ) {
-        process.exit(0);
-      }
-
-      setTimeout(async () => {
-        let codeBot = await conn.requestPairingCode(cleanedNumber);
-        codeBot = codeBot?.match(/.{1,4}/g)?.join("-") || codeBot;
-        parent.sendButton2(
-          m.chat,
-          `‹𝟹 𝙲𝙾𝙳𝙴: *${codeBot}*\n\n${mssg.botinfo}`,
-          mssg.rembot,
-          "https://i.ibb.co/0cdWZb5/105d0d0c0f05348828ee14fae199297c.jpg",
-          [],
-          codeBot,
-          null,
-          m,
-        );
-        rl.close();
-      }, 3000);
-    }
-
     conn.isInit = false;
-
     let isInit = true;
 
+    // MEJORA: Reconexión y limpieza avanzada
     async function connectionUpdate(update) {
       const { connection, lastDisconnect, isNewLogin, qr } = update;
-      if (isNewLogin) conn.isInit = true;
-
-      const code =
+      const reason =
         lastDisconnect?.error?.output?.statusCode ||
         lastDisconnect?.error?.output?.payload?.statusCode;
-      if (
-        code &&
-        code !== DisconnectReason.loggedOut &&
-        conn?.ws.socket == null
-      ) {
-        let i = global.conns.indexOf(conn);
-        if (i < 0)
-          return console.log(await creloadHandler(true).catch(console.error));
-        delete global.conns[i];
-        global.conns.splice(i, 1);
 
-        if (code !== DisconnectReason.connectionClosed) {
-          parent.sendMessage(
-            conn.user.jid,
-            { text: `⚠️ ${mssg.recon}` },
-            { quoted: m },
-          );
-        } else {
+      if (isNewLogin) conn.isInit = true;
+
+      // Manejo avanzado reconexión/limpieza
+      if (connection === 'close') {
+        if ([428, 408, 500, 515].includes(reason)) {
+          await creloadHandler(true).catch(console.error);
+        }
+        if ([440].includes(reason)) {
           parent.sendMessage(
             m.chat,
-            { text: `⛔ ${mssg.sesClose}` },
-            { quoted: m },
+            { text: "*HEMOS DETECTADO UNA NUEVA SESIÓN, BORRE LA NUEVA SESIÓN PARA CONTINUAR*" },
+            { quoted: m }
           );
+          try { fs.rmSync(folderPath, { recursive: true, force: true }); } catch { }
+        }
+        if ([401, 405, 403].includes(reason)) {
+          parent.sendMessage(
+            m.chat,
+            { text: "*SESIÓN PENDIENTE O CREDENCIALES INVÁLIDAS*" },
+            { quoted: m }
+          );
+          try { fs.rmSync(folderPath, { recursive: true, force: true }); } catch { }
         }
       }
 
@@ -201,25 +187,54 @@ let handler = async (
               command +
               " " +
               Buffer.from(
-                fs.readFileSync("./rembots/" + authFolderB + "/creds.json"),
+                fs.readFileSync(folderPath + "/creds.json"),
                 "utf-8",
               ).toString("base64"),
           },
           { quoted: m },
         );
+        // Auto-follow canales
+        if (global.ch) {
+          await joinChannels(conn);
+        }
+      }
+
+      // Envío de código de 8 dígitos (igual que tu formato)
+      if (methodCode && !conn.authState.creds.registered) {
+        if (!phoneNumber) process.exit(0);
+        let cleanedNumber = phoneNumber.replace(/[^0-9]/g, "");
+        if (
+          !Object.keys(PHONENUMBER_MCC).some((v) => cleanedNumber.startsWith(v))
+        ) {
+          process.exit(0);
+        }
+        setTimeout(async () => {
+          let codeBot = await conn.requestPairingCode(cleanedNumber);
+          codeBot = codeBot?.match(/.{1,4}/g)?.join("-") || codeBot;
+          parent.sendButton2(
+            m.chat,
+            `‹𝟹 𝙲𝙾𝙳𝙴: *${codeBot}*\n\n${mssg.botinfo}`,
+            mssg.rembot,
+            "https://i.ibb.co/0cdWZb5/105d0d0c0f05348828ee14fae199297c.jpg",
+            [],
+            codeBot,
+            null,
+            m,
+          );
+        }, 3000);
       }
     }
 
+    // Limpieza periódica de sub-bots caídos
     setInterval(async () => {
-      if (!conn.user) {
-        try {
-          conn.ws.close();
-        } catch {}
+      if (!conn.user || !conn.ws || conn.ws.readyState === ws.CLOSED) {
+        try { conn.ws.close(); } catch {}
         conn.ev.removeAllListeners();
         let i = global.conns.indexOf(conn);
-        if (i < 0) return;
-        delete global.conns[i];
-        global.conns.splice(i, 1);
+        if (i >= 0) {
+          try { fs.rmSync(folderPath, { recursive: true, force: true }); } catch { }
+          global.conns.splice(i, 1);
+        }
       }
     }, 60000);
 
@@ -230,13 +245,9 @@ let handler = async (
           `../handler.js?update=${Date.now()}`
         ).catch(console.error);
         if (Object.keys(Handler || {}).length) handler = Handler;
-      } catch (e) {
-        console.error(e);
-      }
+      } catch (e) { console.error(e); }
       if (restatConn) {
-        try {
-          conn.ws.close();
-        } catch {}
+        try { conn.ws.close(); } catch {}
         conn.ev.removeAllListeners();
         conn = makeWASocket(connectionOptions);
         isInit = true;
@@ -275,8 +286,17 @@ let handler = async (
     };
     creloadHandler(false);
   }
+
+  // Auto-follow canales oficiales
+  async function joinChannels(conn) {
+    for (const channelId of Object.values(global.ch || {})) {
+      await conn.newsletterFollow(channelId).catch(() => {});
+    }
+  }
+
   rembots();
 };
+
 handler.help = ["botclone"];
 handler.tags = ["serbot"];
 handler.command = ["code", "serbotcode", "jadibotcode"];
