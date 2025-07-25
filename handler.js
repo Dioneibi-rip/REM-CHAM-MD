@@ -551,7 +551,9 @@ export async function participantsUpdate({ id, participants, action }) {
 │ 𝙱𝙸𝙴𝙽𝚅𝙴𝙽𝙸𝙳𝙾, ${await this.getName(user)}, 𝙵𝙴𝙻𝙸𝙲𝙸𝙳𝙰𝙳 𝚀𝚄𝙴 ${nthMember}𝙼𝙴𝙼𝙱𝚁𝙾
 │
 │ 𝙱𝚒𝚎𝚗𝚟𝚎𝚗𝚒𝚍𝚘 𝚊 𝚎𝚜𝚝𝚊 𝚑𝚞𝚖𝚒𝚕𝚍𝚎 𝚏𝚊𝚖𝚒𝚕𝚒𝚊 :3
-╰────────═┅═────────`;
+╰────────═┅═────────
+> edita la bienvenida con el comando #setwelcome
+`;
 
             let welcomeApiUrl = `https://i.pinimg.com/564x/92/05/f0/9205f0b8b38e296f91cd09690a0ab3b2.jpg${encodeURIComponent(
               await this.getName(user),
