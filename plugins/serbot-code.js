@@ -51,7 +51,6 @@ let handler = async (
 ) => {
   let parent = _conn;
 
-  // Límite de sub-bots
   if (global.conns.length >= 90) {
     return parent.sendMessage(
       m.chat,
@@ -60,7 +59,6 @@ let handler = async (
     );
   }
 
-  // Anti-spam: espera de 2 minutos por usuario
   if (!global.db?.data?.users) global.db = { data: { users: {} } };
   let user = global.db.data.users[m.sender] || {};
   let last = user.Subs || 0;
@@ -130,7 +128,6 @@ let handler = async (
     conn.isInit = false;
     let isInit = true;
 
-    // MEJORA: Reconexión y limpieza avanzada
     async function connectionUpdate(update) {
       const { connection, lastDisconnect, isNewLogin, qr } = update;
       const reason =
@@ -139,7 +136,6 @@ let handler = async (
 
       if (isNewLogin) conn.isInit = true;
 
-      // Manejo avanzado reconexión/limpieza
       if (connection === 'close') {
         if ([428, 408, 500, 515].includes(reason)) {
           await creloadHandler(true).catch(console.error);
@@ -193,7 +189,7 @@ let handler = async (
           },
           { quoted: m },
         );
-        // Auto-follow canales
+   
         if (global.ch) {
           await joinChannels(conn);
         }
