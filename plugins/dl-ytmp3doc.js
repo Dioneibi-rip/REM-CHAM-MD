@@ -25,7 +25,6 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       throw new Error('La API no devolvió un enlace válido de audio.');
     }
 
-    // Enviar el audio como documento
     await conn.sendMessage(m.chat, {
       document: { url: data.res.url },
       mimetype: 'audio/mpeg',
