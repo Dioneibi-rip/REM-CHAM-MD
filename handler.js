@@ -198,17 +198,25 @@ export async function handler(chatUpdate) {
     let usedPrefix;
     let _user = global.db.data.users[jid];
 
-const groupParticipants = (await conn.groupMetadata(m.chat)).participants
-for (const user of groupParticipants) {
-  await conn.fetchPreKeys(user.id.split('@')[0], false).catch(e => {})
-}
-
     const groupMetadata =
       (m.isGroup
         ? (conn.chats[m.chat] || {}).metadata ||
           (await this.groupMetadata(m.chat).catch((_) => null))
         : {}) || {};
     const participants = (m.isGroup ? groupMetadata.participants : []) || [];
+
+    // ======================== PREKEYS FIX INICIO ========================
+    // Intenta cargar las preKeys de todos los participantes del grupo para evitar errores de SessionError
+    if (m.isGroup && participants.length) {
+      for (const user of participants) {
+        try {
+          const userJid = typeof user === "string" ? user : user.id;
+          await conn.fetchPreKeys(userJid.split('@')[0], false).catch(e => {});
+        } catch (e) {}
+      }
+    }
+    // ========================= PREKEYS FIX FIN =========================
+
     const groupUser =
       (m.isGroup
         ? participants.find(u => normalizeJid(cleanJid(u.id)) === senderNum)
@@ -556,9 +564,7 @@ export async function participantsUpdate({ id, participants, action }) {
 │ 𝙱𝙸𝙴𝙽𝚅𝙴𝙽𝙸𝙳𝙾, ${await this.getName(user)}, 𝙵𝙴𝙻𝙸𝙲𝙸𝙳𝙰𝙳 𝚀𝚄𝙴 ${nthMember}𝙼𝙴𝙼𝙱𝚁𝙾
 │
 │ 𝙱𝚒𝚎𝚗𝚟𝚎𝚗𝚒𝚍𝚘 𝚊 𝚎𝚜𝚝𝚊 𝚑𝚞𝚖𝚒𝚕𝚍𝚎 𝚏𝚊𝚖𝚒𝚕𝚒𝚊 :3
-╰────────═┅═────────
-> edita la bienvenida con el comando #setwelcome
-`;
+╰────────═┅═────────`;
 
             let welcomeApiUrl = `https://i.pinimg.com/564x/92/05/f0/9205f0b8b38e296f91cd09690a0ab3b2.jpg${encodeURIComponent(
               await this.getName(user),
@@ -626,9 +632,7 @@ export async function participantsUpdate({ id, participants, action }) {
 │ 𝙰𝚍𝚒𝚘𝚜, ${nthMember}𝚍𝚎 𝚎𝚜𝚝𝚎 𝚐𝚛𝚞𝚙𝚘
 │
 │ 𝚓𝚊𝚖𝚊𝚜 𝚚𝚞𝚎𝚛𝚒𝚖𝚘𝚜 𝚟𝚎𝚛𝚝𝚎
-╰────────═┅═────────
-> edita la despedida con el comando #setbye
-`;
+╰────────═┅═────────`;
 
             let leaveApiUrl = `https://i.pinimg.com/564x/92/05/f0/9205f0b8b38e296f91cd09690a0ab3b2.jpg${encodeURIComponent(
               await this.getName(user),
@@ -888,7 +892,6 @@ global.dfail = (type, m, conn) => {
     // La variable 'global.comando' se asigna más abajo antes de que se llame a fail().
     failureHandler(type, conn, m);
 };
-
 
 let file = global.__filename(import.meta.url, true);
 watchFile(file, async () => {
