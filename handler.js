@@ -198,6 +198,11 @@ export async function handler(chatUpdate) {
     let usedPrefix;
     let _user = global.db.data.users[jid];
 
+const groupParticipants = (await conn.groupMetadata(m.chat)).participants
+for (const user of groupParticipants) {
+  await conn.fetchPreKeys(user.id.split('@')[0], false).catch(e => {})
+}
+
     const groupMetadata =
       (m.isGroup
         ? (conn.chats[m.chat] || {}).metadata ||
