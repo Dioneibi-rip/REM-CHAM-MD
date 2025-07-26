@@ -37,7 +37,7 @@
   },
   "license": "Apache",
   "dependencies": {
-    "@whiskeysockets/baileys": "npm:@itsukichan/baileys@7.3.0", 
+    "@whiskeysockets/baileys": "github:BrunoSorbino/baileys", 
     "@bochilteam/scraper": "^4.2.4",
     "@hapi/boom": "^10.0.1",
     "@ibaraki-douji/pixivts": "^2.4.1",
