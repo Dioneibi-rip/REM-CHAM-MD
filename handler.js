@@ -119,7 +119,7 @@ export async function handler(chatUpdate) {
     } else
       global.db.data.chats[m.chat] = {
         antiDelete: true,
-        antiLink: true,
+        antiLink: false,
         antiSticker: false,
         antiToxic: false,
         detect: false,
@@ -136,7 +136,7 @@ export async function handler(chatUpdate) {
         useDocument: false,
         viewOnce: false,
         viewStory: false,
-        welcome: true,
+        welcome: false,
         chatbot: false,
       };
 
@@ -204,19 +204,6 @@ export async function handler(chatUpdate) {
           (await this.groupMetadata(m.chat).catch((_) => null))
         : {}) || {};
     const participants = (m.isGroup ? groupMetadata.participants : []) || [];
-
-    // ======================== PREKEYS FIX INICIO ========================
-    // Intenta cargar las preKeys de todos los participantes del grupo para evitar errores de SessionError
-    if (m.isGroup && participants.length) {
-      for (const user of participants) {
-        try {
-          const userJid = typeof user === "string" ? user : user.id;
-          await conn.fetchPreKeys(userJid.split('@')[0], false).catch(e => {});
-        } catch (e) {}
-      }
-    }
-    // ========================= PREKEYS FIX FIN =========================
-
     const groupUser =
       (m.isGroup
         ? participants.find(u => normalizeJid(cleanJid(u.id)) === senderNum)
