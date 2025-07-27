@@ -212,8 +212,6 @@ global.conn = makeWASocket(connectionOptions);
 
 // ======= ARRANQUE NATIVO SUB BOTS by ReyEndymion =======
 
-import { join } from 'path';
-
 global.rutaJadiBot = join(__dirname, './rembots');
 
 if (global.RubyJadibts) {
