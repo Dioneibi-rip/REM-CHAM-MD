@@ -1,27 +1,33 @@
+import { addExif } from '../lib/sticker.js';
 
-import { addExif } from '../lib/sticker.js'
-let handler = async (m, { conn, text, args }) => {
-  if (!m.quoted) throw 'REPONDE AL STIKER'
-  let stiker = false
-       let stick = args.join(" ").split("|");
-       let f = stick[0] !== "" ? stick[0] : packname;
-       let g = typeof stick[1] !== "undefined" ? stick[1] : author;
+let handler = async (m, { conn, args }) => {
+  if (!m.quoted) throw '🚫 *Responde a un sticker para añadir marca de agua.*';
+
+  const stickerInfo = args.join(" ").split("|");
+  const packname = stickerInfo[0] || 'Sticker';
+  const author = stickerInfo[1] || 'Bot';
+
   try {
-    let mime = m.quoted.mimetype || ''
-    if (!/webp/.test(mime)) throw 'RESPONDE AL STIKER'
-    let img = await m.quoted.download()
-    if (!img) throw 'REPONDE AL STIKER!'
-    stiker = await addExif(img, f, g)
-  } catch (e) {
-    console.error(e)
-    if (Buffer.isBuffer(e)) stiker = e
-  } finally {
-    if (stiker) conn.sendFile(m.chat, stiker, 'wm.webp', '', m, null, rpl)
-     else throw 'la convercion fallo'
-  }
-}
-handler.help = ['take <name>|<author>']
-handler.tags = ['sticker']
-handler.command = ['take', 'wm'] 
+    const mime = m.quoted.mimetype || '';
+    if (!/webp/.test(mime)) throw '📌 *El mensaje respondido no es un sticker válido.*';
 
-export default handler
+    const media = await m.quoted.download();
+    if (!media) throw '⚠️ *No se pudo descargar el sticker.*';
+
+    const sticker = await addExif(media, packname, author);
+    if (sticker) {
+      await conn.sendFile(m.chat, sticker, 'sticker.webp', '', m); // eliminado rpl
+    } else {
+      throw '❌ *La conversión del sticker falló.*';
+    }
+  } catch (e) {
+    console.error(e);
+    throw '❌ *Ocurrió un error al procesar el sticker.*';
+  }
+};
+
+handler.help = ['take <packname>|<author>'];
+handler.tags = ['sticker'];
+handler.command = ['take', 'wm'];
+
+export default handler;
