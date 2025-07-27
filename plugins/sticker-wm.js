@@ -1,13 +1,11 @@
 import { addExif } from '../lib/sticker.js';
 
 let handler = async (m, { conn, args }) => {
-  // Validar que haya respuesta a un sticker
   if (!m.quoted) throw '📌 ʀᴇsᴘᴏɴᴅᴇ ᴀ ᴜɴ sᴛɪᴄᴋᴇʀ ᴘᴀʀᴀ ᴄᴀᴍʙɪᴀʀ ʟᴀ ᴍᴀʀᴄᴀ ᴅᴇ ᴀɢᴜᴀ.\n\n*Ejemplo:* .wm StickerPack|By Juanito';
 
   const mime = m.quoted.mimetype || '';
   if (!/webp/.test(mime)) throw '⚠️ ᴇʟ ᴍᴇɴsᴀᴊᴇ ʀᴇsᴘᴏɴᴅɪᴅᴏ ɴᴏ ᴇs ᴜɴ sᴛɪᴄᴋᴇʀ.';
 
-  // Obtener packname y author del argumento
   const stick = args.join(' ').split('|');
   const packname = stick[0]?.trim() || 'Stickers';
   const author = stick[1]?.trim() || 'Bot';
