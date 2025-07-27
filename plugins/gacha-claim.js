@@ -1,89 +1,79 @@
-import { promises as fs } from 'fs';
+import { promises as fs } from 'fs'
 
-const charactersFilePath = './src/database/characters.json';
-const claimMsgFile = './src/database/userClaimConfig.json';
+const charactersFile = './src/database/characters.json'
+const haremFile = './src/database/harem.json'
+const cooldowns = {}
 
-const cooldowns = {};
+const COOLDOWN_TIME = 15 * 60 * 1000 // 15 minutos
 
-async function loadCharacters() {
-    const data = await fs.readFile(charactersFilePath, 'utf-8');
-    return JSON.parse(data);
+async function loadJSON(filePath, defaultValue = []) {
+  try {
+    const data = await fs.readFile(filePath, 'utf-8')
+    return JSON.parse(data)
+  } catch {
+    return defaultValue
+  }
 }
 
-async function saveCharacters(characters) {
-    await fs.writeFile(charactersFilePath, JSON.stringify(characters, null, 2), 'utf-8');
-}
-
-async function loadClaimMessages() {
-    try {
-        const data = await fs.readFile(claimMsgFile, 'utf-8');
-        return JSON.parse(data);
-    } catch {
-        return {};
-    }
-}
-
-async function getCustomClaimMessage(userId, username, characterName) {
-    const messages = await loadClaimMessages();
-    const template = messages[userId] || '✧ *$user* ha reclamado a *$character* ✦';
-
-    return template
-        .replace(/\$user/g, username)
-        .replace(/\$character/g, characterName);
+async function saveJSON(filePath, data) {
+  try {
+    await fs.writeFile(filePath, JSON.stringify(data, null, 2), 'utf-8')
+  } catch (err) {
+    throw new Error(`✘ No se pudo guardar el archivo: ${filePath}`)
+  }
 }
 
 let handler = async (m, { conn }) => {
-    const userId = m.sender;
-    const now = Date.now();
+  const userId = m.sender
+  const now = Date.now()
 
-    if (cooldowns[userId] && now < cooldowns[userId]) {
-        const remaining = cooldowns[userId] - now;
-        const minutes = Math.floor(remaining / 60000);
-        const seconds = Math.floor((remaining % 60000) / 1000);
-        return conn.reply(m.chat, `⏳ Debes esperar *${minutes}m ${seconds}s* antes de reclamar otra waifu.`, m);
-    }
+  if (cooldowns[userId] && now < cooldowns[userId]) {
+    const remaining = Math.ceil((cooldowns[userId] - now) / 1000)
+    const min = Math.floor(remaining / 60)
+    const sec = remaining % 60
+    return await conn.reply(
+      m.chat,
+      `⏳ Debes esperar *${min}m ${sec}s* para volver a usar *#rw*.`,
+      m
+    )
+  }
 
-    if (!m.quoted || !m.quoted.text) {
-        return conn.reply(m.chat, '《✧》Debes *citar un personaje válido* para reclamarlo.', m);
-    }
+  try {
+    const characters = await loadJSON(charactersFile)
+    if (!characters.length) throw new Error('No hay personajes disponibles.')
 
-    try {
-        const characters = await loadCharacters();
+    const character = characters[Math.floor(Math.random() * characters.length)]
+    const image = character.img[Math.floor(Math.random() * character.img.length)]
+    const harem = await loadJSON(haremFile)
 
-        const match = m.quoted.text.match(/𝙄𝘿:\s*\*([^\*]+)\*/i);
-        if (!match) return conn.reply(m.chat, '《✧》No se pudo detectar el ID del personaje.', m);
+    const isClaimed = !!character.user
+    const claimedBy = isClaimed ? `Reclamado por @${character.user.split('@')[0]}` : 'Libre'
 
-        const id = match[1].trim();
-        const character = characters.find(c => c.id === id);
+    const message = `
+╭━━⊰ 𝑷𝑬𝑹𝑺𝑶𝑵𝑨𝑱𝑬 𝑹𝑨𝑵𝑫𝑶𝑴 ⊱━━
+┃ ✦ 𝙉𝙊𝙈𝘽𝙍𝙀: *${character.name}*
+┃ ✦ 𝙂𝙀𝙉𝙀𝙍𝙊: *${character.gender}*
+┃ ✦ 𝙑𝘼𝙇𝙊𝙍: *${character.value}*
+┃ ✦ 𝙀𝙎𝙏𝘼𝘿𝙊: ${claimedBy}
+┃ ✦ 𝙁𝙐𝙀𝙉𝙏𝙀: *${character.source}*
+┃ ✦ 𝙄𝘿: *${character.id}*
+╰━━━━━━━━━━━━━━━━━━━`.trim()
 
-        if (!character) return conn.reply(m.chat, '《✧》Personaje no encontrado.', m);
+    const mentions = isClaimed ? [character.user] : []
 
-        if (character.user && character.user !== userId) {
-            return conn.reply(m.chat,
-                `✧ El personaje *${character.name}* ya fue reclamado por @${character.user.split('@')[0]}.`,
-                m,
-                { mentions: [character.user] });
-        }
+    await conn.sendFile(m.chat, image, `${character.name}.jpg`, message, m, { mentions })
 
-        character.user = userId;
-        character.status = 'Reclamado';
-        await saveCharacters(characters);
+    cooldowns[userId] = now + COOLDOWN_TIME
+  } catch (err) {
+    console.error(err)
+    await conn.reply(m.chat, `❌ Error: ${err.message}`, m)
+  }
+}
 
-        const username = await conn.getName(userId);
-        const mensajeFinal = await getCustomClaimMessage(userId, username, character.name);
 
-        await conn.reply(m.chat, mensajeFinal, m);
+handler.help = ['rw', 'rollwaifu', 'ver']
+handler.tags = ['gacha']
+handler.command = ['rw', 'rollwaifu', 'ver']
+handler.group = true
 
-        cooldowns[userId] = now + 30 * 60 * 1000; // 30 minutos
-
-    } catch (e) {
-        conn.reply(m.chat, `✘ Error al reclamar waifu:\n${e.message}`, m);
-    }
-};
-
-handler.help = ['claim'];
-handler.tags = ['waifus'];
-handler.command = ['claim', 'reclamar', 'c'];
-handler.group = true;
-
-export default handler;
+export default handler
