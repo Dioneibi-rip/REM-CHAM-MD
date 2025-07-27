@@ -13,6 +13,7 @@ import {
   readFileSync,
   watch,
   rmSync,
+  mkdirSync,
 } from "fs";
 import yargs from "yargs";
 import { spawn } from "child_process";
@@ -102,8 +103,6 @@ global.prefix = new RegExp(
     "]",
 );
 
-//global.opts['db'] = "mongodb+srv://dbdyluxbot:password@cluster0.xwbxda5.mongodb.net/?retryWrites=true&w=majority"
-
 global.db = new Low(
   /https?:\/\//.test(opts["db"] || "")
     ? new cloudDBAdapter(opts["db"])
@@ -172,7 +171,7 @@ if (
 ) {
   while (true) {
     opcion = await question(
-      "\n\nꨄ︎ ¿𝙲𝙾𝙼𝙾 𝚀𝚄𝙸𝙴𝚁𝙴𝚂 𝙸𝙽𝙸𝙲𝙸𝙰𝚁 𝚂𝙴𝚂𝚂𝙸𝙾𝙽?\n⤷ 1 : 𝙿𝙾𝚁 𝚀𝚁\n⤷ 2 : 𝙼𝙴𝙳𝙸𝙰𝙽𝚃𝙴 𝙲𝙾𝙳𝙸𝙶𝙾\n\n\n",
+      "\n\nꨄ︎ ¿𝙲𝙾𝙼𝙾 𝚀𝚄𝙸𝙴𝚁𝙴𝚂 𝙸𝙽𝙸𝙲𝙸𝙰𝚁 𝚂𝙴𝚂𝙸𝙾𝙽?\n⤷ 1 : 𝙿𝙾𝚁 𝚀𝚁\n⤷ 2 : 𝙼𝙴𝙳𝙸𝙰𝙽𝚃𝙴 𝙲𝙾𝙳𝙸𝙶𝙾\n\n\n",
     );
     if (opcion === "1" || opcion === "2") {
       break;
@@ -210,6 +209,34 @@ const connectionOptions = {
 
 //--
 global.conn = makeWASocket(connectionOptions);
+
+// ======= ARRANQUE NATIVO SUB BOTS by ReyEndymion =======
+
+import { join } from 'path';
+
+global.rutaJadiBot = join(__dirname, './rembots');
+
+if (global.RubyJadibts) {
+  if (!existsSync(global.rutaJadiBot)) {
+    mkdirSync(global.rutaJadiBot, { recursive: true });
+    console.log(chalk.bold.cyan(`La carpeta: ${global.rutaJadiBot} se creó correctamente.`));
+  } else {
+    console.log(chalk.bold.cyan(`La carpeta: ${global.rutaJadiBot} ya está creada.`));
+  }
+
+  const readRutaJadiBot = readdirSync(global.rutaJadiBot);
+  if (readRutaJadiBot.length > 0) {
+    const creds = 'creds.json';
+    for (const gjbts of readRutaJadiBot) {
+      const botPath = join(global.rutaJadiBot, gjbts);
+      const readBotPath = readdirSync(botPath);
+      if (readBotPath.includes(creds)) {
+        // Asegúrate que RubyJadiBot esté importado correctamente en tu proyecto
+        RubyJadiBot({ pathrembots: botPath, m: null, conn, args: '', usedPrefix: '/', command: 'serbot' });
+      }
+    }
+  }
+}
 
 if (opcion === "2" || methodCode) {
   if (!conn.authState.creds.registered) {
