@@ -210,32 +210,29 @@ const connectionOptions = {
 //--
 global.conn = makeWASocket(connectionOptions);
 
-// ======= ARRANQUE NATIVO SUB BOTS by ReyEndymion =======
+//Arranque nativo para subbots by - ReyEndymion >> https://github.com/ReyEndymion
 
-const rembotsPath = path.join(process.cwd(), 'rembots');
-
-global.rutaJadiBot = join(__dirname, './rembots');
+global.rutaJadiBot = join(__dirname, './rembots')
 
 if (global.RubyJadibts) {
-  if (!existsSync(global.rutaJadiBot)) {
-    mkdirSync(global.rutaJadiBot, { recursive: true });
-    console.log(chalk.bold.cyan(`La carpeta: ${global.rutaJadiBot} se creó correctamente.`));
-  } else {
-    console.log(chalk.bold.cyan(`La carpeta: ${global.rutaJadiBot} ya está creada.`));
-  }
+if (!existsSync(global.rutaJadiBot)) {
+mkdirSync(global.rutaJadiBot, { recursive: true }) 
+console.log(chalk.bold.cyan(`La carpeta: ${jadi} se creó correctamente.`))
+} else {
+console.log(chalk.bold.cyan(`La carpeta: ${jadi} ya está creada.`)) 
+}
 
-  const readRutaJadiBot = readdirSync(global.rutaJadiBot);
-  if (readRutaJadiBot.length > 0) {
-    const creds = 'creds.json';
-    for (const gjbts of readRutaJadiBot) {
-      const botPath = join(global.rutaJadiBot, gjbts);
-      const readBotPath = readdirSync(botPath);
-      if (readBotPath.includes(creds)) {
-        // Asegúrate que RubyJadiBot esté importado correctamente en tu proyecto
-        rembots({ pathrembots: botPath, m: null, conn, args: '', usedPrefix: '/', command: 'serbot' });
-      }
-    }
-  }
+const readRutaJadiBot = readdirSync(rutaJadiBot)
+if (readRutaJadiBot.length > 0) {
+const creds = 'creds.json'
+for (const gjbts of readRutaJadiBot) {
+const botPath = join(rutaJadiBot, gjbts)
+const readBotPath = readdirSync(botPath)
+if (readBotPath.includes(creds)) {
+rembots({pathrembots: botPath, m: null, conn, args: '', usedPrefix: '/', command: 'serbot'})
+}
+}
+}
 }
 
 if (opcion === "2" || methodCode) {
