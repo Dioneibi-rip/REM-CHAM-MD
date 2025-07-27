@@ -37,7 +37,7 @@
   },
   "license": "Apache",
   "dependencies": {
-    "@whiskeysockets/baileys": "github:Dioneibi-rip/baileys", 
+    "@whiskeysockets/baileys": "npm:@soymaycol/maybailyes", 
     "@bochilteam/scraper": "^4.2.4",
     "@hapi/boom": "^10.0.1",
     "@ibaraki-douji/pixivts": "^2.4.1",
@@ -65,7 +65,7 @@
     "human-readable": "^0.2.1",
     "imgur": "2.3.0",
     "instagram-url-direct": "^1.0.13",
-    "jimp": "^0.22.12",
+    "jimp": "^0.16.1",
     "jsdom": "^21.1.0",
     "lodash": "^4.17.21",
     "lowdb": "^3.0.0",
