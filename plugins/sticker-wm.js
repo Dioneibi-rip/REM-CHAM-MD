@@ -1,33 +1,36 @@
 import { addExif } from '../lib/sticker.js';
 
 let handler = async (m, { conn, args }) => {
-  if (!m.quoted) throw '✋ ᴘᴏʀ ғᴀᴠᴏʀ, ʀᴇsᴘᴏɴᴅᴇ ᴀ ᴜɴ sᴛɪᴄᴋᴇʀ ᴘᴀʀᴀ ᴀɢʀᴇɢᴀʀ ᴍᴀʀᴄᴀ ᴅᴇ ᴀɢᴜᴀ.';
+  // Validar que haya respuesta a un sticker
+  if (!m.quoted) throw '📌 ʀᴇsᴘᴏɴᴅᴇ ᴀ ᴜɴ sᴛɪᴄᴋᴇʀ ᴘᴀʀᴀ ᴄᴀᴍʙɪᴀʀ ʟᴀ ᴍᴀʀᴄᴀ ᴅᴇ ᴀɢᴜᴀ.\n\n*Ejemplo:* .wm StickerPack|By Juanito';
 
   const mime = m.quoted.mimetype || '';
-  if (!/webp/.test(mime)) throw '⚠️ ᴇsᴛᴏ ɴᴏ ᴇs ᴜɴ sᴛɪᴄᴋᴇʀ. ʀᴇsᴘᴏɴᴅᴇ ᴀ ᴜɴᴏ.';
+  if (!/webp/.test(mime)) throw '⚠️ ᴇʟ ᴍᴇɴsᴀᴊᴇ ʀᴇsᴘᴏɴᴅɪᴅᴏ ɴᴏ ᴇs ᴜɴ sᴛɪᴄᴋᴇʀ.';
 
+  // Obtener packname y author del argumento
   const stick = args.join(' ').split('|');
-  const packname = stick[0]?.trim() || 'StickerBot';
-  const author = stick[1]?.trim() || 'by Bot';
+  const packname = stick[0]?.trim() || 'Stickers';
+  const author = stick[1]?.trim() || 'Bot';
 
   try {
-    const img = await m.quoted.download();
-    if (!img) throw '❌ ɴᴏ sᴇ ᴘᴜᴅᴏ ᴅᴇsᴄᴀʀɢᴀʀ ᴇʟ sᴛɪᴄᴋᴇʀ.';
+    await m.react('🕓');
+    const buffer = await m.quoted.download();
+    if (!buffer) throw '❌ ɴᴏ sᴇ ᴘᴜᴅᴏ ᴅᴇsᴄᴀʀɢᴀʀ ᴇʟ sᴛɪᴄᴋᴇʀ.';
 
-    const stiker = await addExif(img, packname, author);
-    if (stiker) {
-      await conn.sendFile(m.chat, stiker, 'wm.webp', '', m);
-    } else {
-      throw '❌ Ocurrió un error al generar el sticker.';
-    }
-  } catch (e) {
-    console.error(e);
-    throw '❌ Error al procesar el sticker. Asegúrate de responder a un sticker válido.';
+    const sticker = await addExif(buffer, packname, author);
+    if (!sticker) throw '❌ ʜᴜʙᴏ ᴜɴ ᴘʀᴏʙʟᴇᴍᴀ ᴀʟ ᴄʀᴇᴀʀ ᴇʟ sᴛɪᴄᴋᴇʀ.';
+
+    await conn.sendFile(m.chat, sticker, 'wm.webp', '', m, false, { asSticker: true });
+    await m.react('✅');
+  } catch (err) {
+    console.error(err);
+    await m.react('❌');
+    throw '⚠️ ᴇʀʀᴏʀ ᴀʟ ᴘʀᴏᴄᴇsᴀʀ ᴇʟ sᴛɪᴄᴋᴇʀ. ᴀsᴇɢᴜ́ʀᴀᴛᴇ ᴅᴇ ʀᴇsᴘᴏɴᴅᴇʀ ᴀ ᴜɴ sᴛɪᴄᴋᴇʀ ᴠᴀ́ʟɪᴅᴏ.';
   }
 };
 
-handler.help = ['take <paquete>|<autor>'];
+handler.help = ['wm <paquete>|<autor>'];
 handler.tags = ['sticker'];
-handler.command = ['take', 'wm'];
+handler.command = ['wm', 'take'];
 
 export default handler;
