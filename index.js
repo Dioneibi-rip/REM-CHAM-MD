@@ -4,6 +4,7 @@ import { fileURLToPath } from 'url'
 import { setupMaster, fork } from 'cluster'
 import { watchFile, unwatchFile } from 'fs'
 import figlet from 'figlet'
+import rembots from './remcham.js';
 import { createInterface } from 'readline'
 import yargs from 'yargs'
 import chalk from 'chalk'
