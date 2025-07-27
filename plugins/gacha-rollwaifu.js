@@ -1,79 +1,96 @@
 import { promises as fs } from 'fs'
 
-const charactersFile = './src/database/characters.json'
-const haremFile = './src/database/harem.json'
+const charactersFilePath = './src/database/characters.json'
+const haremFilePath = './src/database/harem.json'
+
 const cooldowns = {}
 
-const COOLDOWN_TIME = 15 * 60 * 1000
-
-async function loadJSON(filePath, defaultValue = []) {
-  try {
-    const data = await fs.readFile(filePath, 'utf-8')
-    return JSON.parse(data)
-  } catch {
-    return defaultValue
-  }
+async function loadCharacters() {
+    try {
+        const data = await fs.readFile(charactersFilePath, 'utf-8')
+        return JSON.parse(data)
+    } catch (error) {
+        throw new Error('❀ No se pudo cargar el archivo characters.json.')
+    }
 }
 
-async function saveJSON(filePath, data) {
-  try {
-    await fs.writeFile(filePath, JSON.stringify(data, null, 2), 'utf-8')
-  } catch (err) {
-    throw new Error(`✘ No se pudo guardar el archivo: ${filePath}`)
-  }
+async function saveCharacters(characters) {
+    try {
+        await fs.writeFile(charactersFilePath, JSON.stringify(characters, null, 2), 'utf-8')
+    } catch (error) {
+        throw new Error('❀ No se pudo guardar el archivo characters.json.')
+    }
+}
+
+async function loadHarem() {
+    try {
+        const data = await fs.readFile(haremFilePath, 'utf-8')
+        return JSON.parse(data)
+    } catch (error) {
+        return []
+    }
+}
+
+async function saveHarem(harem) {
+    try {
+        await fs.writeFile(haremFilePath, JSON.stringify(harem, null, 2), 'utf-8')
+    } catch (error) {
+        throw new Error('❀ No se pudo guardar el archivo harem.json.')
+    }
 }
 
 let handler = async (m, { conn }) => {
-  const userId = m.sender
-  const now = Date.now()
+    const userId = m.sender
+    const now = Date.now()
 
-  // Cooldown
-  if (cooldowns[userId] && now < cooldowns[userId]) {
-    const remaining = Math.ceil((cooldowns[userId] - now) / 1000)
-    const min = Math.floor(remaining / 60)
-    const sec = remaining % 60
-    return await conn.reply(
-      m.chat,
-      `⏳ Debes esperar *${min}m ${sec}s* para volver a usar *#rw*.`,
-      m
-    )
-  }
+    if (cooldowns[userId] && now < cooldowns[userId]) {
+        const remainingTime = Math.ceil((cooldowns[userId] - now) / 1000)
+        const minutes = Math.floor(remainingTime / 60)
+        const seconds = remainingTime % 60
+        return await conn.reply(m.chat, `( ⸝⸝･̆⤚･̆⸝⸝) ¡𝗗𝗲𝗯𝗲𝘀 𝗲𝘀𝗽𝗲𝗿𝗮𝗿 *${minutes} minutos y ${seconds} segundos* 𝗽𝗮𝗿𝗮 𝘃𝗼𝗹𝘃𝗲𝗿  𝘂𝘀𝗮𝗿 *#rw* 𝗱𝗲 𝗻𝘂𝗲𝘃𝗼.`, m)
+    }
 
-  try {
-    const characters = await loadJSON(charactersFile)
-    if (!characters.length) throw new Error('No hay personajes disponibles.')
+    try {
+        const characters = await loadCharacters()
+        const randomCharacter = characters[Math.floor(Math.random() * characters.length)]
+        const randomImage = randomCharacter.img[Math.floor(Math.random() * randomCharacter.img.length)]
 
-    const character = characters[Math.floor(Math.random() * characters.length)]
-    const image = character.img[Math.floor(Math.random() * character.img.length)]
-    const harem = await loadJSON(haremFile)
+        const harem = await loadHarem()
+        const userEntry = harem.find(entry => entry.characterId === randomCharacter.id)
+        const statusMessage = randomCharacter.user 
+            ? `Reclamado por @${randomCharacter.user.split('@')[0]}` 
+            : 'Libre'
 
-    const isClaimed = !!character.user
-    const claimedBy = isClaimed ? `Reclamado por @${character.user.split('@')[0]}` : 'Libre'
+        const message = `╔◡╍┅•.⊹︵ࣾ᷼ ׁ𖥓┅╲۪ ⦙᷼͝🧸᷼͝⦙ ׅ╱ׅ╍𖥓 ︵ࣾ᷼︵ׄׄ᷼⊹┅╍◡╗
+┋  ⣿̶ֻ〪ׅ⃕݊⃧🐚⃚̶̸͝ᤢ֠◌ִ̲ 𝑪𝑯𝑨𝑹𝑨𝑪𝑻𝑬𝑹 𝑹𝑨𝑵𝑫𝑶𝑴 🐸ꨪ̸⃙ׅᮬֺ๋֢᳟  ┋
+╚◠┅┅˙•⊹.⁀𖥓 ׅ╍╲۪ ⦙᷼͝🎠᷼͝⦙ ׅ╱ׅ╍𖥓 ◠˙⁀۪ׄ⊹˙╍┅◠╝
 
-    const message = `
-╭━━⊰ 𝑷𝑬𝑹𝑺𝑶𝑵𝑨𝑱𝑬 𝑹𝑨𝑵𝑫𝑶𝑴 ⊱━━
-┃ ✦ 𝙉𝙊𝙈𝘽𝙍𝙀: *${character.name}*
-┃ ✦ 𝙂𝙀𝙉𝙀𝙍𝙊: *${character.gender}*
-┃ ✦ 𝙑𝘼𝙇𝙊𝙍: *${character.value}*
-┃ ✦ 𝙀𝙎𝙏𝘼𝘿𝙊: ${claimedBy}
-┃ ✦ 𝙁𝙐𝙀𝙉𝙏𝙀: *${character.source}*
-┃ ✦ 𝙄𝘿: *${character.id}*
-╰━━━━━━━━━━━━━━━━━━━`.trim()
+꥓໋╭࣭۬═ֽ̥࣪━᜔๋݈═𑂺ׄ︵ິּ֙᷼⌒݈᳹᪾̯ ⋮꥓ּ࣭ׄ🌹〪ິ᜔ּ໋࣭ׄ⋮⌒ໍּ֣ׄ═ᮣໍ࣭ׄ━𑂺᜔꥓໋┉꥓ׂ᷼━᜔࣭֙━๋݈═̥࣭۬╮
+> ᠙᳞✿̶᮫᮫ְְׅ᳝ׅ᳝᳞᳞࣪᪲࣪֘⣷ׅ᳝࣪ ࣪࣪𖡻ְְׅ᳝ׅׅ࣪࣪֘ᰰ🌵᮫ְׅ᳝࣪᪲⃞̶𝝸𝕝᮫ְ᳝᳝⃨۪۪۪ׅ᳝࣪࣪っְְׅ᳝۪⃨۪۪۪࣪:   𝙉𝘖𝘔𝘉𝘙𝘌: *${randomCharacter.name}*
+> ᠙᳞✿̶᮫᮫ְְׅ᳝ׅ᳝᳞᳞࣪᪲࣪֘⣷ׅ᳝࣪ ࣪࣪𖡻ְְׅ᳝ׅׅ࣪࣪֘ᰰ🍭᮫ְׅ᳝࣪᪲⃞̶𝝸𝕝᮫ְ᳝᳝⃨۪۪۪ׅ᳝࣪࣪っְְׅ᳝۪⃨۪۪۪࣪:  𝙂𝘌𝘕𝘌𝘙𝘖: *${randomCharacter.gender}*
+> ᠙᳞✿̶᮫᮫ְְׅ᳝ׅ᳝᳞᳞࣪᪲࣪֘⣷ׅ᳝࣪ ࣪࣪𖡻ְְׅ᳝ׅׅ࣪࣪֘ᰰ💰᮫ְׅ᳝࣪᪲⃞̶𝝸𝕝᮫ְ᳝᳝⃨۪۪۪ׅ᳝࣪࣪っְְׅ᳝۪⃨۪۪۪࣪:   𝙑𝘈𝘓𝘖𝘙: *${randomCharacter.value}*
+> ᠙᳞✿̶᮫᮫ְְׅ᳝ׅ᳝᳞᳞࣪᪲࣪֘⣷ׅ᳝࣪ ࣪࣪𖡻ְְׅ᳝ׅׅ࣪࣪֘ᰰ🪄᮫ְׅ᳝࣪᪲⃞̶𝝸𝕝᮫ְ᳝᳝⃨۪۪۪ׅ᳝࣪࣪っְְׅ᳝۪⃨۪۪۪࣪:   𝙀𝘚𝘛𝘈𝘋𝘖: ${statusMessage}
+> ᠙᳞✿̶᮫᮫ְְׅ᳝ׅ᳝᳞᳞࣪᪲࣪֘⣷ׅ᳝࣪ ࣪࣪𖡻ְְׅ᳝ׅׅ࣪࣪֘ᰰ📚᮫ְׅ᳝࣪᪲⃞̶𝝸𝕝᮫ְ᳝᳝⃨۪۪۪ׅ᳝࣪࣪っְְׅ᳝۪⃨۪۪۪࣪:   𝙁𝘜𝘌𝘕𝘛𝘌: *${randomCharacter.source}*
+> ᠙᳞✿̶᮫᮫ְְׅ᳝ׅ᳝᳞᳞࣪᪲࣪֘⣷ׅ᳝࣪ ࣪࣪𖡻ְְׅ᳝ׅׅ࣪࣪֘ᰰ🆔᮫ְׅ᳝࣪᪲⃞̶𝝸𝕝᮫ְ᳝᳝⃨۪۪۪ׅ᳝࣪࣪っְְׅ᳝۪⃨۪۪۪࣪:   𝙄𝘿: *${randomCharacter.id}*
+꥓໋╰ׅ۬═ֽ̥࣪━᜔๋݈═𑂺ׄ︵ິּ֙᷼⌒݈᳹᪾̯ ⋮꥓ּ࣭ׄ🐦‍🔥⋮⌒ໍּ֣ׄ═ᮣໍ࣭ׄ━𑂺᜔꥓໋┉꥓ׂ᷼━᜔࣭֙━๋݈═̥࣭۬╯`
 
-    const mentions = isClaimed ? [character.user] : []
+        const mentions = userEntry ? [userEntry.userId] : []
+        await conn.sendFile(m.chat, randomImage, `${randomCharacter.name}.jpg`, message, m, { mentions })
 
-    await conn.sendFile(m.chat, image, `${character.name}.jpg`, message, m, { mentions })
+        if (!randomCharacter.user) {
+            await saveCharacters(characters)
+        }
 
-    cooldowns[userId] = now + COOLDOWN_TIME
-  } catch (err) {
-    console.error(err)
-    await conn.reply(m.chat, `❌ Error: ${err.message}`, m)
-  }
+        cooldowns[userId] = now + 15 * 60 * 1000
+
+    } catch (error) {
+        await conn.reply(m.chat, `✘ Error al cargar el personaje: ${error.message}`, m)
+    }
 }
 
-handler.help = ['rw', 'rollwaifu', 'ver']
+handler.help = ['ver', 'rw', 'rollwaifu']
 handler.tags = ['gacha']
-handler.command = ['rw', 'rollwaifu', 'ver']
+handler.command = ['ver', 'rw', 'rollwaifu']
 handler.group = true
 
 export default handler
