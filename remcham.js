@@ -232,7 +232,7 @@ if (global.RubyJadibts) {
       const readBotPath = readdirSync(botPath);
       if (readBotPath.includes(creds)) {
         // Asegúrate que RubyJadiBot esté importado correctamente en tu proyecto
-        RubyJadiBot({ pathrembots: botPath, m: null, conn, args: '', usedPrefix: '/', command: 'serbot' });
+        rembots({ pathrembots: botPath, m: null, conn, args: '', usedPrefix: '/', command: 'serbot' });
       }
     }
   }
