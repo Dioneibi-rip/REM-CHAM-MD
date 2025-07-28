@@ -1,11 +1,11 @@
 import axios from 'axios';
-const baileys = (await import("@whiskeysockets/baileys")).default;
+const baileys = (await import('@whiskeysockets/baileys')).default;
 const { proto } = baileys;
 const { generateWAMessageFromContent, generateWAMessageContent } = baileys;
 
 let handler = async (message, { conn, text }) => {
     if (!text) {
-        return conn.reply(message.chat, ' *¿Qué video de Facebook quieres descargar? :3*', message);
+        return conn.reply(message.chat, '*¿Qué video de Facebook quieres descargar? :3*', message);
     }
 
     async function createVideoMessage(url) {
@@ -17,30 +17,28 @@ let handler = async (message, { conn, text }) => {
     }
 
     try {
-        const { data: response } = await axios.get(`https://api.vreden.my.id/api/fbdl?url=${encodeURIComponent(text)}`);
+        const { data } = await axios.get(`https://api.vreden.my.id/api/fbdl?url=${encodeURIComponent(text)}`);
+        const videoUrl = data?.data?.hd_url || data?.data?.sd_url;
 
-        if (!response?.data?.status || !response.data?.hd_url) {
-            return conn.reply(message.chat, ' *No se pudo descargar el video. :c*', message);
+        if (!videoUrl) {
+            return conn.reply(message.chat, '⚠️ No se pudo obtener el video.', message);
         }
 
-        const url = response.data.hd_url;
-        const videoMessage = await createVideoMessage(url);
+        const videoMessage = await createVideoMessage(videoUrl);
 
-        const cards = [
-            {
-                body: proto.Message.InteractiveMessage.Body.fromObject({ text: null }),
-                footer: proto.Message.InteractiveMessage.Footer.fromObject({
-                    text: '🎥 Video descargado con éxito'
-                }),
-                header: proto.Message.InteractiveMessage.Header.fromObject({
-                    hasMediaAttachment: true,
-                    videoMessage
-                }),
-                nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.fromObject({
-                    buttons: []
-                })
-            }
-        ];
+        const cards = [{
+            body: proto.Message.InteractiveMessage.Body.fromObject({ text: null }),
+            footer: proto.Message.InteractiveMessage.Footer.fromObject({
+                text: '🎬 Video de Facebook listo para ver o descargar.'
+            }),
+            header: proto.Message.InteractiveMessage.Header.fromObject({
+                hasMediaAttachment: true,
+                videoMessage
+            }),
+            nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.fromObject({
+                buttons: []
+            })
+        }];
 
         const responseMessage = generateWAMessageFromContent(
             message.chat,
@@ -54,7 +52,7 @@ let handler = async (message, { conn, text }) => {
                         interactiveMessage: proto.Message.InteractiveMessage.fromObject({
                             body: proto.Message.InteractiveMessage.Body.create({ text: null }),
                             footer: proto.Message.InteractiveMessage.Footer.create({
-                                text: ' `𝙁 𝘼 𝘾 𝙀 𝘽 𝙊 𝙊 𝙆  𝘿 𝙊 𝙒 𝙉 𝙇 𝙊 𝘼 𝘿 𝙀 𝙍`'
+                                text: '📥 𝙁𝘼𝘾𝙀𝘽𝙊𝙊𝙆 𝘿𝙊𝙒𝙉𝙇𝙊𝘼𝘿𝙀𝙍'
                             }),
                             header: proto.Message.InteractiveMessage.Header.create({
                                 title: null,
