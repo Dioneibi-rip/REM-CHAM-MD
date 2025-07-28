@@ -211,26 +211,34 @@ const connectionOptions = {
 //--
 global.conn = makeWASocket(connectionOptions);
 
-//Arranque nativo para subbots by - ReyEndymion >> https://github.com/ReyEndymion
-
-global.rutaJadiBot = join(__dirname, './rembots')
+global.rutaJadiBot = join(__dirname, './rembots');
 
 if (global.RubyJadibts) {
-if (!existsSync(global.rutaJadiBot)) {
-mkdirSync(global.rutaJadiBot, { recursive: true }) 
-console.log(chalk.bold.cyan(`La carpeta: ${jadi} se creó correctamente.`))
-} else {
-console.log(chalk.bold.cyan(`La carpeta: ${jadi} ya está creada.`)) 
-}
+  if (!existsSync(global.rutaJadiBot)) {
+    mkdirSync(global.rutaJadiBot, { recursive: true });
+    console.log(chalk.bold.cyan(`La carpeta: rembots se creó correctamente.`));
+  } else {
+    console.log(chalk.bold.cyan(`La carpeta: rembots ya está creada.`));
+  }
 
-const readRutaJadiBot = readdirSync(rutaJadiBot)
-if (readRutaJadiBot.length > 0) {
-const creds = 'creds.json'
-for (const gjbts of readRutaJadiBot) {
-const botPath = join(rutaJadiBot, gjbts)
-const readBotPath = readdirSync(botPath)
-if (readBotPath.includes(creds)) {
-rembots({pathrembots: botPath, m: null, conn, args: '', usedPrefix: '/', command: 'serbot'})
+  const readRutaJadiBot = readdirSync(global.rutaJadiBot);
+  if (readRutaJadiBot.length > 0) {
+    const creds = 'creds.json';
+    for (const gjbts of readRutaJadiBot) {
+      const botPath = join(global.rutaJadiBot, gjbts);
+
+      // 🔒 Solo continuar si es una carpeta
+      if (!statSync(botPath).isDirectory()) continue;
+
+      const readBotPath = readdirSync(botPath);
+      if (readBotPath.includes(creds)) {
+        rembots({
+          pathrembots: botPath,
+          m: null,
+          conn,
+          args: '',
+          usedPrefix: '/',
+          command: 'serbot',
 }
 }
 }
