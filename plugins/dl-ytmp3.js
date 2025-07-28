@@ -23,7 +23,6 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
     const ytURL = encodeURIComponent(args[0]);
     const apiURL = `https://dark-core-api.vercel.app/api/download/YTMP3?key=api&url=${ytURL}`;
-
     const { data } = await axios.get(apiURL);
 
     if (!data.status || !data.download) {
@@ -32,16 +31,14 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
 
     const videoUrl = args[0];
     const title = data.title || 'Audio de YouTube';
-
     const thumbnailUrl = 'https://files.catbox.moe/wdnz90.jpg';
 
     const thumbData = await (await conn.getFile(thumbnailUrl)).data;
 
     await conn.sendMessage(m.chat, {
       audio: { url: data.download },
-      mimetype: 'audio/mp4',
-      fileName: `${title}`,
-      ptt: false,
+      mimetype: 'audio/mpeg',
+      fileName: `${title}.mp3`,
       contextInfo: {
         externalAdReply: {
           showAdAttribution: true,
