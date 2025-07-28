@@ -41,7 +41,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       audio: { url: data.download },
       mimetype: 'audio/mp4',
       fileName: `${title}`,
-      ptt: true,
+      ptt: false,
       contextInfo: {
         externalAdReply: {
           showAdAttribution: true,
