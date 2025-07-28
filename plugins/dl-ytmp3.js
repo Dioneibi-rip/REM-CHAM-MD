@@ -30,10 +30,28 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
       throw new Error('La API no devolvió un enlace de descarga válido.');
     }
 
+    const videoUrl = args[0];
+    const title = data.title || 'Audio de YouTube';
+
+    const thumbnailUrl = 'https://telegra.ph/file/0a357c6729e72e32f5c4d.jpg';
+
+    const thumbData = await (await conn.getFile(thumbnailUrl)).data;
+
     await conn.sendMessage(m.chat, {
       audio: { url: data.download },
-      mimetype: 'audio/mpeg',
-      ptt: true
+      mimetype: 'audio/mp4',
+      fileName: `${title}`,
+      ptt: true,
+      contextInfo: {
+        externalAdReply: {
+          showAdAttribution: true,
+          mediaType: 2,
+          mediaUrl: videoUrl,
+          title: title,
+          sourceUrl: videoUrl,
+          thumbnail: thumbData,
+        },
+      },
     }, { quoted: m });
 
     await m.react(successEmoji);
