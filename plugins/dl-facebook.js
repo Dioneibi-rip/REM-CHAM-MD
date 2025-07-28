@@ -17,28 +17,41 @@ let handler = async (message, { conn, text }) => {
     }
 
     try {
-        const { data: response } = await axios.get(`https://api.dorratz.com/fbvideo?url=${encodeURIComponent(text)}`);
+        const { data } = await axios.get(`https://api.vreden.my.id/api/fbdl?url=${encodeURIComponent(text)}`);
 
-        if (!Array.isArray(response) || response.length === 0) {
-            return conn.reply(message.chat, ' *No se pudo descargar el video. :c*', message);
+        if (!data || !data.data || (!data.data.hd_url && !data.data.sd_url)) {
+            return conn.reply(message.chat, ' *No se pudo descargar el video de Facebook. :c*', message);
         }
 
         const cards = [];
 
-        for (const item of response) {
-            const quality = item.resolution;
-            const url = item.url;
-
-            const videoMessage = await createVideoMessage(url);
-
+        if (data.data.hd_url) {
+            const hdVideo = await createVideoMessage(data.data.hd_url);
             cards.push({
                 body: proto.Message.InteractiveMessage.Body.fromObject({ text: null }),
                 footer: proto.Message.InteractiveMessage.Footer.fromObject({
-                    text: `𝘾𝘼𝙇𝙄𝘿𝘼𝘿 ${quality.toUpperCase()}`
+                    text: '𝘾𝘼𝙇𝙄𝘿𝘼𝘿 HD'
                 }),
                 header: proto.Message.InteractiveMessage.Header.fromObject({
                     hasMediaAttachment: true,
-                    videoMessage: videoMessage
+                    videoMessage: hdVideo
+                }),
+                nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.fromObject({
+                    buttons: []
+                })
+            });
+        }
+
+        if (data.data.sd_url) {
+            const sdVideo = await createVideoMessage(data.data.sd_url);
+            cards.push({
+                body: proto.Message.InteractiveMessage.Body.fromObject({ text: null }),
+                footer: proto.Message.InteractiveMessage.Footer.fromObject({
+                    text: '𝘾𝘼𝙇𝙄𝘿𝘼𝘿 SD'
+                }),
+                header: proto.Message.InteractiveMessage.Header.fromObject({
+                    hasMediaAttachment: true,
+                    videoMessage: sdVideo
                 }),
                 nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.fromObject({
                     buttons: []
