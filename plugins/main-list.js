@@ -154,6 +154,7 @@ break;
 ⎪⌲👑 _${usedPrefix}hornycard_
 ⎪⌲👑 _${usedPrefix}ytcomment_
 ⎪⌲👑 _${usedPrefix}stupid_
+> Genera un meme "It\'s so stupid" con la foto de perfil de alguien
 ⎪⌲👑 _${usedPrefix}lolicon_
 ┗━━━ʕ•㉨•ʔ━━━┛`; // 
       break;
