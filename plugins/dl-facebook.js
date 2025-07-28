@@ -17,47 +17,30 @@ let handler = async (message, { conn, text }) => {
     }
 
     try {
-        const { data } = await axios.get(`https://api.vreden.my.id/api/fbdl?url=${encodeURIComponent(text)}`);
+        const { data: response } = await axios.get(`https://api.vreden.my.id/api/fbdl?url=${encodeURIComponent(text)}`);
 
-        if (!data || !data.data || (!data.data.hd_url && !data.data.sd_url)) {
-            return conn.reply(message.chat, ' *No se pudo descargar el video de Facebook. :c*', message);
+        if (!response?.data?.status || !response.data?.hd_url) {
+            return conn.reply(message.chat, ' *No se pudo descargar el video. :c*', message);
         }
 
-        const cards = [];
+        const url = response.data.hd_url;
+        const videoMessage = await createVideoMessage(url);
 
-        if (data.data.hd_url) {
-            const hdVideo = await createVideoMessage(data.data.hd_url);
-            cards.push({
+        const cards = [
+            {
                 body: proto.Message.InteractiveMessage.Body.fromObject({ text: null }),
                 footer: proto.Message.InteractiveMessage.Footer.fromObject({
-                    text: '𝘾𝘼𝙇𝙄𝘿𝘼𝘿 HD'
+                    text: '🎥 Video descargado con éxito'
                 }),
                 header: proto.Message.InteractiveMessage.Header.fromObject({
                     hasMediaAttachment: true,
-                    videoMessage: hdVideo
+                    videoMessage
                 }),
                 nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.fromObject({
                     buttons: []
                 })
-            });
-        }
-
-        if (data.data.sd_url) {
-            const sdVideo = await createVideoMessage(data.data.sd_url);
-            cards.push({
-                body: proto.Message.InteractiveMessage.Body.fromObject({ text: null }),
-                footer: proto.Message.InteractiveMessage.Footer.fromObject({
-                    text: '𝘾𝘼𝙇𝙄𝘿𝘼𝘿 SD'
-                }),
-                header: proto.Message.InteractiveMessage.Header.fromObject({
-                    hasMediaAttachment: true,
-                    videoMessage: sdVideo
-                }),
-                nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.fromObject({
-                    buttons: []
-                })
-            });
-        }
+            }
+        ];
 
         const responseMessage = generateWAMessageFromContent(
             message.chat,
