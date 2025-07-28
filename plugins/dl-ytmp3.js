@@ -33,7 +33,7 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     const videoUrl = args[0];
     const title = data.title || 'Audio de YouTube';
 
-    const thumbnailUrl = 'https://telegra.ph/file/0a357c6729e72e32f5c4d.jpg';
+    const thumbnailUrl = 'https://files.catbox.moe/wdnz90.jpg';
 
     const thumbData = await (await conn.getFile(thumbnailUrl)).data;
 
