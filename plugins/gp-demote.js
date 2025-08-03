@@ -1,35 +1,36 @@
-let handler = async (m, { conn,usedPrefix, command, text }) => {
-if(isNaN(text) && !text.match(/@/g)){
-	
-}else if(isNaN(text)) {
-var number = text.split`@`[1]
-}else if(!isNaN(text)) {
-var number = text
-}
-if(!text && !m.quoted) return conn.reply(m.chat, `✳️ Usando el comando \n *${usedPrefix + command}* @tag`, m)
-if(number.length > 13 || (number.length < 11 && number.length > 0)) return conn.reply(m.chat, `✳️ Numero incorecto`, m)
-  
-try {
-if(text) {
-var user = number + '@s.whatsapp.net'
-} else if(m.quoted.sender) {
-var user = m.quoted.sender
-} else if(m.mentionedJid) {
-var user = number + '@s.whatsapp.net'
-} 
-} catch (e) {
-} finally {
-conn.groupParticipantsUpdate(m.chat, [user], 'demote')
-m.reply(`✅ Usuario degradado`)
-}
+import { areJidsSameUser } from '@whiskeysockets/baileys';
 
-}
-handler.help = ['demote (@tag)']
-handler.tags = ['group']
-handler.command = ['demote', 'degradar'] 
-handler.group = true
-handler.admin = true
-handler.botAdmin = true
-handler.fail = null
+let handler = async (m, { conn, participants, command, usedPrefix, args }) => {
 
-export default handler
+
+  let target;
+  if (m.mentionedJid?.length) {
+    target = m.mentionedJid[0];
+  } else if (m.quoted) {
+    target = m.quoted.sender;
+  } else {
+    return m.reply(`✳️ ᴇsᴘᴇᴄɪꜰɪ́ᴄᴀ ᴀ ǫᴜɪᴇ́ɴ ǫᴜɪᴇʀᴇs ǫᴜɪᴛᴀʀʟᴇ ᴇʟ ᴀᴅᴍɪɴ.\n\n🧩 ᴇᴊᴇᴍᴘʟᴏ:\n${usedPrefix + command} @usuario`);
+  }
+
+  const targetData = participants.find(p => areJidsSameUser(p.id, target));
+
+  if (!targetData) return m.reply('😵 ᴇʟ ᴜsᴜᴀʀɪᴏ ɴᴏ ᴇsᴛᴀ́ ᴇɴ ᴇʟ ɢʀᴜᴘᴏ.');
+  if (!targetData.admin) return m.reply('❗ ᴇsᴇ ᴜsᴜᴀʀɪᴏ ɴᴏ ᴇs ᴀᴅᴍɪɴ.');
+
+  if (targetData.admin === 'superadmin') {
+    return m.reply('👑 ɴᴏ ᴘᴜᴇᴅᴏ ǫᴜɪᴛᴀʀ ᴇʟ ᴀᴅᴍɪɴ ᴀʟ ᴄʀᴇᴀᴅᴏʀ ᴅᴇʟ ɢʀᴜᴘᴏ.');
+  }
+
+  await conn.groupParticipantsUpdate(m.chat, [target], 'demote');
+
+  m.reply(`✅ ᴘᴇʀᴍɪsᴏs ʀᴇᴛɪʀᴀᴅᴏs ᴀ:\n@${target.split('@')[0]}`, null, {
+    mentions: [target]
+  });
+};
+
+handler.command = /^(demote|quitaradmin|quitarpija)$/i;
+handler.group = true;
+handler.admin = true;
+handler.botAdmin = true;
+
+export default handler;
