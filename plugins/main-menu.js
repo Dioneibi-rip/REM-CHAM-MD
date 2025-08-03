@@ -970,6 +970,20 @@ contextInfo: {
         },
       }
     },
+    { quoted:fcontact });
+         } else if (choice === "21") {
+      await conn.sendMessage(m.chat, { image: { url: 'https://files.catbox.moe/hvh8qd.png' },
+      caption: menugacha,
+contextInfo: {
+        mentionedJid: [m.sender],
+        isForwarded: true,
+        forwardedNewsletterMessageInfo: {
+          newsletterJid: id_canal,
+          newsletterName: name_canal,
+          serverMessageId: -1,
+        },
+      }
+    },
      { quoted:fcontact });
     } else {
       m.reply('𝙽𝙾 𝙴𝚂 𝚄𝙽 𝙽𝚄𝙼𝙴𝚁𝙾 𝙳𝙴 𝙻𝙰 𝙻𝙸𝚂𝚃𝙰 𝙿𝙾𝚁 𝙵𝙰𝚅𝙾𝚁 𝙴𝙽𝚅𝙸𝙰 𝚄𝙽 𝙽𝚄𝙼𝙴𝚁𝙾 𝙳𝙴 𝙻𝙰 𝙻𝙸𝚂𝚃𝙰 𝙳𝙴 𝙼𝙴𝙽𝚄.');
