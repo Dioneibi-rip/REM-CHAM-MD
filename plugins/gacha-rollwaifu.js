@@ -56,7 +56,7 @@ let handler = async (m, { conn }) => {
 ┃ ✦ *ᴠᴀʟᴏʀ*: *${character.value}*
 ┃ ✦ *ᴇsᴛᴀᴅᴏ*: ${claimedBy}
 ┃ ✦ *ғᴜᴇɴᴛᴇ*: *${character.source}*
-┃ ✦ *ɪ́ᴅ*: *${character.id}*
+┃ ✦ ɪ́ᴅ: *${character.id}*
 ╰━━━━━━━━━━━━━━━━━━━`.trim()
 
     const mentions = isClaimed ? [character.user] : []
