@@ -10,26 +10,30 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
   const success = '✅';
   const errorEmoji = '❌';
 
-  if (!args[0]) return m.reply(`${emoji} ᴘᴏʀ ғᴀᴠᴏʀ, ɪɴɢʀᴇsᴀ ᴜɴ ᴇɴʟᴀᴄᴇ ᴅᴇ *YᴏᴜTᴜʙᴇ*.\n\n*Ejemplo:* ${usedPrefix + command} https://youtube.com/watch?v=dQw4w9WgXcQ`);
+  if (!args[0]) {
+    return m.reply(`${emoji} ᴘᴏʀ ғᴀᴠᴏʀ, ɪɴɢʀᴇsᴀ ᴜɴ ᴇɴʟᴀᴄᴇ ᴅᴇ *YᴏᴜTᴜʙᴇ*.\n\n*Ejemplo:* ${usedPrefix + command} https://youtube.com/watch?v=dQw4w9WgXcQ`);
+  }
 
-  if (!isValidYouTubeUrl(args[0])) return m.reply(`${emoji} ᴇʟ ᴇɴʟᴀᴄᴇ ɴᴏ ᴘᴀʀᴇᴄᴇ sᴇʀ ᴠᴀ́ʟɪᴅᴏ ᴅᴇ YᴏᴜTᴜʙᴇ 💙`);
+  if (!isValidYouTubeUrl(args[0])) {
+    return m.reply(`${emoji} ᴇʟ ᴇɴʟᴀᴄᴇ ɴᴏ ᴘᴀʀᴇᴄᴇ sᴇʀ ᴠᴀ́ʟɪᴅᴏ ᴅᴇ YᴏᴜTᴜʙᴇ 💙`);
+  }
 
   try {
     await m.react(loading);
 
     const ytURL = encodeURIComponent(args[0]);
-    const apiURL = `https://dark-core-api.vercel.app/api/download/ytmp4/v2?key=api&url=${ytURL}`;
+    const apiURL = `https://api.stellarwa.xyz/dow/ytmp4?url=${ytURL}&apikey=stellar-o7UYR5SC`;
 
     const { data } = await axios.get(apiURL);
 
-    if (!data.download || !data.title) {
+    if (!data.status || !data.data?.dl) {
       throw new Error('La API no devolvió un enlace válido de video.');
     }
 
-    const { title, download } = data;
+    const { title, dl } = data.data;
 
     await conn.sendMessage(m.chat, {
-      video: { url: download },
+      video: { url: dl },
       mimetype: 'video/mp4',
       fileName: `${title}.mp4`
     }, { quoted: m });
