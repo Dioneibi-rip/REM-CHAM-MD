@@ -10,27 +10,34 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
   const success = '✅';
   const errorEmoji = '❌';
 
-  if (!args[0]) return m.reply(`${emoji} ᴘᴏʀ ғᴀᴠᴏʀ, ɪɴɢʀᴇsᴀ ᴜɴ ᴇɴʟᴀᴄᴇ ᴅᴇ *YᴏᴜTᴜʙᴇ*.\n\n*Ejemplo:* ${usedPrefix + command} https://youtube.com/watch?v=dQw4w9WgXcQ`);
+  if (!args[0]) {
+    return m.reply(`${emoji} ᴘᴏʀ ғᴀᴠᴏʀ, ɪɴɢʀᴇsᴀ ᴜɴ ᴇɴʟᴀᴄᴇ ᴅᴇ *YᴏᴜTᴜʙᴇ*.\n\n*Ejemplo:* ${usedPrefix + command} https://youtube.com/watch?v=dQw4w9WgXcQ`);
+  }
 
-  if (!isValidYouTubeUrl(args[0])) return m.reply(`${emoji} ᴇʟ ᴇɴʟᴀᴄᴇ ɴᴏ ᴘᴀʀᴇᴄᴇ sᴇʀ ᴠᴀ́ʟɪᴅᴏ ᴅᴇ YᴏᴜTᴜʙᴇ 💙`);
+  if (!isValidYouTubeUrl(args[0])) {
+    return m.reply(`${emoji} ᴇʟ ᴇɴʟᴀᴄᴇ ɴᴏ ᴘᴀʀᴇᴄᴇ sᴇʀ ᴠᴀ́ʟɪᴅᴏ ᴅᴇ YᴏᴜTᴜʙᴇ 💙`);
+  }
 
   try {
     await m.react(loading);
 
-    const apiURL = `https://api.vreden.my.id/api/ytmp4?url=${encodeURIComponent(args[0])}`;
+    const ytURL = encodeURIComponent(args[0]);
+    const apiURL = `https://api.vreden.my.id/api/ytmp4?url=${ytURL}`;
+
     const { data } = await axios.get(apiURL);
 
-    if (!data.result?.download?.url || !data.result?.metadata?.title) {
-      throw new Error('❌ No se encontró el enlace de descarga en la respuesta de la API.');
+    if (data.status !== 200 || !data.result?.download?.url) {
+      throw new Error('❌ La API no devolvió un enlace válido de video.');
     }
 
-    const { url: downloadUrl, filename } = data.result.download;
-    const title = data.result.metadata.title;
+    const videoURL = data.result.download.url;
+    const title = data.result.metadata?.title || 'video';
+    const filename = data.result.download.filename || `${title}.mp4`;
 
     await conn.sendMessage(m.chat, {
-      video: { url: downloadUrl },
+      video: { url: videoURL },
       mimetype: 'video/mp4',
-      fileName: filename || `${title}.mp4`
+      fileName: filename
     }, { quoted: m });
 
     await m.react(success);
