@@ -17,21 +17,20 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
   try {
     await m.react(loading);
 
-    const ytURL = encodeURIComponent(args[0]);
-    const apiURL = `https://api.stellarwa.xyz/dow/ytmp4?url=${ytURL}&apikey=stellar-o7UYR5SC`;
-
+    const apiURL = `https://api.vreden.my.id/api/ytmp4?url=${encodeURIComponent(args[0])}`;
     const { data } = await axios.get(apiURL);
 
-    if (!data.status || !data.data?.dl) {
-      throw new Error('La API no devolvió un enlace válido de video.');
+    if (!data.result?.download?.url || !data.result?.metadata?.title) {
+      throw new Error('❌ No se encontró el enlace de descarga en la respuesta de la API.');
     }
 
-    const { title, dl } = data.data;
+    const { url: downloadUrl, filename } = data.result.download;
+    const title = data.result.metadata.title;
 
     await conn.sendMessage(m.chat, {
-      video: { url: dl },
+      video: { url: downloadUrl },
       mimetype: 'video/mp4',
-      fileName: `${title}.mp4`
+      fileName: filename || `${title}.mp4`
     }, { quoted: m });
 
     await m.react(success);
