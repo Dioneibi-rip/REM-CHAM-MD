@@ -5,7 +5,7 @@ const exec = promisify(cp.exec).bind(cp);
 const handler = async (m) => {
     let o;
     try {
-      conn.reply(m.chat, `${emoji} Speed Test....`, m, )
+      conn.reply(m.chat, `💙 Speed Test....`, m, )
       o = await exec('python3 ./lib/ookla-speedtest.py --secure --share');
         const {stdout, stderr} = o;
         if (stdout.trim()) {
