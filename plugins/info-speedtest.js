@@ -1,4 +1,9 @@
+import cp from 'child_process';
+import { promisify } from 'util';
+const exec = promisify(cp.exec).bind(cp);
+
 const handler = async (m, { conn }) => {
+    // Definimos fkontak aquí, donde m existe
     const fkontak = {
         key: {
             participant: '0@s.whatsapp.net',
@@ -12,11 +17,9 @@ const handler = async (m, { conn }) => {
         }
     };
 
-    let o;
     try {
-        conn.reply(m.chat, `💙 Speed Test....`, m)
-        o = await exec('python3 ./lib/ookla-speedtest.py --secure --share');
-        const { stdout, stderr } = o;
+        conn.reply(m.chat, `💙 Speed Test....`, m);
+        const { stdout, stderr } = await exec('python3 ./lib/ookla-speedtest.py --secure --share');
 
         if (stdout.trim()) {
             const match = stdout.match(/http[^"]+\.png/);
@@ -32,3 +35,10 @@ const handler = async (m, { conn }) => {
         return m.reply(e.message);
     }
 };
+
+handler.help = ['speedtest'];
+handler.tags = ['info'];
+handler.command = ['speedtest', 'stest', 'test'];
+handler.register = true;
+
+export default handler;
