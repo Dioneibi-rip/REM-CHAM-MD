@@ -12,12 +12,9 @@ import axios from 'axios';
 // Variables globales
 // ╰─────────────────────────────────────────────╮
 global.owner = [
-// <-- Número @s.whatsapp.net -->
   ['18294868853', '⏤͟͞ू⃪ ፝͜⁞𝘿𝙞𝙤𝙣𝙚𝙞𝙗𝙞-ʳⁱᵖ ִֶ ࣪˖ ִֶָ🐇་༘', true],
   ['18096758983', '⟆⃝༉⃟⸙ ᯽ N͙e͙v͙i͙-D͙e͙v͙ ⌗⚙️࿐', true],
   ['595972157130', '⏤͟͟͞͞𝐑𝐀𝐘𝐎-𝐎𝐅𝐅𝐈𝐂𝐈𝐀𝐋 ❒', true],
-
-// <-- Número @lid -->
   ['200141197844495', 'Dioneibi', true],
   ['260081845334105', 'nevi', true],
   ['186397822587042', 'dev-rayo', true],
@@ -80,7 +77,21 @@ global.canal = 'https://whatsapp.com/channel/0029VaqEpTQBPzjbuTwGDN1U'
 global.botname = '𝚁𝙴𝙼-𝙲𝙷𝙰𝙼';
 global.premium = 'true';
 
-global.fkontak = { "key": { "participants":"0@s.whatsapp.net", "remoteJid": "status@broadcast", "fromMe": false, "id": "Halo" }, "message": { "contactMessage": { "vcard": `BEGIN:VCARD\nVERSION:3.0\nN:Sy;Bot;;;\nFN:y\nitem1.TEL;waid=${m.sender.split('@')[0]}:${m.sender.split('@')[0]}\nitem1.X-ABLabel:Ponsel\nEND:VCARD` }}, "participant": "0@s.whatsapp.net" }
+// 💡 Versión dinámica para evitar errores con m no definido
+global.fkontak = function (m, conn) {
+  return {
+    key: {
+      participant: '0@s.whatsapp.net',
+      remoteJid: 'status@broadcast'
+    },
+    message: {
+      contactMessage: {
+        displayName: conn?.getName ? conn.getName(m.sender) : m.pushName || 'Usuario',
+        vcard: `BEGIN:VCARD\nVERSION:3.0\nN:;${conn?.getName ? conn.getName(m.sender) : m.pushName || 'Usuario'};;;\nFN:${conn?.getName ? conn.getName(m.sender) : m.pushName || 'Usuario'}\nitem1.TEL;waid=${m.sender.split('@')[0]}:${m.sender.split('@')[0]}\nEND:VCARD`
+      }
+    }
+  };
+};
 
 global.packname = 'ʀᴇᴍ ᴄʜᴀᴍ ᴍᴅ';
 global.author = 'GabrielCuri';
@@ -100,13 +111,14 @@ global.error = '❌';
 global.xmoji = '🔥';
 global.multiplier = 69;
 global.maxwarn = '3';
-global.jadi = 'rembots' 
-global.RubyJadibts = true
-global.ch = {
-ch1: '120363335626706839@newsletter',
-}
+global.jadi = 'rembots';
+global.RubyJadibts = true;
+global.ch = { ch1: '120363335626706839@newsletter' };
 
-const iconos = [ 
+// ─────────────╮
+// Iconos aleatorios
+// ╰─────────────────────────────────────────────╮
+const iconos = [
   'https://qu.ax/RsvOR.jpg',
   'https://qu.ax/PtdyH.jpg',
   'https://qu.ax/UvXvG.jpg',
@@ -139,38 +151,31 @@ const iconos = [
   'https://qu.ax/eOiVl.jpg',
   'https://qu.ax/ZjPbX.jpg',
   'https://qu.ax/MNKqO.jpg',
-  'https://qu.ax/SXPJd.jpg',
-]
+  'https://qu.ax/SXPJd.jpg'
+];
+global.icono = iconos[Math.floor(Math.random() * iconos.length)];
 
-global.icono = iconos[Math.floor(Math.random() * iconos.length)]
-
-
-// Definir función para obtener un elemento aleatorio de un array
+// ─────────────╮
+// Función utilitaria
+// ╰─────────────────────────────────────────────╮
 Array.prototype.getRandom = function() {
   return this[Math.floor(Math.random() * this.length)];
-}
+};
 
 // Enlaces
-var canal = 'https://chat.whatsapp.com/Bns5M5EQ1Yq2d4rt6o9iNE' 
-var canal2 = 'https://chat.whatsapp.com/Bns5M5EQ1Yq2d4rt6o9iNE'  
-var git = 'https://github.com/nevi67' 
-var youtube = 'https://www.youtube.com' 
-var github = 'https://github.com/nevi67/VermeilBot-MD' 
-var facebook = 'https://www.facebook.com' 
-let tiktok = 'https://tiktok.com'
-
-// Ahora sí puedes usar getRandom
-global.redes = [canal, canal2, git, youtube, github, facebook, tiktok].getRandom()
-
+var canal = 'https://chat.whatsapp.com/Bns5M5EQ1Yq2d4rt6o9iNE';
+var canal2 = 'https://chat.whatsapp.com/Bns5M5EQ1Yq2d4rt6o9iNE';
+var git = 'https://github.com/nevi67';
+var youtube = 'https://www.youtube.com';
+var github = 'https://github.com/nevi67/VermeilBot-MD';
+var facebook = 'https://www.facebook.com';
+let tiktok = 'https://tiktok.com';
+global.redes = [canal, canal2, git, youtube, github, facebook, tiktok].getRandom();
 
 // ──────────────────────────────────────────────╮
-// Ruta del archivo actual
+// Ruta del archivo actual y vigilancia de cambios
 // ──────────────────────────────────────────────╯
 let file = fileURLToPath(import.meta.url);
-
-// ──────────────────────────────────────────────╮
-// Vigilar cambios en el archivo
-// ──────────────────────────────────────────────╯
 watchFile(file, () => {
   unwatchFile(file);
   console.log(chalk.redBright("Update 'config.js'"));
