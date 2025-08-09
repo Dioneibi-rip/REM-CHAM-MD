@@ -79,6 +79,9 @@ global.rcanal = 'https://whatsapp.com/channel/0029VaqEpTQBPzjbuTwGDN1U'
 global.canal = 'https://whatsapp.com/channel/0029VaqEpTQBPzjbuTwGDN1U'
 global.botname = '𝚁𝙴𝙼-𝙲𝙷𝙰𝙼';
 global.premium = 'true';
+
+global.fkontak = { "key": { "participants":"0@s.whatsapp.net", "remoteJid": "status@broadcast", "fromMe": false, "id": "Halo" }, "message": { "contactMessage": { "vcard": `BEGIN:VCARD\nVERSION:3.0\nN:Sy;Bot;;;\nFN:y\nitem1.TEL;waid=${m.sender.split('@')[0]}:${m.sender.split('@')[0]}\nitem1.X-ABLabel:Ponsel\nEND:VCARD` }}, "participant": "0@s.whatsapp.net" }
+
 global.packname = 'ʀᴇᴍ ᴄʜᴀᴍ ᴍᴅ';
 global.author = 'GabrielCuri';
 global.menuvid = 'https://telegra.ph/file/c92cd247a11a336199650.mp4';
