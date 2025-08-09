@@ -2,6 +2,19 @@ import cp from 'child_process';
 import { promisify } from 'util';
 const exec = promisify(cp.exec).bind(cp);
 
+const fkontak = {
+    key: {
+        participant: '0@s.whatsapp.net',
+        remoteJid: 'status@broadcast'
+    },
+    message: {
+        contactMessage: {
+            displayName: this.getName ? this.getName(m.sender) : m.pushName,
+            vcard: `BEGIN:VCARD\nVERSION:3.0\nN:;${this.getName ? this.getName(m.sender) : m.pushName};;;\nFN:${this.getName ? this.getName(m.sender) : m.pushName}\nitem1.TEL;waid=${m.sender.split('@')[0]}:${m.sender.split('@')[0]}\nEND:VCARD`
+        }
+    }
+};
+
 const handler = async (m) => {
     let o;
     try {
