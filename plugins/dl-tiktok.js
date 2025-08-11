@@ -1,119 +1,70 @@
-// Este codigo fue por Gabriel Curi si vas cargar mis plugis dame creditos crack Saludos
-import axios from 'axios';
-const baileys = (await import("@whiskeysockets/baileys")).default;
-const { proto } = baileys;
-const { generateWAMessageFromContent } = baileys;
-const { generateWAMessageContent } = baileys;
+import fetch from 'node-fetch';
 
-let handler = async (message, { conn, text }) => {
-    if (!text) {
-        return conn.reply(message.chat, ' *¿Qué video de TikTok quieres descargar?*', message);
-    }
-    async function createVideoMessage(url) {
-        const { videoMessage } = await generateWAMessageContent(
-            { video: { url } },
-            { upload: conn.waUploadToServer }
-        );
-        return videoMessage;
-    }
-    try {
-        const { data: response } = await axios.get(`https://rembotapi.vercel.app/api/tiktokdl?url=${encodeURIComponent(text)}`);
+var handler = async (m, { conn, args, usedPrefix, command }) => {
+  if (!args[0]) {
+    return conn.reply(
+      m.chat,
+      ` 𝙿𝚘𝚛 𝚏𝚊𝚟𝚘𝚛, 𝚒𝚗𝚐𝚛𝚎𝚜𝚊 𝚞𝚗 𝚎𝚗𝚕𝚊𝚌𝚎 𝚍𝚎 𝚃𝚒𝚔𝚃𝚘𝚔.\n\n📌 *Ejemplo:* ${usedPrefix + command} https://vm.tiktok.com/...`,
+      m
+    );
+  }
 
-        if (!response.status) {
-            return conn.reply(message.chat, ' *No se pudo descargar el video de TikTok.*', message);
-        }
-        const hdUrl = response.data.hdplay;
-        const sdUrl = response.data.play;
-        const wmUrl = response.data.wmplay;
-        const title = response.data.title;
-        const hdVideoMessage = await createVideoMessage(hdUrl);
-        const sdVideoMessage = await createVideoMessage(sdUrl);
-        const wmVideoMessage = await createVideoMessage(wmUrl);
-        const responseMessage = generateWAMessageFromContent(
-            message.chat,
-            {
-                viewOnceMessage: {
-                    message: {
-                        messageContextInfo: {
-                            deviceListMetadata: {},
-                            deviceListMetadataVersion: 2
-                        },
-                        interactiveMessage: proto.Message.InteractiveMessage.fromObject({
-                            body: proto.Message.InteractiveMessage.Body.create({
-                                text: null
-                            }),
-                            footer: proto.Message.InteractiveMessage.Footer.create({
-                                text: ' `𝙏 𝙄 𝙆 𝙏 𝙊 𝙆  𝘿 𝙊 𝙒 𝙉 𝙇 𝙊 𝘼 𝘿 𝙀 𝙍`'
-                            }),
-                            header: proto.Message.InteractiveMessage.Header.create({
-                                title: null,
-                                hasMediaAttachment: false
-                            }),
-                            carouselMessage: proto.Message.InteractiveMessage.CarouselMessage.fromObject({
-                                cards: [
-                                    {
-                                        body: proto.Message.InteractiveMessage.Body.fromObject({
-                                            text: null
-                                        }),
-                                        footer: proto.Message.InteractiveMessage.Footer.fromObject({
-                                            text: `𝘾𝘼𝙇𝙄𝘿𝘼𝘿 𝘼𝙇𝙏𝘼\n\n𝚃𝚒𝚝𝚞𝚕𝚘: ${title}`
-                                        }),
-                                        header: proto.Message.InteractiveMessage.Header.fromObject({
-                                            hasMediaAttachment: true,
-                                            videoMessage: hdVideoMessage
-                                        }),
-                                        nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.fromObject({
-                                            buttons: []
-                                        })
-                                    },
-                                    {
-                                        body: proto.Message.InteractiveMessage.Body.fromObject({
-                                            text: null
-                                        }),
-                                        footer: proto.Message.InteractiveMessage.Footer.fromObject({
-                                            text: `𝘾𝘼𝙇𝙄𝘿𝘼𝘿 𝙈𝙀𝘿𝙄𝘼\n\n𝚃𝚒𝚝𝚞𝚕𝚘: ${title}`
-                                        }),
-                                        header: proto.Message.InteractiveMessage.Header.fromObject({
-                                            hasMediaAttachment: true,
-                                            videoMessage: sdVideoMessage
-                                        }),
-                                        nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.fromObject({
-                                            buttons: []
-                                        })
-                                    },
-                                    {
-                                        body: proto.Message.InteractiveMessage.Body.fromObject({
-                                            text: null
-                                        }),
-                                        footer: proto.Message.InteractiveMessage.Footer.fromObject({
-                                            text: `𝘾𝘼𝙇𝙄𝘿𝘼𝘿 𝘽𝘼𝙅𝘼 (CON MARCA DE AGUA)\n\n𝚃𝚒𝚝𝚞𝚕𝚘: ${title}`
-                                        }),
-                                        header: proto.Message.InteractiveMessage.Header.fromObject({
-                                            hasMediaAttachment: true,
-                                            videoMessage: wmVideoMessage
-                                        }),
-                                        nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.fromObject({
-                                            buttons: []
-                                        })
-                                    }
-                                ]
-                            })
-                        })
-                    }
-                }
-            },
-            { quoted: message }
-        );
-        await conn.relayMessage(message.chat, responseMessage.message, { messageId: responseMessage.key.id });
+  try {
+    await conn.reply(m.chat, `𝙴𝚜𝚙𝚎𝚛𝚎 𝚞𝚗 𝚖𝚘𝚖𝚎𝚗𝚝𝚘, 𝚘𝚋𝚝𝚎𝚗𝚒𝚎𝚗𝚍𝚘 𝚎𝚕 𝚟𝚒𝚍𝚎𝚘...`, m);
 
-    } catch (error) {
-        await conn.reply(message.chat, error.toString(), message);
+    const tiktokData = await tiktokdl(args[0]);
+    const result = tiktokData?.data;
+
+    if (!result?.play) {
+      return conn.reply(m.chat, "❌ 𝙴𝚛𝚛𝚘𝚛: 𝙽𝚘 𝚜𝚎 𝚙𝚞𝚍𝚘 𝚘𝚋𝚝𝚎𝚗𝚎𝚛 𝚎𝚕 𝚟𝚒𝚍𝚎𝚘.", m);
     }
+
+    const caption = `
+  *T I K T O K  -  D O W N L O A D*
+
+\`${result.title || 'Sin título'}\`
+
+01:43 ━━━━●───── 04:40
+⇆ㅤ ◁ㅤ ❚❚ ㅤ▷ ㅤ ↻
+               ılıılıılıılıılıılı
+𝚅𝙾𝙻𝚄𝙼𝙴 : ▮▮▮▮▮▮▮▮▮▮
+
+❐  *Autor* : ${result.author?.nickname || 'Desconocido'}
+❐  *Duración* : ${result.duration || 0} segundos
+❐  *Vistas* : ${result.play_count || 0}
+❐  *Likes* : ${result.digg_count || 0}
+❐  *Comentarios* : ${result.comment_count || 0}
+❐  *Compartidos* : ${result.share_count || 0}
+❐  *Publicado* : ${formatDate(result.create_time)}
+❐  *Descargas* : ${result.download_count || 0}
+`.trim();
+
+    await conn.sendFile(m.chat, result.play, 'tiktok.mp4', caption, m);
+    await m.react('✅');
+  } catch (error) {
+    console.error(error);
+    return conn.reply(m.chat, `❌ 𝙴𝚛𝚛𝚘𝚛 𝚊𝚕 𝚍𝚎𝚜𝚌𝚊𝚛𝚐𝚊𝚛: ${error.message}`, m);
+  }
 };
 
-handler.help = ['tiktokdl <url>'];
-handler.tags = ['downloader'];
-handler.command = ['tiktok', 'tiktokdl', 'ttdl'];
-handler.register = true
+handler.help = ['tiktok', 'tt'].map(v => v + ' *<link>*');
+handler.tags = ['descargas'];
+handler.command = ['tiktok', 'tt', 'tiktokdl', 'ttdl'];
+handler.group = true;
+handler.register = true;
+handler.coin = 2;
+handler.limit = true;
 
 export default handler;
+
+async function tiktokdl(url) {
+  const api = `https://www.tikwm.com/api/?url=${url}&hd=1`;
+  const res = await fetch(api);
+  const json = await res.json();
+  return json;
+}
+
+function formatDate(timestamp) {
+  const date = new Date(timestamp * 1000);
+  return date.toLocaleString('es-ES', { timeZone: 'America/Mexico_City' });
+}
