@@ -153,7 +153,8 @@ break;
 ⎪⌲👑 _${usedPrefix}gay_
 ⎪⌲👑 _${usedPrefix}shayeri_
 ⎪⌲👑 _${usedPrefix}ship_
-⎪⌲👑 _${usedPrefix}waste_
+⎪⌲👑 _${usedPrefix}waste @tag_
+> Aplica un efecto "Wasted" al avatar de un usuario mencionado o citado, como en GTA, y lo envía en la conversación.
 ⎪⌲👑 _${usedPrefix}simpcard @tag_
 > obtén tu tarjeta de simp o menciona a un usuario
 ⎪⌲👑 _${usedPrefix}hornycard @tag_
@@ -162,7 +163,7 @@ break;
 > hacer un comentario de youtube
 ⎪⌲👑 _${usedPrefix}stupid_
 > Genera un meme "It\'s so stupid" con la foto de perfil de alguien. 
-⎪⌲👑 _${usedPrefix}lolicon_
+⎪⌲👑 _${usedPrefix}lolicon @tag_
 ┗━━━ʕ•㉨•ʔ━━━┛`; // 
       break;
       case 'animemenu':
