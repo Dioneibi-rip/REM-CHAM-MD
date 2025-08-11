@@ -154,9 +154,12 @@ break;
 ⎪⌲👑 _${usedPrefix}shayeri_
 ⎪⌲👑 _${usedPrefix}ship_
 ⎪⌲👑 _${usedPrefix}waste_
-⎪⌲👑 _${usedPrefix}simpcard_
-⎪⌲👑 _${usedPrefix}hornycard_
+⎪⌲👑 _${usedPrefix}simpcard @tag_
+> obtén tu tarjeta de simp o menciona a un usuario
+⎪⌲👑 _${usedPrefix}hornycard @tag_
+> obtén tu tarjeta por caliente o el de un usuario
 ⎪⌲👑 _${usedPrefix}ytcomment_
+> hacer un comentario de youtube
 ⎪⌲👑 _${usedPrefix}stupid_
 > Genera un meme "It\'s so stupid" con la foto de perfil de alguien. 
 ⎪⌲👑 _${usedPrefix}lolicon_
