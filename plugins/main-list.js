@@ -143,12 +143,13 @@ break;
 ╰───•••──┄ °❀     
 ┏━━━ʕ•㉨•ʔ━━━┓
 ⎪⌲👑 _${usedPrefix}character_
-> comprueba el carácter de un usuario mencionandolo
+> comprueba el carácter de un usuario mencionandolo. 
 ⎪⌲👑 _${usedPrefix}truth_
-> Muestra una frase de verdad
+> Muestra una frase de verdad. 
 ⎪⌲👑 _${usedPrefix}dare_
-> nuestra una frase de atrevimiento
+> nuestra una frase de atrevimiento. 
 ⎪⌲👑 _${usedPrefix}flirt_
+> Asigna un personaje o rasgo aleatorio a un usuario mencionado.
 ⎪⌲👑 _${usedPrefix}gay_
 ⎪⌲👑 _${usedPrefix}shayeri_
 ⎪⌲👑 _${usedPrefix}ship_
@@ -157,7 +158,7 @@ break;
 ⎪⌲👑 _${usedPrefix}hornycard_
 ⎪⌲👑 _${usedPrefix}ytcomment_
 ⎪⌲👑 _${usedPrefix}stupid_
-> Genera un meme "It\'s so stupid" con la foto de perfil de alguien
+> Genera un meme "It\'s so stupid" con la foto de perfil de alguien. 
 ⎪⌲👑 _${usedPrefix}lolicon_
 ┗━━━ʕ•㉨•ʔ━━━┛`; // 
       break;
