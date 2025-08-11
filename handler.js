@@ -46,6 +46,23 @@ export async function handler(chatUpdate) {
   try {
     m = smsg(this, m) || m;
     if (!m) return;
+
+    // --- INICIO DE LA LÓGICA DEL BOT PRIMARIO CON EXCEPCIÓN ---
+    const chatDB = global.db.data.chats[m.chat];
+    if (chatDB && chatDB.botPrimario) {
+        // Lista de palabras universales que TODOS los bots deben obedecer
+        const universalWords = ['resetbot', 'resetprimario', 'botreset'];
+        const firstWord = m.text ? m.text.trim().split(' ')[0].toLowerCase() : '';
+
+        // Si el mensaje NO comienza con una de las palabras universales, aplicamos la regla.
+        if (!universalWords.includes(firstWord)) {
+            if (chatDB.botPrimario !== this.user.jid) {
+                return; // Silencia al bot si no es el primario.
+            }
+        }
+    }
+    // --- FIN DE LA LÓGICA ---
+
     m.exp = 0;
     m.credit = false;
     m.bank = false;
@@ -116,6 +133,7 @@ export async function handler(chatUpdate) {
       if (!("welcome" in chat)) chat.welcome = true;
       if (!("chatbot" in chat)) chat.chatbot = false;
       if (!isNumber(chat.expired)) chat.expired = 0;
+      if (!("botPrimario" in chat)) chat.botPrimario = null; // <-- CAMBIO APLICADO
     } else
       global.db.data.chats[m.chat] = {
         antiDelete: true,
@@ -138,6 +156,7 @@ export async function handler(chatUpdate) {
         viewStory: false,
         welcome: false,
         chatbot: false,
+        botPrimario: null, // <-- CAMBIO APLICADO
       };
 
     let settings = global.db.data.settings[this.user.jid];
@@ -795,11 +814,11 @@ export async function deleteUpdate(message) {
     await this.reply(
       conn.user.id,
       `
-            ≡ BORRASTE UN MENSAJE 
-            ┌─⊷  𝘼𝙉𝙏𝙄 𝘿𝙀𝙇𝙀𝙏𝙀 
-            ▢ *NOMBRE :* @${participant.split`@`[0]} 
-            └─────────────
-            `.trim(),
+              ≡ BORRASTE UN MENSAJE 
+              ┌─⊷  𝘼𝙉𝙏𝙄 𝘿𝙀𝙇𝙀𝙏𝙀 
+              ▢ *NOMBRE :* @${participant.split`@`[0]} 
+              └─────────────
+              `.trim(),
       msg,
       {
         mentions: [participant],
