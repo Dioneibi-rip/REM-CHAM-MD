@@ -1,4 +1,4 @@
-// Este código fue modificado por ChatGPT a petición del usuario, basado en el original de Gabriel Curi
+// Este codigo fue por Gabriel Curi si vas cargar mis plugis dame creditos crack Saludos
 import axios from 'axios';
 const baileys = (await import("@whiskeysockets/baileys")).default;
 const { proto } = baileys;
@@ -18,14 +18,12 @@ let handler = async (message, { conn, text }) => {
     }
 
     try {
-        // Nueva API
         const { data: response } = await axios.get(`https://api.dorratz.com/v2/tiktok-dl?url=${encodeURIComponent(text)}`);
 
         if (!response.status || !response.data) {
             return conn.reply(message.chat, ' *No se pudo descargar el video de TikTok.*', message);
         }
 
-        // Extraer datos del nuevo formato
         const result = response.data;
         const hdUrl = result.media.hd;
         const sdUrl = result.media.org;
@@ -84,7 +82,7 @@ let handler = async (message, { conn, text }) => {
                                     },
                                     {
                                         footer: proto.Message.InteractiveMessage.Footer.fromObject({
-                                            text: `𝘾𝘼𝙇𝙄𝘿𝘼𝘿 𝘽𝘼𝙹𝘼 (CON MARCA DE AGUA)\n\n𝚃𝚒𝚝𝚞𝚕𝚘: ${title}`
+                                            text: `𝘾𝘼𝙇𝙄𝘿𝘼𝘿 𝘽𝘼𝙅𝘼\n\n𝚃𝚒𝚝𝚞𝚕𝚘: ${title}`
                                         }),
                                         header: proto.Message.InteractiveMessage.Header.fromObject({
                                             hasMediaAttachment: true,
