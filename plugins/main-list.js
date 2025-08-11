@@ -147,6 +147,7 @@ break;
 ⎪⌲👑 _${usedPrefix}truth_
 > Muestra una frase de verdad
 ⎪⌲👑 _${usedPrefix}dare_
+> nuestra una frase de atrevimiento
 ⎪⌲👑 _${usedPrefix}flirt_
 ⎪⌲👑 _${usedPrefix}gay_
 ⎪⌲👑 _${usedPrefix}shayeri_
