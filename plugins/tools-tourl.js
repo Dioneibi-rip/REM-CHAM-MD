@@ -1,65 +1,53 @@
-import fs from 'fs';
-import axios from 'axios';
-import FormData from 'form-data';
+import uploadFile from '../lib/uploadFile.js'
+import uploadImage from '../lib/uploadImage.js'
+import fetch from 'node-fetch'
 
-const CUSTOM_FILENAME = '';
-const EXPIRE_VALUE = 365;
-const EXPIRE_UNIT = 'days';
+let handler = async (m) => {
+  let q = m.quoted ? m.quoted : m
+  let mime = (q.msg || q).mimetype || ''
+  if (!mime) return conn.reply(m.chat, `⚠️ ᴘᴏʀ ғᴀᴠᴏʀ, ʀᴇsᴘᴏɴᴅᴀ ᴀ ᴜɴᴀ *ɪᴍᴀɢᴇɴ* ᴏ *ᴠɪᴅᴇᴏ.*`, m)
 
-let handler = async (m, { conn, args }) => {
-  const q = m.quoted && m.quoted.download ? m.quoted : m;
-
-  if (!q || !q.download) return m.reply('🌷 Responde o envía directamente una imagen, video o archivo para subirlo.');
+  await m.react(rwait)
 
   try {
-    const media = await q.download();
-    const ext = q.mimetype?.split('/')[1] || 'bin';
-    const filename = `${Date.now()}.${ext}`;
-    const filepath = `./${filename}`;
+    let media = await q.download()
+    let isTele = /image\/(png|jpe?g|gif)|video\/mp4/.test(mime)
+    let link = await (isTele ? uploadImage : uploadFile)(media)
+    let img = await (await fetch(`${link}`)).buffer()
 
-    fs.writeFileSync(filepath, media);
-    let { file_url } = await upload(filepath);
-    fs.unlinkSync(filepath);
+    let txt = `╭───〔 𝙴𝙽𝙻𝙰𝙲𝙴 ─ ʟɪɴᴋ 〕───╮\n`
+    txt += `│ ✦ *ᴇɴʟᴀᴄᴇ:* ${link}\n`
+    txt += `│ ✦ *ᴀᴄᴏʀᴛᴀᴅᴏ:* ${await shortUrl(link)}\n`
+    txt += `│ ✦ *ᴛᴀᴍᴀñᴏ:* ${formatBytes(media.length)}\n`
+    txt += `│ ✦ *ᴇxᴘɪʀᴀᴄɪóɴ:* ${isTele ? 'ɴᴏ ᴇxᴘɪʀᴀ' : 'ᴅᴇsᴄᴏɴᴏᴄɪᴅᴏ'}\n`
+    txt += `╰─────────────────────╯\n`
+    txt += `> 👤 ${dev}`
 
-    await m.reply(`🌱 Archivo subido:\n${file_url}`);
-  } catch (e) {
-    console.error(e);
-    m.reply('🌷 Error al subir el archivo: ' + (e?.message || e));
+    await conn.sendFile(m.chat, img, 'thumbnail.jpg', txt, m, fkontak)
+    await m.react(done)
+
+  } catch {
+    await m.react(error)
   }
-};
+}
 
-handler.help = ["tourl"];
-handler.command = ["tourl"];
-export default handler;
+handler.help = ['tourl']
+handler.tags = ['transformador']
+handler.register = true
+handler.command = ['tourl', 'upload']
 
-async function upload(filePath) {
-  if (!fs.existsSync(filePath)) throw "Archivo no encontrado.";
+export default handler
 
-  const form = new FormData();
-  form.append('file', fs.createReadStream(filePath));
-  if (CUSTOM_FILENAME) form.append('filename', CUSTOM_FILENAME);
-  form.append('expire_value', EXPIRE_VALUE);
-  form.append('expire_unit', EXPIRE_UNIT);
-
-  const contentLength = await new Promise((resolve, reject) => {
-    form.getLength((err, length) => {
-      if (err) reject(err);
-      else resolve(length);
-    });
-  });
-
-  try {
-    const response = await axios.post('https://sylphy.xyz/upload', form, {
-      headers: {
-        ...form.getHeaders(),
-        'Content-Length': contentLength
-      },
-      maxContentLength: Infinity,
-      maxBodyLength: Infinity
-    });
-    return response.data;
-  } catch (err) {
-    if (err.response?.data) throw err.response.data;
-    else throw err.message;
+function formatBytes(bytes) {
+  if (bytes === 0) {
+    return '0 B'
   }
+  const sizes = ['B', 'KB', 'MB', 'GB', 'TB']
+  const i = Math.floor(Math.log(bytes) / Math.log(1024))
+  return `${(bytes / 1024 ** i).toFixed(2)} ${sizes[i]}`
+}
+
+async function shortUrl(url) {
+  let res = await fetch(`https://tinyurl.com/api-create.php?url=${url}`)
+  return await res.text()
 }
