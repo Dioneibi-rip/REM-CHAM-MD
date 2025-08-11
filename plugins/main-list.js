@@ -143,6 +143,7 @@ break;
 ╰───•••──┄ °❀     
 ┏━━━ʕ•㉨•ʔ━━━┓
 ⎪⌲👑 _${usedPrefix}character_
+> comprueba el carácter de un usuario mencionandolo
 ⎪⌲👑 _${usedPrefix}truth_
 ⎪⌲👑 _${usedPrefix}dare_
 ⎪⌲👑 _${usedPrefix}flirt_
