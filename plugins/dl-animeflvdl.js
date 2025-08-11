@@ -126,7 +126,7 @@ handler.before = async (m, { conn }) => {
     session.downloading = true;
 
     try {
-        const videoBuffer = await (await fetch(inf.dl[lang])).buffer();
+        const videoBuffer = await (await fetch(inf.dl[lang])).arrayBuffer();
         await conn.sendFile(m.chat, videoBuffer, `${session.title} - cap ${epi} ${idiomaLabel}.mp4`, '', m, false, {
             mimetype: 'video/mp4',
             asDocument: true
