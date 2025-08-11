@@ -1,61 +1,148 @@
-// ESTE CODIGO COMO LA API FUE ECHO POR GABRIEL CURI, SI VAS USAR EL PLUGIN DAME CREDITOS CRACK 
-// Hablando firme dame credito p :V
-import { File } from 'megajs';
-import path from 'path';
-import fetch from 'node-fetch';
+import { download, detail, search } from "../lib/anime.js";
 
-let handler = async (m, { conn, args, usedPrefix, text, command }) => {
-    try {
-        if (!args[0]) return m.reply(`𝙻𝚘 𝚊𝚗𝚍𝚊𝚜 𝚑𝚊𝚌𝚒𝚎𝚗𝚍𝚘 𝚖𝚊𝚕 𝚝𝚎 𝚐𝚞𝚒𝚊𝚛𝚎 ${usedPrefix + command} <ᴀɴɪᴍᴇɪᴅ, ᴘᴀʀᴀ ᴄᴏɴꜱᴜʟᴛᴀʀ ᴇʟ ɪᴅ ᴅᴇʟ ᴀɴɪᴍᴇ ᴜꜱᴀ .ᴀɴɪᴍᴇꜰʟᴠꜱᴇᴀʀᴄʜ> <ᴄᴀᴘɪᴛᴜʟᴏ>\n .animedl to-love-ru-ova 1`);
-        const animeId = args[0];
-        const episode = args[1] || 1;
-        const apiUrl = `https://animeflvapi.vercel.app/download/anime/${animeId}/${episode}`;
-        const response = await fetch(apiUrl);
-        if (!response.ok) throw new Error('Error al obtener datos de la API');
-        const { servers } = await response.json();
-        const megaLink = servers[0].find(server => server.server === 'mega').url;
-        if (!megaLink) throw new Error('No se encontró el enlace de MEGA ');
-        const file = File.fromURL(megaLink);
-        await file.loadAttributes();
-        if (file.size >= 300000000) return m.reply('Error: El archivo es grande (Máximo tamaño: 300MB)');
-        await conn.loadingMsg(m.chat, '💙 𝘿𝙀𝙎𝘾𝘼𝙍𝙂𝘼𝙉𝘿𝙊 𝙎𝙐 𝘼𝙉𝙄𝙈𝙀 \n ᴛᴇɴɢᴀ ᴇɴ ᴄᴜᴇɴᴛᴀ Qᴜᴇ ᴇʟ ᴠɪᴅᴇᴏ ᴅᴇ ʟᴏꜱ ᴀɴɪᴍᴇꜱ ᴇɴ ᴇꜱᴛʀᴇɴᴏ ꜱᴜ ᴠɪᴅᴇᴏ ꜱᴏʟᴏ ᴅᴜʀᴀ 3 ᴅɪᴀꜱ ᴅᴇɴᴛʀᴏ ᴅᴇ ʟᴀ ɴᴜʙᴇ ꜱᴇᴀ ʀᴀᴘɪᴅᴏ', `✅ ᴍᴀɴᴅᴀɴᴅᴏ ᴀʀᴄʜɪᴠᴏ`, [
-            "▰▱▱▱▱ ᴄᴀʀɢᴀɴᴅᴏ ...",
-            "▰▰▱▱▱ ᴄᴀʀɢᴀɴᴅᴏ ...",
-            "▰▰▰▱▱ ᴄᴀʀɢᴀɴᴅᴏ ...",
-            "▰▰▰▰▱ ᴄᴀʀɢᴀɴᴅᴏ ...",
-            "▰▰▰▰▰ ᴄᴀʀɢᴀɴᴅᴏ ..."
-        ], m);
-        const caption = `*_𝘼𝙉𝙄𝙈𝙀 𝙁𝙇𝙑 𝘿𝙀𝙎𝘾𝘼𝙍𝙂𝘼𝙎..._*\nɴᴏᴍʙʀᴇ: ${file.name}\nᴛᴀᴍᴀÑᴏ: ${formatBytes(file.size)}`;
-        const dataBuffer = await file.downloadBuffer();
-        const fileExtension = path.extname(file.name).toLowerCase();
-        const mimeTypes = {
-            ".mp4": "video/mp4",
-            ".pdf": "application/pdf",
-            ".zip": "application/zip",
-            ".rar": "application/x-rar-compressed",
-            ".7z": "application/x-7z-compressed",
-            ".jpg": "image/jpeg",
-            ".jpeg": "image/jpeg",
-            ".png": "image/png",
-        };
-        const mimetype = mimeTypes[fileExtension] || "application/octet-stream";
-
-        await conn.sendFile(m.chat, dataBuffer, file.name, caption, m, null, { mimetype, asDocument: true });
-    } catch (error) {
-        return m.reply(`Error: No especifico el anime`);
+async function lang(episodes) {
+    const list = [];
+    for (const ep of episodes) {
+        try {
+            const dl = await download(ep.link);
+            const langs = [];
+            if (dl?.dl?.sub) langs.push('sub');
+            if (dl?.dl?.dub) langs.push('dub');
+            list.push({ ...ep, lang: langs });
+        } catch {
+            list.push({ ...ep, lang: [] });
+        }
     }
-}
-function formatBytes(bytes) {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return list;
 }
 
-handler.help = ['animedl <anime-id> <episode-number>'];
-handler.tags = ['downloader'];
-handler.command = ['animedl', 'animeflvdl', 'anidl'];
-handler.register = true
+let handler = async (m, { command, usedPrefix, conn, text, args }) => {
+    if (!text) return m.reply(`🌱 \`Ingresa el título de algún anime o la URL. Ejemplo:\`\n\n • ${usedPrefix + command} Mushoku Tensei\n • ${usedPrefix + command} https://animeav1.com/media/mushoku-tensei`);
+
+    try {
+        if (text.includes('https://animeav1.com/media/')) {
+            m.react("⌛");
+            let info = await detail(args[0]);
+            let { title, altTitle, description, cover, votes, rating, total, genres } = info;
+            let episodes = await lang(info.episodes);
+
+            const gen = genres.join(', ');
+            let eps = episodes.map(e => {
+                const epNum = e.ep;
+                return `• Episodio ${epNum} (${e.lang.includes('sub') ? 'SUB' : ''}${e.lang.includes('dub') ? (e.lang.includes('sub') ? ' & ' : '') + 'DUB' : ''})`;
+            }).join('\n');
+
+            let cap = `
+乂 \`\`\`ANIME - DOWNLOAD\`\`\`
+
+≡ 🌷 \`Título :\` ${title} - ${altTitle}
+≡ 🌾 \`Descripción :\` ${description}
+≡ 🌲 \`Votos :\` ${votes}
+≡ 🍂 \`Rating :\` ${rating}
+≡ 🍃 \`Géneros :\` ${gen}
+≡ 🌱 \`Episodios totales :\` ${total}
+≡ 🌿 \`Episodios disponibles :\`
+
+${eps}
+
+> Responde a este mensaje con el número del episodio y el idioma. Ejemplo: 1 sub, 3 dub
+`.trim();
+
+            let buffer = await (await fetch(cover)).arrayBuffer();
+            let sent = await conn.sendMessage(m.chat, { image: Buffer.from(buffer), caption: cap }, m)
+            
+            conn.anime = conn.anime || {};
+            conn.anime[m.sender] = {
+                title,
+                episodes,
+                key: sent.key,
+                downloading: false,
+                timeout: setTimeout(() => delete conn.anime[m.sender], 600_000)
+            };
+        } else {
+            m.react('🔍');
+            const results = await search(text);
+            if (results.length === 0) {
+                return conn.reply(m.chat, 'No se encontraron resultados.', m);
+            }
+
+            let cap = `◜ Anime - Search ◞\n`;
+            results.slice(0, 15).forEach((res, index) => {
+                cap += `\n\`${index + 1}\`\n≡ 🌴 \`Title :\` ${res.title}\n≡ 🌱 \`Link :\` ${res.link}\n`;
+            });
+
+            let buffer = await (await fetch(logo)).arrayBuffer();
+            conn.relayMessage(m.chat, {
+                extendedTextMessage: {
+                    text: cap,
+                    contextInfo: {
+                        externalAdReply: {
+                            title: wm,
+                            mediaType: 1,
+                            previewType: 0,
+                            renderLargerThumbnail: true,
+                            thumbnail: Buffer.from(buffer),
+                            sourceUrl: ''
+                        }
+                    }, mentions: [m.sender]
+                }
+            }, {});
+            m.react("🌱");
+        }
+    } catch (error) {
+        console.error('Error en handler anime:', error);
+        conn.reply(m.chat, 'Error al procesar la solicitud: ' + error.message, m);
+    }
+};
+
+handler.before = async (m, { conn }) => {
+    conn.anime = conn.anime || {};
+    const session = conn.anime[m.sender];
+    if (!session || !m.quoted || m.quoted.id !== session.key.id) return;
+
+    if (session.downloading) return m.reply('⏳ Ya estás descargando un episodio. Espera a que termine.');
+
+    let [epStr, langInput] = m.text.trim().split(/\s+/);
+    const epi = parseInt(epStr);
+    let lang = langInput?.toLowerCase();
+
+    if (isNaN(epi)) return m.reply('Número de episodio no válido.');
+
+    const episode = session.episodes.find(e => parseInt(e.ep) === epi);
+    if (!episode) return m.reply(`Episodio ${epi} no encontrado.`);
+
+    const inf = await download(episode.link);
+    const availableLangs = Object.keys(inf.dl || {});
+    if (!availableLangs.length) return m.reply(`No hay idiomas disponibles para el episodio ${epi}.`);
+
+    if (!lang || !availableLangs.includes(lang)) {
+        lang = availableLangs[0];
+    }
+
+    const idiomaLabel = lang === 'sub' ? 'sub español' : 'español latino';
+    await m.reply(`Descargando ${session.title} - cap ${epi} ${idiomaLabel}`);
+    m.react("📥");
+
+    session.downloading = true;
+
+    try {
+        const videoBuffer = await (await fetch(inf.dl[lang])).buffer();
+        await conn.sendFile(m.chat, videoBuffer, `${session.title} - cap ${epi} ${idiomaLabel}.mp4`, '', m, false, {
+            mimetype: 'video/mp4',
+            asDocument: true
+        });
+        m.react("✅");
+    } catch (err) {
+        console.error('Error al descargar:', err);
+        m.reply(`Error al descargar el episodio: ${err.message}`);
+    }
+
+    clearTimeout(session.timeout);
+    delete conn.anime[m.sender];
+};
+
+handler.command = ["anime", "animedl", "animes"];
+handler.tags = ['download'];
+handler.help = ["animedl"];
 
 export default handler;
