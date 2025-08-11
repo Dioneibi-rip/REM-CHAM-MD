@@ -22,18 +22,18 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     await m.react(loading);
 
     const ytURL = encodeURIComponent(args[0]);
-    const apiURL = `https://api.stellarwa.xyz/dow/ytmp4?url=${ytURL}&apikey=stellar-o7UYR5SC`;
+    const apiURL = `https://api.sylphy.xyz/download/ytmp4?url=${ytURL}&apikey=sylph-30fc019324`;
 
     const { data } = await axios.get(apiURL);
 
-    if (!data.status || !data.data?.dl) {
+    if (!data.status || !data.res?.url) {
       throw new Error('La API no devolvió un enlace válido de video.');
     }
 
-    const { title, dl } = data.data;
+    const { title, url } = data.res;
 
     await conn.sendMessage(m.chat, {
-      video: { url: dl },
+      video: { url },
       mimetype: 'video/mp4',
       fileName: `${title}.mp4`
     }, { quoted: m });
