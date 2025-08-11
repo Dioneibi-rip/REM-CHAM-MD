@@ -1,49 +1,65 @@
-import uploadtoimgur from '../lib/imgur.js';
 import fs from 'fs';
-import path from 'path';
+import axios from 'axios';
+import FormData from 'form-data';
 
-let handler = async (m) => {
-  let q = m.quoted ? m.quoted : m;
-  let mime = (q.msg || q).mimetype || '';
-  
-  if (!mime) {
-    throw '✳️ Responde ala imagen/video';
+const CUSTOM_FILENAME = '';
+const EXPIRE_VALUE = 365;
+const EXPIRE_UNIT = 'days';
+
+let handler = async (m, { conn, args }) => {
+  const q = m.quoted && m.quoted.download ? m.quoted : m;
+
+  if (!q || !q.download) return m.reply('🌷 Responde o envía directamente una imagen, video o archivo para subirlo.');
+
+  try {
+    const media = await q.download();
+    const ext = q.mimetype?.split('/')[1] || 'bin';
+    const filename = `${Date.now()}.${ext}`;
+    const filepath = `./${filename}`;
+
+    fs.writeFileSync(filepath, media);
+    let { file_url } = await upload(filepath);
+    fs.unlinkSync(filepath);
+
+    await m.reply(`🌱 Archivo subido:\n${file_url}`);
+  } catch (e) {
+    console.error(e);
+    m.reply('🌷 Error al subir el archivo: ' + (e?.message || e));
   }
-  let mediaBuffer = await q.download();
-
- 
-  if (mediaBuffer.length > 10 * 1024 * 1024) {
-    throw '✴️ El tamaño del medio supera los 10 MB. Por favor sube un archivo más pequeño.';
-  }
-
-  let currentModuleDirectory = path.dirname(new URL(import.meta.url).pathname);
-
-  let tmpDir = path.join(currentModuleDirectory, '../tmp');
-  if (!fs.existsSync(tmpDir)) {
-    fs.mkdirSync(tmpDir);
-  }
-
-  let mediaPath = path.join(tmpDir, `media_${Date.now()}.${mime.split('/')[1]}`);
-  fs.writeFileSync(mediaPath, mediaBuffer);
-
-  let isTele = /image\/(png|jpe?g|gif)|video\/mp4/.test(mime);
-
-  if (isTele) {
-    let link = await uploadtoimgur(mediaPath);
-
-    const fileSizeMB = (mediaBuffer.length / (1024 * 1024)).toFixed(2);
-
-    m.reply(`✅ *Exelente*\n♕ *File Size:* ${fileSizeMB} MB\n♕ *URL:* ${link}`);
-  } else {
-    m.reply(`♕ ${mediaBuffer.length} Byte(s) 
-    ♕ (Unknown)`);
-  }
-
-  fs.unlinkSync(mediaPath);
 };
 
-handler.help = ['tourl'];
-handler.tags = ['tools'];
-handler.command = ['url', 'tourl'];
-
+handler.help = ["tourl"];
+handler.command = ["tourl"];
 export default handler;
+
+async function upload(filePath) {
+  if (!fs.existsSync(filePath)) throw "Archivo no encontrado.";
+
+  const form = new FormData();
+  form.append('file', fs.createReadStream(filePath));
+  if (CUSTOM_FILENAME) form.append('filename', CUSTOM_FILENAME);
+  form.append('expire_value', EXPIRE_VALUE);
+  form.append('expire_unit', EXPIRE_UNIT);
+
+  const contentLength = await new Promise((resolve, reject) => {
+    form.getLength((err, length) => {
+      if (err) reject(err);
+      else resolve(length);
+    });
+  });
+
+  try {
+    const response = await axios.post('https://sylphy.xyz/upload', form, {
+      headers: {
+        ...form.getHeaders(),
+        'Content-Length': contentLength
+      },
+      maxContentLength: Infinity,
+      maxBodyLength: Infinity
+    });
+    return response.data;
+  } catch (err) {
+    if (err.response?.data) throw err.response.data;
+    else throw err.message;
+  }
+}
