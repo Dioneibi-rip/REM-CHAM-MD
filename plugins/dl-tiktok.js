@@ -1,70 +1,118 @@
-import fetch from 'node-fetch';
+// Este código fue modificado por ChatGPT a petición del usuario, basado en el original de Gabriel Curi
+import axios from 'axios';
+const baileys = (await import("@whiskeysockets/baileys")).default;
+const { proto } = baileys;
+const { generateWAMessageFromContent, generateWAMessageContent } = baileys;
 
-var handler = async (m, { conn, args, usedPrefix, command }) => {
-  if (!args[0]) {
-    return conn.reply(
-      m.chat,
-      `💠 𝙿𝚘𝚛 𝚏𝚊𝚟𝚘𝚛, 𝚒𝚗𝚐𝚛𝚎𝚜𝚊 𝚞𝚗 𝚎𝚗𝚕𝚊𝚌𝚎 𝚍𝚎 𝚃𝚒𝚔𝚃𝚘𝚔.`,
-      m
-    );
-  }
-
-  try {
-    await conn.reply(m.chat, `⏳ 𝙴𝚜𝚙𝚎𝚛𝚎 𝚞𝚗 𝚖𝚘𝚖𝚎𝚗𝚝𝚘...\n🎬 ᴏʙᴛᴇɴɪᴇɴᴅᴏ ᴇʟ ᴠɪᴅᴇᴏ ᴅᴇ ᴛɪᴋᴛᴏᴋ`, m);
-
-    const tiktokData = await tiktokdl(args[0]);
-    const result = tiktokData?.data;
-
-    if (!result?.play) {
-      return conn.reply(m.chat, "❌ 𝙴𝚛𝚛𝚘𝚛: 𝙽𝚘 𝚜𝚎 𝚙𝚞𝚍𝚘 𝚘𝚋𝚝𝚎𝚗𝚎𝚛 𝚎𝚕 𝚟𝚒𝚍𝚎𝚘.", m);
+let handler = async (message, { conn, text }) => {
+    if (!text) {
+        return conn.reply(message.chat, ' *¿Qué video de TikTok quieres descargar?*', message);
     }
 
-    const caption = `
-⪻ *T I K T O K* ⪼  🎵
-⏜᷼͡︵⌢᷼︵⏜᷼⌢︵ ⋱ ⋮ ⋰ ︵⌢᷼⏜︵᷼⌢︵᷼͡⏜
-│🎥 𝚃𝚒́𝚝𝚞𝚕𝚘:  ${result.title || '𝚂𝚒𝚗 𝚝𝚒́𝚝𝚞𝚕𝚘'}
-│👤 𝙰𝚞𝚝𝚘𝚛:  ${result.author?.nickname || 'Desconocido'}
-│🕒 𝙳𝚞𝚛𝚊𝚌𝚒𝚘́𝚗:  ${result.duration || 0} segundos
-│👁 𝚅𝚒𝚜𝚝𝚊𝚜:  ${result.play_count || 0}
-│❤️ 𝙻𝚒𝚔𝚎𝚜:  ${result.digg_count || 0}
-│💬 𝙲𝚘𝚖𝚎𝚗𝚝𝚊𝚛𝚒𝚘𝚜:  ${result.comment_count || 0}
-│🔁 𝙲𝚘𝚖𝚙𝚊𝚛𝚝𝚒𝚍𝚘𝚜:  ${result.share_count || 0}
-│📅 𝙵𝚎𝚌𝚑𝚊:  ${formatDate(result.create_time)}
-│⬇️ 𝙳𝚎𝚜𝚌𝚊𝚛𝚐𝚊𝚜:  ${result.download_count || 0}
-⏝᷼͡︵⌢᷼︵⏝᷼⌢︵ ⋰ ⋮ ⋱ ︵⌢᷼⏝︵᷼⌢︵᷼͡⏝
+    async function createVideoMessage(url) {
+        const { videoMessage } = await generateWAMessageContent(
+            { video: { url } },
+            { upload: conn.waUploadToServer }
+        );
+        return videoMessage;
+    }
 
- ━━━━●────────── 04:40
-⇆ㅤ ◁ㅤ ❚❚ ㅤ▷ ㅤ ↻
-               ılıılıılıılıılıılı
-𝚅𝙾𝙻𝚄𝙼𝙴 : ▮▮▮▮▮▮▮▮▮▮
-`.trim();
+    try {
+        // Nueva API
+        const { data: response } = await axios.get(`https://api.dorratz.com/v2/tiktok-dl?url=${encodeURIComponent(text)}`);
 
-    await conn.sendFile(m.chat, result.play, 'tiktok.mp4', caption, m);
-    await m.react('✅');
-  } catch (error) {
-    console.error(error);
-    return conn.reply(m.chat, `❌ 𝙴𝚛𝚛𝚘𝚛 𝚊𝚕 𝚍𝚎𝚜𝚌𝚊𝚛𝚐𝚊𝚛: ${error.message}`, m);
-  }
+        if (!response.status || !response.data) {
+            return conn.reply(message.chat, ' *No se pudo descargar el video de TikTok.*', message);
+        }
+
+        // Extraer datos del nuevo formato
+        const result = response.data;
+        const hdUrl = result.media.hd;
+        const sdUrl = result.media.org;
+        const wmUrl = result.media.wm;
+        const title = result.title;
+
+        const hdVideoMessage = await createVideoMessage(hdUrl);
+        const sdVideoMessage = await createVideoMessage(sdUrl);
+        const wmVideoMessage = await createVideoMessage(wmUrl);
+
+        const responseMessage = generateWAMessageFromContent(
+            message.chat,
+            {
+                viewOnceMessage: {
+                    message: {
+                        messageContextInfo: {
+                            deviceListMetadata: {},
+                            deviceListMetadataVersion: 2
+                        },
+                        interactiveMessage: proto.Message.InteractiveMessage.fromObject({
+                            body: proto.Message.InteractiveMessage.Body.create({
+                                text: null
+                            }),
+                            footer: proto.Message.InteractiveMessage.Footer.create({
+                                text: ' `𝙏 𝙄 𝙆 𝙏 𝙊 𝙆  𝘿 𝙊 𝙒 𝙉 𝙇 𝙊 𝘼 𝘿 𝙀 𝙍`'
+                            }),
+                            header: proto.Message.InteractiveMessage.Header.create({
+                                title: null,
+                                hasMediaAttachment: false
+                            }),
+                            carouselMessage: proto.Message.InteractiveMessage.CarouselMessage.fromObject({
+                                cards: [
+                                    {
+                                        footer: proto.Message.InteractiveMessage.Footer.fromObject({
+                                            text: `𝘾𝘼𝙇𝙄𝘿𝘼𝘿 𝘼𝙇𝙏𝘼\n\n𝚃𝚒𝚝𝚞𝚕𝚘: ${title}`
+                                        }),
+                                        header: proto.Message.InteractiveMessage.Header.fromObject({
+                                            hasMediaAttachment: true,
+                                            videoMessage: hdVideoMessage
+                                        }),
+                                        nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.fromObject({
+                                            buttons: []
+                                        })
+                                    },
+                                    {
+                                        footer: proto.Message.InteractiveMessage.Footer.fromObject({
+                                            text: `𝘾𝘼𝙇𝙄𝘿𝘼𝘿 𝙈𝙀𝘿𝙄𝘼\n\n𝚃𝚒𝚝𝚞𝚕𝚘: ${title}`
+                                        }),
+                                        header: proto.Message.InteractiveMessage.Header.fromObject({
+                                            hasMediaAttachment: true,
+                                            videoMessage: sdVideoMessage
+                                        }),
+                                        nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.fromObject({
+                                            buttons: []
+                                        })
+                                    },
+                                    {
+                                        footer: proto.Message.InteractiveMessage.Footer.fromObject({
+                                            text: `𝘾𝘼𝙇𝙄𝘿𝘼𝘿 𝘽𝘼𝙹𝘼 (CON MARCA DE AGUA)\n\n𝚃𝚒𝚝𝚞𝚕𝚘: ${title}`
+                                        }),
+                                        header: proto.Message.InteractiveMessage.Header.fromObject({
+                                            hasMediaAttachment: true,
+                                            videoMessage: wmVideoMessage
+                                        }),
+                                        nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.fromObject({
+                                            buttons: []
+                                        })
+                                    }
+                                ]
+                            })
+                        })
+                    }
+                }
+            },
+            { quoted: message }
+        );
+
+        await conn.relayMessage(message.chat, responseMessage.message, { messageId: responseMessage.key.id });
+
+    } catch (error) {
+        await conn.reply(message.chat, error.toString(), message);
+    }
 };
 
-handler.help = ['tiktok', 'tt'].map(v => v + ' *<link>*');
-handler.tags = ['descargas'];
-handler.command = ['tiktok', 'tt', 'tiktokdl', 'ttdl'];
-handler.group = true;
+handler.help = ['tiktokdl <url>'];
+handler.tags = ['downloader'];
+handler.command = ['tiktok', 'tiktokdl', 'ttdl'];
 handler.register = true;
-handler.coin = 2;
-handler.limit = true;
 
 export default handler;
-
-async function tiktokdl(url) {
-  const api = `https://www.tikwm.com/api/?url=${url}&hd=1`;
-  const res = await fetch(api);
-  const json = await res.json();
-  return json;
-}
-
-function formatDate(timestamp) {
-  const date = new Date(timestamp * 1000);
-  return date.toLocaleString('es-ES', { timeZone: 'America/Mexico_City' });
-}
