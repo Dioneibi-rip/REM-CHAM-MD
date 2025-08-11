@@ -120,21 +120,23 @@ handler.before = async (m, { conn }) => {
     }
 
     const idiomaLabel = lang === 'sub' ? 'sub español' : 'español latino';
-    await m.reply(`Descargando ${session.title} - cap ${epi} ${idiomaLabel}`);
+    await m.reply(`Enviando ${session.title} - cap ${epi} ${idiomaLabel}...`);
     m.react("📥");
 
     session.downloading = true;
 
     try {
-        const videoBuffer = await (await fetch(inf.dl[lang])).arrayBuffer();
-        await conn.sendFile(m.chat, videoBuffer, `${session.title} - cap ${epi} ${idiomaLabel}.mp4`, '', m, false, {
+        const videoUrl = inf.dl[lang];
+        
+        await conn.sendFile(m.chat, videoUrl, `${session.title} - cap ${epi} ${idiomaLabel}.mp4`, '', m, false, {
             mimetype: 'video/mp4',
             asDocument: true
         });
+
         m.react("✅");
     } catch (err) {
-        console.error('Error al descargar:', err);
-        m.reply(`Error al descargar el episodio: ${err.message}`);
+        console.error('Error al enviar el archivo:', err);
+        m.reply(`Error al enviar el episodio: ${err.message}`);
     }
 
     clearTimeout(session.timeout);
