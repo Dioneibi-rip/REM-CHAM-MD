@@ -4,13 +4,13 @@ var handler = async (m, { conn, args, usedPrefix, command }) => {
   if (!args[0]) {
     return conn.reply(
       m.chat,
-      ` 𝙿𝚘𝚛 𝚏𝚊𝚟𝚘𝚛, 𝚒𝚗𝚐𝚛𝚎𝚜𝚊 𝚞𝚗 𝚎𝚗𝚕𝚊𝚌𝚎 𝚍𝚎 𝚃𝚒𝚔𝚃𝚘𝚔.\n\n📌 *Ejemplo:* ${usedPrefix + command} https://vm.tiktok.com/...`,
+      `💠 𝙿𝚘𝚛 𝚏𝚊𝚟𝚘𝚛, 𝚒𝚗𝚐𝚛𝚎𝚜𝚊 𝚞𝚗 𝚎𝚗𝚕𝚊𝚌𝚎 𝚍𝚎 𝚃𝚒𝚔𝚃𝚘𝚔.`,
       m
     );
   }
 
   try {
-    await conn.reply(m.chat, `𝙴𝚜𝚙𝚎𝚛𝚎 𝚞𝚗 𝚖𝚘𝚖𝚎𝚗𝚝𝚘, 𝚘𝚋𝚝𝚎𝚗𝚒𝚎𝚗𝚍𝚘 𝚎𝚕 𝚟𝚒𝚍𝚎𝚘...`, m);
+    await conn.reply(m.chat, `⏳ 𝙴𝚜𝚙𝚎𝚛𝚎 𝚞𝚗 𝚖𝚘𝚖𝚎𝚗𝚝𝚘...\n🎬 ᴏʙᴛᴇɴɪᴇɴᴅᴏ ᴇʟ ᴠɪᴅᴇᴏ ᴅᴇ ᴛɪᴋᴛᴏᴋ`, m);
 
     const tiktokData = await tiktokdl(args[0]);
     const result = tiktokData?.data;
@@ -20,23 +20,23 @@ var handler = async (m, { conn, args, usedPrefix, command }) => {
     }
 
     const caption = `
-  *T I K T O K  -  D O W N L O A D*
+⪻ *T I K T O K* ⪼  🎵
+╔ׁ࣭┉ׁ۪〫𝆬⏠ּ〪꤫〫̇═ꩌׁ࡛🏰ᩧ̥〫𝆬═꤫̇𝆬ꥇ⏠᮫ּ〪꤫〫۟(᮫๑᳞ׄ ࣭•۟⩊ֹ۪̇• ꤫𝆬๑᳞〫)᮫࡛⏠〪꤫〫۟═ꩌׁ࡛🌸ᩧ̥〫𝆬═꤫̇𝆬ꥇ⏠ּ〪꤫〫̇┉ׁ۪〫╗꤫۪ׄ
+│🎥 𝚃𝚒́𝚝𝚞𝚕𝚘:  ${result.title || '𝚂𝚒𝚗 𝚝𝚒́𝚝𝚞𝚕𝚘'}
+│👤 𝙰𝚞𝚝𝚘𝚛:  ${result.author?.nickname || 'Desconocido'}
+│🕒 𝙳𝚞𝚛𝚊𝚌𝚒𝚘́𝚗:  ${result.duration || 0} segundos
+│👁 𝚅𝚒𝚜𝚝𝚊𝚜:  ${result.play_count || 0}
+│❤️ 𝙻𝚒𝚔𝚎𝚜:  ${result.digg_count || 0}
+│💬 𝙲𝚘𝚖𝚎𝚗𝚝𝚊𝚛𝚒𝚘𝚜:  ${result.comment_count || 0}
+│🔁 𝙲𝚘𝚖𝚙𝚊𝚛𝚝𝚒𝚍𝚘𝚜:  ${result.share_count || 0}
+│📅 𝙵𝚎𝚌𝚑𝚊:  ${formatDate(result.create_time)}
+│⬇️ 𝙳𝚎𝚜𝚌𝚊𝚛𝚐𝚊𝚜:  ${result.download_count || 0}
+╚࡛ࠬ┉ׁ۪〫𝆬𝆬⏡〪꤫〫𝆬═ꩌׁ࡛🌸ᩧ̥〫𝆬═꤫̇𝆬ꥇ⏡ּ〪꤫〫(᮫๑᳞ׄ ࣭•۟⩊ֹ۪̇• ꤫𝆬๑᳞〫)᮫࡛⏡〪꤫〫۟═ꩌׁ࡛🏰ᩧ̥〫𝆬═꤫̇𝆬ꥇ۪⏡〪꤫〫┉ׁ۪〫╝᮫ׁ꤫
 
-\`${result.title || 'Sin título'}\`
-
-01:43 ━━━━●───── 04:40
+ ━━━━●────────── 04:40
 ⇆ㅤ ◁ㅤ ❚❚ ㅤ▷ ㅤ ↻
                ılıılıılıılıılıılı
 𝚅𝙾𝙻𝚄𝙼𝙴 : ▮▮▮▮▮▮▮▮▮▮
-
-❐  *Autor* : ${result.author?.nickname || 'Desconocido'}
-❐  *Duración* : ${result.duration || 0} segundos
-❐  *Vistas* : ${result.play_count || 0}
-❐  *Likes* : ${result.digg_count || 0}
-❐  *Comentarios* : ${result.comment_count || 0}
-❐  *Compartidos* : ${result.share_count || 0}
-❐  *Publicado* : ${formatDate(result.create_time)}
-❐  *Descargas* : ${result.download_count || 0}
 `.trim();
 
     await conn.sendFile(m.chat, result.play, 'tiktok.mp4', caption, m);
