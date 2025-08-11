@@ -145,6 +145,7 @@ break;
 ⎪⌲👑 _${usedPrefix}character_
 > comprueba el carácter de un usuario mencionandolo
 ⎪⌲👑 _${usedPrefix}truth_
+> Muestra una frase de verdad
 ⎪⌲👑 _${usedPrefix}dare_
 ⎪⌲👑 _${usedPrefix}flirt_
 ⎪⌲👑 _${usedPrefix}gay_
