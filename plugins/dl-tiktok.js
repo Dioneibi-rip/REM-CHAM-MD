@@ -21,7 +21,7 @@ var handler = async (m, { conn, args, usedPrefix, command }) => {
 
     const caption = `
 ⪻ *T I K T O K* ⪼  🎵
-╔ׁ࣭┉ׁ۪〫𝆬⏠ּ〪꤫〫̇═ꩌׁ࡛🏰ᩧ̥〫𝆬═꤫̇𝆬ꥇ⏠᮫ּ〪꤫〫۟(᮫๑᳞ׄ ࣭•۟⩊ֹ۪̇• ꤫𝆬๑᳞〫)᮫࡛⏠〪꤫〫۟═ꩌׁ࡛🌸ᩧ̥〫𝆬═꤫̇𝆬ꥇ⏠ּ〪꤫〫̇┉ׁ۪〫╗꤫۪ׄ
+⏜᷼͡︵⌢᷼︵⏜᷼⌢︵ ⋱ ⋮ ⋰ ︵⌢᷼⏜︵᷼⌢︵᷼͡⏜
 │🎥 𝚃𝚒́𝚝𝚞𝚕𝚘:  ${result.title || '𝚂𝚒𝚗 𝚝𝚒́𝚝𝚞𝚕𝚘'}
 │👤 𝙰𝚞𝚝𝚘𝚛:  ${result.author?.nickname || 'Desconocido'}
 │🕒 𝙳𝚞𝚛𝚊𝚌𝚒𝚘́𝚗:  ${result.duration || 0} segundos
@@ -31,7 +31,7 @@ var handler = async (m, { conn, args, usedPrefix, command }) => {
 │🔁 𝙲𝚘𝚖𝚙𝚊𝚛𝚝𝚒𝚍𝚘𝚜:  ${result.share_count || 0}
 │📅 𝙵𝚎𝚌𝚑𝚊:  ${formatDate(result.create_time)}
 │⬇️ 𝙳𝚎𝚜𝚌𝚊𝚛𝚐𝚊𝚜:  ${result.download_count || 0}
-╚࡛ࠬ┉ׁ۪〫𝆬𝆬⏡〪꤫〫𝆬═ꩌׁ࡛🌸ᩧ̥〫𝆬═꤫̇𝆬ꥇ⏡ּ〪꤫〫(᮫๑᳞ׄ ࣭•۟⩊ֹ۪̇• ꤫𝆬๑᳞〫)᮫࡛⏡〪꤫〫۟═ꩌׁ࡛🏰ᩧ̥〫𝆬═꤫̇𝆬ꥇ۪⏡〪꤫〫┉ׁ۪〫╝᮫ׁ꤫
+⏝᷼͡︵⌢᷼︵⏝᷼⌢︵ ⋰ ⋮ ⋱ ︵⌢᷼⏝︵᷼⌢︵᷼͡⏝
 
  ━━━━●────────── 04:40
 ⇆ㅤ ◁ㅤ ❚❚ ㅤ▷ ㅤ ↻
