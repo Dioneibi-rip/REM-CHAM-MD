@@ -1,56 +1,39 @@
 import fetch from 'node-fetch';
 
-// Función que traduce un texto usando la API de Google Translate
-async function translateGoogle(text, fromLang, toLang) {
-  // Construye la URL para llamar a la API no oficial de Google Translate
-  const url =
-    'https://translate.googleapis.com/translate_a/single?client=gtx' +
-    '&sl=' + fromLang +
-    '&tl=' + toLang +
-    '&dt=t&q=' + encodeURIComponent(text);
+async function translateGoogle(text, sourceLang, targetLang) {
+  // Realiza una traducción usando la API de Google Translate (no oficial, vía web)
+  const url = 
+    `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${sourceLang}&tl=${targetLang}&dt=t&q=${encodeURIComponent(text)}`;
 
-  // Hace la petición a la API
   const response = await fetch(url);
   const data = await response.json();
 
-  // Devuelve el texto traducido que está en data[0][0][0]
+  // La traducción suele estar en data[0][0][0]
   return data[0][0][0];
 }
 
-// Handler del comando
 let handler = async (m, { conn }) => {
-  // URL de una API que devuelve frases de verdad/verdad o reto (truth)
-  let apiUrl = 'https://shizoapi.onrender.com/truth';
+  // URL fija para obtener algún texto (probablemente "verdad" / truth)
+  const apiUrl = 'https://shizuoapi.onrender.com/api/texts/truth?apikey=1246924ZjByPl';
 
-  // Hace la petición a la API externa
-  let res = await fetch(apiUrl);
-
-  // Si la respuesta no es correcta lanza un error
+  // Solicita datos al API
+  const res = await fetch(apiUrl);
   if (!res.ok) throw new Error(await res.text());
 
-  // Obtiene el JSON de la respuesta
-  let json = await res.json();
+  const json = await res.json();
 
-  // Extrae la frase en inglés (supongo que json.text contiene la frase)
-  let englishText = json.text;
+  // Extrae el texto original
+  const originalText = json.result;
 
-  // Traduce la frase de inglés a español usando la función anterior
-  let translatedText = await translateGoogle(englishText, 'en', 'es');
+  // Traduce el texto de inglés a español
+  const translatedText = await translateGoogle(originalText, 'en', 'es');
 
-  // Envía el texto traducido al chat, mencionando al usuario que invocó el comando
-  conn.sendMessage(
-    m.chat,
-    {
-      text: translatedText,
-      mentions: [m.sender],
-    },
-    { quoted: m }
-  );
+  // Envía la traducción en el chat, mencionando al remitente y citando el mensaje original
+  await conn.sendMessage(m.chat, { text: translatedText, mentions: [m.sender] }, { quoted: m });
 };
 
-// Configuraciones del comando
-handler.help = ['truth'];          // Comando ayuda
-handler.tags = ['fun'];            // Categoría
-handler.command = /^(truth)$/i;    // Comando activador: "truth"
+handler.help = ['truth'];
+handler.tags = ['fun'];
+handler.command = /^(truth)$/i;
 
 export default handler;
