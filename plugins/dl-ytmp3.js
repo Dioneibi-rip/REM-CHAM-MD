@@ -11,7 +11,9 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
   const errorEmoji = '❌';
 
   if (!args[0]) {
-    return m.reply(`${emoji} ᴘᴏʀ ғᴀᴠᴏʀ, ɪɴɢʀᴇsᴀ ᴜɴ ᴇɴʟᴀᴄᴇ ᴅᴇ *YᴏᴜTᴜʙᴇ*.\n\n*Ejemplo:* ${usedPrefix + command} https://youtube.com/watch?v=dQw4w9WgXcQ`);
+    return m.reply(
+      `${emoji} ᴘᴏʀ ғᴀᴠᴏʀ, ɪɴɢʀᴇsᴀ ᴜɴ ᴇɴʟᴀᴄᴇ ᴅᴇ *YᴏᴜTᴜʙᴇ*.\n\n*Ejemplo:* ${usedPrefix + command} https://youtube.com/watch?v=dQw4w9WgXcQ`
+    );
   }
 
   if (!isValidYouTubeUrl(args[0])) {
@@ -22,19 +24,28 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     await m.react(loading);
 
     const ytURL = encodeURIComponent(args[0]);
-    const apiURL = `https://dark-core-api.vercel.app/api/download/YTMP3?key=api&url=${ytURL}`;
+    const apiURL = `https://ruby-core.vercel.app/api/download/youtube/mp3?url=${ytURL}`;
 
     const { data } = await axios.get(apiURL);
 
-    if (!data.status || !data.download) {
-      throw new Error('La API no devolvió un enlace de descarga válido.');
+    if (!data.status || !data.download?.url) {
+      throw new Error('La API no devolvió un enlace válido de audio.');
     }
 
-    await conn.sendMessage(m.chat, {
-      audio: { url: data.download },
-      mimetype: 'audio/mpeg',
-      ptt: true
-    }, { quoted: m });
+    const title = data.metadata?.title || "audio";
+    const audioUrl = data.download.url;
+
+    await conn.sendMessage(
+      m.chat,
+      {
+        audio: { url: audioUrl },
+        mimetype: 'audio/mpeg',
+        fileName: `${title}.mp3`,
+        caption: `🎵 *${title}*`,
+        ptt: true
+      },
+      { quoted: m }
+    );
 
     await m.react(successEmoji);
 
@@ -45,9 +56,9 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
   }
 };
 
-handler.help = ['ytptt <url>'];
+handler.help = ['ytmp3 <url>'];
 handler.tags = ['downloader'];
-handler.command = ['ytaudio', 'mp3', 'ytmp3'];
+handler.command = ['ytmp3', 'ytaudio', 'mp3'];
 handler.limit = 1;
 
 export default handler;
