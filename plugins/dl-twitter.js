@@ -13,36 +13,47 @@ let handler = async (m, { conn, args, usedPrefix, command }) => {
     await conn.sendReaction(m.chat, '⌛', m.key);
 
     const url = args[0];
-    const response = await axios.get(`https://api.siputzx.my.id/api/d/twitter?url=${encodeURIComponent(url)}`);
+    const response = await axios.get(`https://ruby-core.vercel.app/api/download/twitter?url=${encodeURIComponent(url)}`);
     const res = response.data;
 
-    if (!res.status) {
+    if (!res?.status) {
       await conn.sendReaction(m.chat, '❌', m.key);
       return conn.reply(m.chat, '⚠️ No se pudo descargar el video, verifica el enlace.', m);
     }
 
-    const { imgUrl, downloadLink, videoTitle, videoDescription } = res.data;
+    const { metadata, downloads } = res;
+    const { title, uploader, duration, thumbnail, like_count } = metadata;
+
+    let video = downloads.find(v => v.resolution.includes("720")) || downloads[0];
 
     const caption = `
-╭─❏ *ᥫ᭡ 𝗧𝗪𝗜𝗧𝗧𝗘𝗥 𝗗𝗘𝗦𝗖𝗔𝗥𝗚𝗔𝗦 𝗕𝗢𝗧 ᥫ᭡*
+╭─❏ *🐦 𝗧𝗪𝗜𝗧𝗧𝗘𝗥 𝗗𝗢𝗪𝗡𝗟𝗢𝗔𝗗𝗘𝗥*
 │
-│ *𝑻𝒊𝒕𝒖𝒍𝒐:* ${videoTitle || 'Desconocido'}
-│ *𝑫𝒆𝒔𝒄𝒓𝒊𝒑𝒄𝒊ó𝒏:* ${videoDescription || 'Sin descripción'}
+│ 🎬 *Título:* ${title || 'Desconocido'}
+│ 👤 *Canal:* ${uploader || 'N/A'}
+│ ⏱️ *Duración:* ${duration ? duration.toFixed(1) + "s" : 'N/A'}
+│ ❤️ *Likes:* ${like_count || '0'}
+│ 📹 *Calidad:* ${video.quality || 'Desconocida'}
 │
 ╰─────❏
-`;
+`.trim();
+
+    const thumbBuffer = thumbnail
+      ? Buffer.from(await (await axios.get(thumbnail, { responseType: 'arraybuffer' })).data)
+      : null;
 
     await conn.sendMessage(m.chat, {
-      video: { url: downloadLink },
+      video: { url: video.url },
       caption,
-      jpegThumbnail: Buffer.from(await (await axios.get(imgUrl, { responseType: 'arraybuffer' })).data),
+      jpegThumbnail: thumbBuffer,
       mimetype: 'video/mp4',
-      fileName: `twitter-video.mp4`
+      fileName: `twitter-${video.quality || 'video'}.mp4`
     }, { quoted: m });
 
     await conn.sendReaction(m.chat, '✅', m.key);
 
   } catch (error) {
+    console.error(error);
     await conn.sendReaction(m.chat, '❌', m.key);
     conn.reply(m.chat, '❌ Hubo un error al descargar el video de Twitter, intenta nuevamente.', m);
   }
