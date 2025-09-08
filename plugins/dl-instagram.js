@@ -16,7 +16,7 @@ let handler = async (m, { conn, args }) => {
 
     await conn.sendMessage(m.chat, {
       video: { url: videoLink },
-      caption: `🎬 ᴀǫᴜɪ́ ᴛɪᴇɴᴇs sᴜ ᴅᴇsᴄᴀʀɢᴀ ᴅᴇ ɪɴsᴛᴀɢʀᴀᴍ (⁎˃ᴗ˂⁎)}`,
+      caption: `🎬 ᴀǫᴜɪ́ ᴛɪᴇɴᴇs sᴜ ᴅᴇsᴄᴀʀɢᴀ ᴅᴇ ɪɴsᴛᴀɢʀᴀᴍ (⁎˃ᴗ˂⁎)`,
       mimetype: 'video/mp4',
       fileName: 'instagram.mp4',
       jpegThumbnail: thumbnail ? await (await axios.get(thumbnail, { responseType: 'arraybuffer' })).data : null
