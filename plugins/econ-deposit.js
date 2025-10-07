@@ -11,10 +11,10 @@ let handler = async (m, { conn, args }) => {
   if (args[0].toLowerCase() === 'all') {
     let total = user.credit || 0
     if (total === 0) 
-      return m.reply(`${emoji2} No tienes nada en tu cartera para depositar.`)
+      return m.reply(`╥﹏╥ No tienes nada en tu cartera para depositar.`)
     user.credit = 0
     user.bank += total
-    return m.reply(`✅ Depositaste *${total.toLocaleString()} ${m.moneda}* en tu bóveda.\n\n💰 Cartera: *${user.credit.toLocaleString()}* | 🏦 Banco: *${user.bank.toLocaleString()}*\n\nTu oro ahora está seguro 💼✨`)
+    return m.reply(`✅ Depositaste *${total.toLocaleString()} ${m.moneda}* en tu bóveda.\n\n💰 Cartera: *${user.credit.toLocaleString()}* | 🏦 Banco: *${user.bank.toLocaleString()}*\n\nTus ${m.moneda} ahora está seguro 💼✨`)
   }
 
   if (isNaN(args[0]) || parseInt(args[0]) <= 0)
@@ -28,7 +28,7 @@ let handler = async (m, { conn, args }) => {
   user.credit -= cantidad
   user.bank += cantidad
 
-  return m.reply(`🏦 *Depósito Realizado* 🏦\n\n💰 *Cantidad Depositada:* ${cantidad.toLocaleString()} ${m.moneda}\n👤 *Saldo en la Bóveda:* ${user.bank.toLocaleString()} ${m.moneda}\n\nGracias por depositar en tu bóveda. ¡Tu oro está seguro con nosotros! 💼✨`)
+  return m.reply(`🏦 *Depósito Realizado* 🏦\n\n💰 *Cantidad Depositada:* ${cantidad.toLocaleString()} ${m.moneda}\n👤 *Saldo en la Bóveda:* ${user.bank.toLocaleString()} ${m.moneda}\n\nGracias por depositar en tu bóveda. ¡Tus ${m.moneda} está seguro con nosotros! 💼✨`)
 }
 
 handler.help = ['depositar <cantidad|all>']
