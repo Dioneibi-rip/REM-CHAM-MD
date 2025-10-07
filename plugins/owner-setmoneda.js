@@ -1,14 +1,29 @@
-let handler = async (m, { conn, text, isRowner }) => {
-  if (!text) return m.reply(`${emoji} Por favor, proporciona un nombre para el bot.\n> Ejemplo: #setmoneda Coins`);
+let handler = async (m, { conn, text }) => {
+  if (!global.db.data.settings) global.db.data.settings = {}
 
-  global.moneda = text.trim();
-  
-  m.reply(`${emoji} La moneda del bot ha sido cambiado a: ${global.moneda}`);
-};
+  let settings = global.db.data.settings[conn.user.jid]
+  if (!settings) global.db.data.settings[conn.user.jid] = {}, settings = global.db.data.settings[conn.user.jid]
 
-handler.help = ['setmoneda'];
-handler.tags = ['tools'];
-handler.command = ['setmoneda'];
-handler.rowner = true;
+  if (!text) {
+    const currentMoneda = settings.moneda || 'No establecida'
+    return m.reply(
+`*🌸 ᴍᴏɴᴇᴅᴀ ᴅᴇʟ ʙᴏᴛ 🌸*
 
-export default handler;
+Por favor, escribe el nombre de la moneda que deseas usar.
+> *Ejemplo:* #setmoneda Diamantes 💎
+
+*Moneda actual:* ${currentMoneda}`
+    )
+  }
+
+  settings.moneda = text.trim()
+
+  m.reply(`✅ ᴍᴏɴᴇᴅᴀ ᴀᴄᴛᴜᴀʟɪᴢᴀᴅᴀ:\n> Nueva moneda: *${settings.moneda}*`)
+}
+
+handler.help = ['setmoneda <nombre>']
+handler.tags = ['owner']
+handler.command = ['setmoneda']
+handler.rowner = true
+
+export default handler
