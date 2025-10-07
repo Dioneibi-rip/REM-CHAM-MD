@@ -19,7 +19,7 @@ let handler = async (m, { conn, usedPrefix, command }) => {
     let gain = base
     user.credit += gain
     let work = pickRandom(trabajosBuenos)
-    m.reply(`‣ ${work}\nGanaste 💸 *${gain.toLocaleString()} ${m.moneda}*\n\n💰 Cartera: *${user.credit.toLocaleString()}* | 🏦 Banco: *${user.bank.toLocaleString()}*`)
+    m.reply(`‣ ${work}\nGanaste *${gain.toLocaleString()} ${m.moneda}*\n\n💰 Cartera: *${user.credit.toLocaleString()}* | 🏦 Banco: *${user.bank.toLocaleString()}*`)
   } else {
     let loss = Math.floor(base / 1.5)
     let total = user.credit + user.bank
