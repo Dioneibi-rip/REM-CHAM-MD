@@ -11,7 +11,7 @@ let handler = async (m, { conn, usedPrefix, command }) => {
  global.db.data.users[m.sender].credit += earn
 
   m.reply(`
-‣ ${res.wrk} ${earn} gold
+‣ ${res.wrk} ${earn} ${m.moneda}
 `)
   global.db.data.users[m.sender].lastwork = new Date * 1
 }
