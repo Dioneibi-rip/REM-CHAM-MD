@@ -1,68 +1,39 @@
-import axios from 'axios'
-
-let handler = async (m, { conn, args, usedPrefix, command }) => {
+let handler = async (m, { conn, args }) => {
   let user = global.db.data.users[m.sender]
   let emoji = '🏦', emoji2 = '❌'
-  let imgUrl = 'https://i.imgur.com/P3u2et7.jpg'
+
+  if (!user.credit) user.credit = 0
+  if (!user.bank) user.bank = 0
 
   if (!args[0]) 
-    throw `${emoji} Ingresa la cantidad de *${m.moneda}* que deseas depositar.\n\nEjemplo:\n> ${usedPrefix + command} 500\n> ${usedPrefix + command} all`
+    return m.reply(`${emoji} Ingresa la cantidad de *${m.moneda}* que deseas depositar.\n\n> Ejemplo 1: *.depositar 2500*\n> Ejemplo 2: *.depositar all*`)
 
   if (args[0].toLowerCase() === 'all') {
     let total = user.credit || 0
     if (total === 0) 
-      throw `${emoji2} No tienes nada en tu cartera para depositar.`
+      return m.reply(`${emoji2} No tienes nada en tu cartera para depositar.`)
     user.credit = 0
     user.bank += total
-
-    let message = `
-🏦 *Depósito Realizado* 🏦
-
-💰 *Cantidad Depositada:* ${total.toLocaleString()} ${m.moneda}
-👤 *Saldo Actual en la Bóveda:* ${user.bank.toLocaleString()} ${m.moneda}
-
-Gracias por depositar en tu bóveda. ¡Tu oro está seguro con nosotros! 💼✨
-`.trim()
-
-    try {
-      const responseImg = await axios.get(imgUrl, { responseType: 'arraybuffer' })
-      await conn.sendFile(m.chat, responseImg.data, 'deposito.jpg', message, m)
-    } catch {
-      await conn.reply(m.chat, message, m)
-    }
-    return
+    return m.reply(`✅ Depositaste *${total.toLocaleString()} ${m.moneda}* en tu bóveda.\n\n💰 Cartera: *${user.credit.toLocaleString()}* | 🏦 Banco: *${user.bank.toLocaleString()}*\n\nTu oro ahora está seguro 💼✨`)
   }
 
+  if (isNaN(args[0]) || parseInt(args[0]) <= 0)
+    return m.reply(`${emoji2} Debes ingresar una cantidad válida para depositar.\n\n> Ejemplo 1: *.depositar 1000*\n> Ejemplo 2: *.depositar all*`)
+
   let cantidad = parseInt(args[0])
-  if (isNaN(cantidad) || cantidad <= 0)
-    throw `${emoji2} Debes ingresar una cantidad válida para depositar.\n\nEjemplo:\n> ${usedPrefix + command} 100\n> ${usedPrefix + command} all`
 
   if (user.credit < cantidad)
-    throw `${emoji2} Solo tienes *${user.credit.toLocaleString()} ${m.moneda}* en tu cartera.
+    return m.reply(`${emoji2} No tienes suficiente *${m.moneda}*.\n💰 Cartera actual: *${user.credit.toLocaleString()}*`)
 
   user.credit -= cantidad
   user.bank += cantidad
 
-  let message = `
-🏦 *Depósito Realizado* 🏦
-
-💰 *Cantidad Depositada:* ${cantidad.toLocaleString()} ${m.moneda}
-👤 *Saldo Actual en la Bóveda:* ${user.bank.toLocaleString()} ${m.moneda}
-
-Gracias por depositar en tu bóveda. ¡Tus ${m.moneda} están seguros con nosotros! 💼✨
-`.trim()
-
-  try {
-    const responseImg = await axios.get(imgUrl, { responseType: 'arraybuffer' })
-    await conn.sendFile(m.chat, responseImg.data, 'deposito.jpg', message, m)
-  } catch {
-    await conn.reply(m.chat, message, m)
-  }
+  return m.reply(`🏦 *Depósito Realizado* 🏦\n\n💰 *Cantidad Depositada:* ${cantidad.toLocaleString()} ${m.moneda}\n👤 *Saldo en la Bóveda:* ${user.bank.toLocaleString()} ${m.moneda}\n\nGracias por depositar en tu bóveda. ¡Tu oro está seguro con nosotros! 💼✨`)
 }
 
-handler.help = ['depositar <cantidad>', 'depositar all']
+handler.help = ['depositar <cantidad|all>']
 handler.tags = ['economy']
-handler.command = ['depositar', 'deposit', 'dep', 'd', 'aguardar']
+handler.command = ['depositar', 'dep', 'deposit', 'd']
 handler.group = true
 handler.register = true
 
