@@ -9,8 +9,8 @@ import failureHandler from './lib/respuesta.js';
 import Pino from "pino";
 
 /**
- * @type {import("@whiskeysockets/baileys")}
- */
+* @type {import("@whiskeysockets/baileys")}
+*/
 const isNumber = (x) => typeof x === "number" && !isNaN(x);
 const delay = (ms) =>
 isNumber(ms) &&
@@ -21,12 +21,12 @@ resolve();
 }, ms),
 );
 
-const cleanJid = jid => jid?.split(':')[0] || '';
-const normalizeJid = jid => jid?.replace(/[^0-9]/g, '');
+// Se elimina la función cleanJid y normalizeJid que ya no son necesarias
+// con el nuevo método más robusto.
 
 /**
- * Manejo principal del mensaje
- */
+* Manejo principal del mensaje
+*/
 const { getAggregateVotesInPollMessage, makeInMemoryStore } = await (
 await import("@whiskeysockets/baileys")
 ).default;
@@ -47,28 +47,28 @@ try {
 m = smsg(this, m) || m;
 if (!m) return;
 
-// --- INICIO DE LA LÓGICA DEL BOT PRIMARIO CON EXCEPCIÓN ---
 const chatDB = global.db.data.chats[m.chat];
 if (chatDB && chatDB.botPrimario) {
-// Lista de palabras universales que TODOS los bots deben obedecer
 const universalWords = ['resetbot', 'resetprimario', 'botreset'];
 const firstWord = m.text ? m.text.trim().split(' ')[0].toLowerCase() : '';
 
-// Si el mensaje NO comienza con una de las palabras universales, aplicamos la regla.
 if (!universalWords.includes(firstWord)) {
 if (chatDB.botPrimario !== this.user.jid) {
-return; // Silencia al bot si no es el primario.
+return;
 }
 }
 }
-// --- FIN DE LA LÓGICA ---
 
 m.exp = 0;
 m.credit = false;
 m.bank = false;
 m.chicken = false;
 
-let jid = cleanJid(m.sender);
+// ====================================================================
+// CORRECCIÓN #1: OBTENEMOS EL ID DEL USUARIO (JID) DE FORMA FIABLE
+// Este es el método robusto que funciona con @jid y @lid
+// ====================================================================
+const jid = m.isGroup ? (m.key.participant ? m.key.participant : m.sender) : m.key.remoteJid;
 
 let user = global.db.data.users[jid];
 if (typeof user !== "object") {
@@ -133,7 +133,7 @@ if (!("viewStory" in chat)) chat.viewStory = false;
 if (!("welcome" in chat)) chat.welcome = true;
 if (!("chatbot" in chat)) chat.chatbot = false;
 if (!isNumber(chat.expired)) chat.expired = 0;
-if (!("botPrimario" in chat)) chat.botPrimario = null; // <-- CAMBIO APLICADO
+if (!("botPrimario" in chat)) chat.botPrimario = null;
 } else
 global.db.data.chats[m.chat] = {
 antiDelete: true,
@@ -156,7 +156,7 @@ viewOnce: false,
 viewStory: false,
 welcome: false,
 chatbot: false,
-botPrimario: null, // <-- CAMBIO APLICADO
+botPrimario: null,
 };
 
 let settings = global.db.data.settings[this.user.jid];
@@ -168,7 +168,7 @@ if (!("autoread" in settings)) settings.autoread = false;
 if (!("restrict" in settings)) settings.restrict = false;
 if (!("restartDB" in settings)) settings.restartDB = 0;
 if (!("status" in settings)) settings.status = 0;
-if (!('moneda' in settings)) settings.moneda = 'Oro'; // <-- CAMBIO APLICADO
+if (!('moneda' in settings)) settings.moneda = 'Oro';
 } else
 global.db.data.settings[this.user.jid] = {
 self: false,
@@ -176,7 +176,7 @@ autoread: false,
 restrict: false,
 restartDB: 0,
 status: 0,
-moneda: 'Oro', // <-- CAMBIO APLICADO
+moneda: 'Oro',
 };
 
 if (opts["nyimak"]) return;
@@ -185,21 +185,14 @@ if (opts["gconly"] && !m.chat.endsWith("g.us")) return;
 if (opts["swonly"] && m.chat !== "status@broadcast") return;
 if (typeof m.text !== "string") m.text = "";
 
-const senderNum = normalizeJid(jid);
-const isROwner = [
-cleanJid(conn.decodeJid(global.conn.user.id)),
-...global.owner.map(([number]) => number),
-].map(v => normalizeJid(v)).includes(senderNum);
+const senderNum = jid.split('@')[0]; // Usamos el jid fiable
+const isROwner = [...global.owner.map(([number]) => number), this.user.jid.split('@')[0]].includes(senderNum);
 const isOwner = isROwner || m.fromMe;
-const isMods = isOwner ||
-global.mods.map(v => normalizeJid(v)).includes(senderNum);
-const isPrems = isROwner ||
-global.prems.map(v => normalizeJid(v)).includes(senderNum);
+const isMods = isOwner || global.mods.map(v => v.replace(/[^0-9]/g, '')).includes(senderNum);
+const isPrems = isROwner || global.prems.map(v => v.replace(/[^0-9]/g, '')).includes(senderNum) || (user && user.premium);
 
-// --- INICIO DE LA LÓGICA DE LA MONEDA ---
 const moneda = global.db.data.settings[this.user.jid]?.moneda || 'Oro';
 m.moneda = moneda;
-// --- FIN DE LA LÓGICA DE LA MONEDA ---
 
 if (opts["queque"] && m.text && !(isMods || isPrems)) {
 let queque = this.msgqueque,
@@ -224,24 +217,18 @@ m.exp += Math.ceil(Math.random() * 10);
 let usedPrefix;
 let _user = global.db.data.users[jid];
 
-const groupMetadata =
-(m.isGroup
-? (conn.chats[m.chat] || {}).metadata ||
-(await this.groupMetadata(m.chat).catch((_) => null))
-: {}) || {};
-const participants = (m.isGroup ? groupMetadata.participants : []) || [];
-const groupUser =
-(m.isGroup
-? participants.find(u => normalizeJid(cleanJid(u.id)) === senderNum)
-: {}) || {};
-const botNums = [this.user.jid, this.user.lid].map(j => normalizeJid(cleanJid(j)));
-const bot =
-(m.isGroup
-? participants.find(u => botNums.includes(normalizeJid(cleanJid(u.id))))
-: {}) || {};
-const isRAdmin = groupUser?.admin == "superadmin" || false;
-const isAdmin = isRAdmin || groupUser?.admin == "admin" || false;
-const isBotAdmin = bot?.admin || false;
+// ====================================================================
+// CORRECCIÓN #2: LÓGICA DE ADMINISTRADORES MODERNA Y ROBUSTA
+// Este bloque reemplaza el antiguo. Usa decodeJid para funcionar siempre.
+// ====================================================================
+const groupMetadata = m.isGroup ? { ...(this.chats[m.chat]?.metadata || await this.groupMetadata(m.chat).catch(_ => null) || {}), ...(((this.chats[m.chat]?.metadata || await this.groupMetadata(m.chat).catch(_ => null) || {}).participants) && { participants: ((this.chats[m.chat]?.metadata || await this.groupMetadata(m.chat).catch(_ => null) || {}).participants || []).map(p => ({ ...p, id: p.jid, jid: p.jid, lid: p.lid })) }) } : {}
+const participants = ((m.isGroup ? groupMetadata.participants : []) || []).map(participant => ({ id: participant.jid, jid: participant.jid, lid: participant.lid, admin: participant.admin }))
+const userGroup = (m.isGroup ? participants.find((u) => this.decodeJid(u.jid) === jid) : {}) || {}
+const botGroup = (m.isGroup ? participants.find((u) => this.decodeJid(u.jid) == this.user.jid) : {}) || {}
+const isRAdmin = userGroup?.admin == "superadmin" || false
+const isAdmin = isRAdmin || userGroup?.admin == "admin" || false
+const isBotAdmin = botGroup?.admin || false
+// ====================================================================
 
 const ___dirname = path.join(
 path.dirname(fileURLToPath(import.meta.url)),
@@ -264,10 +251,10 @@ console.error(e);
 for (let [jid] of global.owner.filter(
 ([number, _, isDeveloper]) => isDeveloper && number,
 )) {
-let data = (await conn.onWhatsApp(jid))[0] || {};
+let data = (await this.onWhatsApp(jid))[0] || {};
 if (data.exists)
 m.reply(
-`*🗂️ Plugin:* ${name}\n*👤 Sender:* ${m.sender}\n*💬 Chat:* ${m.chat}\n*💻 Command:* ${m.text}\n\n\${format(e)}`.trim(),
+`*🗂️ Plugin:* ${name}\n*👤 Sender:* ${m.sender}\n*💬 Chat:* ${m.chat}\n*💻 Command:* ${m.text}\n\n${format(e)}`.trim(),
 data.jid,
 );
 }
@@ -280,8 +267,8 @@ continue;
 const str2Regex = (str) => str.replace(/[|\\{}()[\]^$+*?.]/g, "\\$&");
 let _prefix = plugin.customPrefix
 ? plugin.customPrefix
-: conn.prefix
-? conn.prefix
+: this.prefix
+? this.prefix
 : global.prefix;
 let match = (
 _prefix instanceof RegExp
@@ -310,8 +297,8 @@ match,
 conn: this,
 participants,
 groupMetadata,
-user: groupUser,
-bot,
+user: userGroup, // Se pasa el userGroup que encontramos
+bot: botGroup, // Se pasa el botGroup que encontramos
 isROwner,
 isOwner,
 isRAdmin,
@@ -426,8 +413,8 @@ text,
 conn: this,
 participants,
 groupMetadata,
-user: groupUser,
-bot,
+user: userGroup, // Pasamos el userGroup correcto
+bot: botGroup, // Pasamos el botGroup correcto
 isROwner,
 isOwner,
 isRAdmin,
@@ -469,7 +456,7 @@ await plugin.after.call(this, m, extra);
 console.error(e);
 }
 }
-if (m.credit) m.reply(`Gastaste *${+m.credit} ${m.moneda}*`); // <-- CAMBIO APLICADO
+if (m.credit) m.reply(`Gastaste *${+m.credit} ${m.moneda}*`);
 }
 break;
 }
@@ -483,7 +470,6 @@ if (quequeIndex !== -1) this.msgqueque.splice(quequeIndex, 1);
 }
 let user,
 stats = global.db.data.stats;
-let jid = cleanJid(m?.sender);
 if (m && jid && (user = global.db.data.users[jid])) {
 user.exp += m.exp;
 user.credit -= m.credit * 1;
