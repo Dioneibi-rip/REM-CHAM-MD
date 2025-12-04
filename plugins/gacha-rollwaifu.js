@@ -34,7 +34,7 @@ const message = `╭━━⊰ 𝑷𝑬𝑹𝑺𝑶𝑵𝑨𝑱𝑬 𝑹𝑨𝑵�
 ┃ ✦ *ᴠᴀʟᴏʀ*: *${randomCharacter.value}*
 ┃ ✦ *ᴇsᴛᴀᴅᴏ*: ${statusMessage}
 ┃ ✦ *ғᴜᴇɴᴛᴇ*: *${randomCharacter.source}*
-┃ ✦ ɪ́ᴅ: *${character.id}*
+┃ ✦ ɪ́ᴅ: *${randomCharacter.id}*
 ╰━━━━━━━━━━━━━━━━━━━`
 const mentions = statusMessage.startsWith('Reclamado por') ? [randomCharacter.user] : []
 await conn.sendFile(m.chat, randomImage, `${randomCharacter.name}.jpg`, message, m, { mentions })
