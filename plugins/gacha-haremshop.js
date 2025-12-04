@@ -55,7 +55,7 @@ let handler = async (m, { conn, args }) => {
       }
 
       texto += `✰ ${inicio + i + 1} » *${name}* (*${valorOriginal.toLocaleString()})*\n`;
-      texto += `  🛒 Precio de venta: *¥${(precio || 0).toLocaleString()} ${moneda}*\n`;
+      texto += `  🛒 Precio de venta: *¥${(precio || 0).toLocaleString()} ${m.moneda}*\n`;
       texto += `  🆔 ID: *${idPersonaje}*\n`;
       texto += `  👤 Vendedor: ${username}\n`;
       texto += `  📅 Publicado: ${formatoFecha(fecha)}\n\n`;

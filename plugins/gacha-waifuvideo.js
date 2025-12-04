@@ -3,6 +3,21 @@ import { promises as fs } from 'fs'
 const charactersFilePath = './src/database/characters.json'
 const haremFilePath = './src/database/harem.json'
 
+// Función para corregir enlaces rotos o indirectos
+function formatUrl(url) {
+    if (!url) return url
+    
+    // 1. Corregir enlaces de GitHub que apuntan al visor web (/blob/) en lugar del archivo raw
+    if (url.includes('github.com') && url.includes('/blob/')) {
+        return url.replace('github.com', 'raw.githubusercontent.com').replace('/blob/', '/')
+    }
+    
+    // 2. Corregir enlaces de Tenor que a veces dan problemas si no terminan en extensión de archivo
+    // (Opcional, pero ayuda si usas la API de tenor, aunque aquí asumimos enlaces directos)
+    
+    return url.trim()
+}
+
 async function loadCharacters() {
     try {
         const data = await fs.readFile(charactersFilePath, 'utf-8')
@@ -31,6 +46,7 @@ let handler = async (m, { conn, command, args }) => {
 
     try {
         const characters = await loadCharacters()
+        // Buscamos el personaje (convirtiendo ambos a minúsculas para evitar errores)
         const character = characters.find(c => c.name.toLowerCase() === characterName)
 
         if (!character) {
@@ -43,20 +59,35 @@ let handler = async (m, { conn, command, args }) => {
             return
         }
 
-        const randomVideo = character.vid[Math.floor(Math.random() * character.vid.length)]
+        // Seleccionar video al azar
+        let randomVideo = character.vid[Math.floor(Math.random() * character.vid.length)]
+        
+        // --- PASO CRITICO: LIMPIEZA DE URL ---
+        const cleanUrl = formatUrl(randomVideo)
+
         const message = `❀ Nombre » *${character.name}*
 ⚥ Género » *${character.gender}*
 ❖ Fuente » *${character.source}*`
 
-        const sendAsGif = Math.random() < 0.5
+        // --- LÓGICA DE DETECCIÓN DE TIPO ---
+        // Si el link termina en .gif o viene de Tenor/Pinterest y parece un gif, forzamos gifPlayback
+        const isGif = cleanUrl.endsWith('.gif') || 
+                      cleanUrl.includes('.gif') || 
+                      cleanUrl.includes('tenor.com') ||
+                      cleanUrl.includes('pinimg.com') 
 
-        if (sendAsGif) {
-            conn.sendMessage(m.chat, { video: { url: randomVideo }, gifPlayback: true, caption: message }, { quoted: m })
-        } else {
-            conn.sendMessage(m.chat, { video: { url: randomVideo }, caption: message }, { quoted: m })
-        }
+        // Enviamos el mensaje
+        await conn.sendMessage(m.chat, { 
+            video: { url: cleanUrl }, 
+            caption: message,
+            // Si es un GIF, OBLIGAMOS gifPlayback: true. Si es MP4, lo dejamos opcional o false.
+            // Esto soluciona el error de "falla en reproducción" en archivos .gif
+            gifPlayback: isGif 
+        }, { quoted: m })
+
     } catch (error) {
-        await conn.reply(m.chat, `✘ Error al cargar el video del personaje: ${error.message}`, m)
+        console.error(error) // Útil para ver el error real en la consola
+        await conn.reply(m.chat, `✘ Error al cargar el video del personaje. Verifica que los enlaces en el JSON sean directos (raw).`, m)
     }
 }
 

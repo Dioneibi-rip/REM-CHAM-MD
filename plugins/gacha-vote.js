@@ -37,16 +37,17 @@ async function saveHarem(harem) {
     }
 }
 
-let cooldowns = new Map();
+export let cooldowns = new Map();
+export const voteCooldownTime = 1 * 60 * 60 * 1000; // 1 hora
+
 let characterVotes = new Map();
 
 let handler = async (m, { conn, args }) => {
     try {
         const userId = m.sender;
-        const cooldownTime = 1 * 60 * 60 * 1000;
-
+        
         if (cooldowns.has(userId)) {
-            const expirationTime = cooldowns.get(userId) + cooldownTime;
+            const expirationTime = cooldowns.get(userId) + voteCooldownTime;
             const now = Date.now();
             if (now < expirationTime) {
                 const timeLeft = expirationTime - now;
@@ -84,27 +85,27 @@ let handler = async (m, { conn, args }) => {
 
         const incrementValue = Math.floor(Math.random() * 10) + 1;
         character.value = String(Number(character.value) + incrementValue);
-        character.votes += 1;
+        character.votes = (character.votes || 0) + 1;
         await saveCharacters(characters);
 
         const harem = await loadHarem();
         const userEntry = harem.find(entry => entry.userId === userId && entry.characterId === character.id);
-
+        
         if (!userEntry) {
             harem.push({
                 userId: userId,
                 characterId: character.id,
                 lastVoteTime: Date.now(),
-                voteCooldown: Date.now() + cooldownTime
+                voteCooldown: Date.now() + voteCooldownTime
             });
         } else {
             userEntry.lastVoteTime = Date.now();
-            userEntry.voteCooldown = Date.now() + cooldownTime;
+            userEntry.voteCooldown = Date.now() + voteCooldownTime;
         }
         await saveHarem(harem);
-
+        
         cooldowns.set(userId, Date.now());
-        characterVotes.set(originalCharacterName, Date.now() + cooldownTime);
+        characterVotes.set(originalCharacterName, Date.now() + voteCooldownTime);
 
         await conn.reply(m.chat, `✰ Votaste por el personaje *${originalCharacterName}*\n> Su nuevo valor es *${character.value}* (incrementado en *${incrementValue}*)\n> Total de votos: *${character.votes}*`, m);
     } catch (e) {
