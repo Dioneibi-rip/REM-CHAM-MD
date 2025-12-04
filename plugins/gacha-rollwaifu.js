@@ -29,11 +29,11 @@ if (!randomCharacter.user) {
 global.activeRolls[randomCharacter.id] = { user: userId, time: Date.now() }
 }
 const message = `╭━━⊰ 𝑷𝑬𝑹𝑺𝑶𝑵𝑨𝑱𝑬 𝑹𝑨𝑵𝑫𝑶𝑴 ⊱━━
-┃ ✦ *ɴᴏᴍʙʀᴇ*: *${character.name}*
-┃ ✦ *ɢᴇ́ɴᴇʀᴏ*: *${character.gender}*
-┃ ✦ *ᴠᴀʟᴏʀ*: *${character.value}*
-┃ ✦ *ᴇsᴛᴀᴅᴏ*: ${claimedBy}
-┃ ✦ *ғᴜᴇɴᴛᴇ*: *${character.source}*
+┃ ✦ *ɴᴏᴍʙʀᴇ*: *${randomCharacter.name}*
+┃ ✦ *ɢᴇ́ɴᴇʀᴏ*: *${randomCharacter.gender}*
+┃ ✦ *ᴠᴀʟᴏʀ*: *${randomCharacter.value}*
+┃ ✦ *ᴇsᴛᴀᴅᴏ*: ${statusMessage}
+┃ ✦ *ғᴜᴇɴᴛᴇ*: *${randomCharacter.source}*
 ┃ ✦ ɪ́ᴅ: *${character.id}*
 ╰━━━━━━━━━━━━━━━━━━━`
 const mentions = statusMessage.startsWith('Reclamado por') ? [randomCharacter.user] : []
