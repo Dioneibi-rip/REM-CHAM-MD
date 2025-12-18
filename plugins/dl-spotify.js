@@ -14,7 +14,7 @@ ${usedPrefix + command} https://open.spotify.com/track/30SdJAyFsYxAMBfJmNNPqI`
   try {
     const query = args.join(" ")
 
-    /* ========= PASO 1: BUSCAR CANCIÓN ========= */
+    /* ===== PASO 1: BUSCAR ===== */
     const searchRes = await fetch(
       `https://spotdown.org/api/song-details?url=${encodeURIComponent(query)}`,
       { headers: { accept: "application/json" } }
@@ -26,13 +26,11 @@ ${usedPrefix + command} https://open.spotify.com/track/30SdJAyFsYxAMBfJmNNPqI`
       )
 
     const searchData = await searchRes.json()
-
-    if (!searchData.songs || !searchData.songs.length)
+    if (!searchData.songs?.length)
       throw new Error("No se encontraron canciones")
 
     const song = searchData.songs[0]
 
-    /* ========= INFO ========= */
     await conn.sendMessage(
       m.chat,
       {
@@ -48,14 +46,20 @@ ${usedPrefix + command} https://open.spotify.com/track/30SdJAyFsYxAMBfJmNNPqI`
       { quoted: m }
     )
 
-    const downloadRes = await fetch("https://spotdown.org/api/download", {
-      method: "POST",
-      headers: {
-        accept: "application/json, text/plain, */*",
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({ url: song.url }),
-    })
+    /* ===== PASO 2: DESCARGA (FIX) ===== */
+    const body = new URLSearchParams({ url: song.url }).toString()
+
+    const downloadRes = await fetch(
+      "https://spotdown.org/api/download",
+      {
+        method: "POST",
+        headers: {
+          accept: "*/*",
+          "content-type": "application/x-www-form-urlencoded;charset=UTF-8",
+        },
+        body,
+      }
+    )
 
     if (!downloadRes.ok || !downloadRes.body)
       throw new Error(
@@ -64,6 +68,7 @@ ${usedPrefix + command} https://open.spotify.com/track/30SdJAyFsYxAMBfJmNNPqI`
 
     const buffer = Buffer.from(await downloadRes.arrayBuffer())
 
+    /* ===== ENVIAR MP3 ===== */
     await conn.sendFile(
       m.chat,
       buffer,
