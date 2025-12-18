@@ -1,64 +1,87 @@
-import axios from 'axios';
+import axios from 'axios'
 
 const isValidYouTubeUrl = (url) => {
-  return /^https?:\/\/(www\.)?(youtube\.com|youtu\.be)\/.+$/.test(url);
-};
+  return /^https?:\/\/(www\.)?(youtube\.com|youtu\.be)\/.+$/.test(url)
+}
 
 let handler = async (m, { conn, args, usedPrefix, command }) => {
-  const emoji = '💙';
-  const loading = '⏳';
-  const successEmoji = '✅';
-  const errorEmoji = '❌';
+  const loading = '⏳'
+  const success = '✅'
+  const error = '❌'
 
   if (!args[0]) {
     return m.reply(
-      `${emoji} ᴘᴏʀ ғᴀᴠᴏʀ, ɪɴɢʀᴇsᴀ ᴜɴ ᴇɴʟᴀᴄᴇ ᴅᴇ *YᴏᴜTᴜʙᴇ*.\n\n*Ejemplo:* ${usedPrefix + command} https://youtube.com/watch?v=dQw4w9WgXcQ`
-    );
+      `💙 Ingresa un enlace de *YouTube*\n\nEjemplo:\n${usedPrefix + command} https://youtu.be/dQw4w9WgXcQ`
+    )
   }
 
   if (!isValidYouTubeUrl(args[0])) {
-    return m.reply(`${emoji} ᴇʟ ᴇɴʟᴀᴄᴇ ɴᴏ ᴘᴀʀᴇᴄᴇ sᴇʀ ᴠᴀ́ʟɪᴅᴏ ᴅᴇ YᴏᴜTᴜʙᴇ 💙`);
+    return m.reply('❌ El enlace no es válido de YouTube')
   }
 
   try {
-    await m.react(loading);
+    await m.react(loading)
 
-    const ytURL = encodeURIComponent(args[0]);
-    const apiURL = `https://ruby-core.vercel.app/api/download/youtube/mp3?url=${ytURL}`;
+    /* ================= SCRAPER CLIPTO ================= */
+    const res = await axios.post(
+      'https://www.clipto.com/api/youtube',
+      { url: args[0] },
+      {
+        headers: {
+          'Accept': 'application/json, text/plain, */*',
+          'Content-Type': 'application/json'
+        }
+      }
+    )
 
-    const { data } = await axios.get(apiURL);
-
-    if (!data.status || !data.download?.url) {
-      throw new Error('La API no devolvió un enlace válido de audio.');
+    if (!res.data || res.data.success !== true) {
+      throw new Error('Respuesta inválida de Clipto')
     }
 
-    const title = data.metadata?.title || "audio";
-    const audioUrl = data.download.url;
+    const medias = res.data.medias || []
+
+    const audio = medias
+      .filter(m =>
+        m.type === 'audio' &&
+        ['m4a', 'mp3', 'opus'].includes(m.ext)
+      )
+      .sort((a, b) => (b.bitrate || 0) - (a.bitrate || 0))[0]
+
+    if (!audio) {
+      throw new Error('No se encontró audio válido')
+    }
+    /* =================================================== */
+
+    const title = res.data.title || 'audio'
+    const audioUrl = audio.url
+    const ext = audio.ext
 
     await conn.sendMessage(
       m.chat,
       {
         audio: { url: audioUrl },
-        mimetype: 'audio/mpeg',
-        fileName: `${title}.mp3`,
+        mimetype: ext === 'opus'
+          ? 'audio/ogg; codecs=opus'
+          : 'audio/mpeg',
+        fileName: `${title}.${ext}`,
         caption: `🎵 *${title}*`,
         ptt: true
       },
       { quoted: m }
-    );
+    )
 
-    await m.react(successEmoji);
+    await m.react(success)
 
   } catch (err) {
-    console.error(err);
-    await m.react(errorEmoji);
-    m.reply(`❌ ᴏᴄᴜʀʀɪᴏ́ ᴜɴ ᴇʀʀᴏʀ:\n${err.message || err}`);
+    console.error(err)
+    await m.react(error)
+    m.reply(`❌ Error al descargar audio:\n${err.message}`)
   }
-};
+}
 
-handler.help = ['ytmp3 <url>'];
-handler.tags = ['downloader'];
-handler.command = ['ytmp3', 'ytaudio', 'mp3'];
-handler.limit = 1;
+handler.help = ['ytmp3 <url>']
+handler.tags = ['downloader']
+handler.command = ['ytmp3', 'ytaudio', 'mp3']
+handler.limit = 1
 
-export default handler;
+export default handler
