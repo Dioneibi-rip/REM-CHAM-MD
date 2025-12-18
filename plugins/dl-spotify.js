@@ -14,77 +14,81 @@ ${usedPrefix + command} https://open.spotify.com/track/30SdJAyFsYxAMBfJmNNPqI`
   try {
     const url = args[0]
     if (!/open\.spotify\.com/.test(url))
-      throw "❌ Enlace de Spotify inválido"
+      throw new Error("URL de Spotify inválida")
 
-    const infoRes = await axios.get(
-      `https://api.fabdl.com/spotify/get?url=${encodeURIComponent(url)}`,
-      {
-        headers: {
-          accept: "application/json, text/plain, */*",
-          referer: "https://spotifydownload.org/",
-          "user-agent":
-            "Mozilla/5.0 (Linux; Android 10) AppleWebKit/537.36 Chrome/116.0.0.0 Mobile Safari/537.36",
-        },
-      }
-    )
-
-    const { result } = infoRes.data
-    if (!result) throw "❌ No se pudo obtener información"
-
-    const trackId =
-      result.type === "album" ? result.tracks[0].id : result.id
-
-    const convertRes = await axios.get(
-      `https://api.fabdl.com/spotify/mp3-convert-task/${result.gid}/${trackId}`,
-      { headers: { accept: "application/json" } }
-    )
-
-    const tid = convertRes.data?.result?.tid
-    if (!tid) throw "❌ Error al iniciar conversión"
-
-    let downloadUrl, status
-    for (let i = 0; i < 10; i++) {
-      const progress = await axios.get(
-        `https://api.fabdl.com/spotify/mp3-convert-progress/${tid}`,
+    /* ===== PASO 1: INFO ===== */
+    let infoRes
+    try {
+      infoRes = await axios.get(
+        `https://api.fabdl.com/spotify/get?url=${encodeURIComponent(url)}`,
         { headers: { accept: "application/json" } }
       )
+    } catch (e) {
+      throw new Error(
+        `Fallo al obtener info del track\n` +
+        `Status: ${e.response?.status}\n` +
+        `Respuesta: ${JSON.stringify(e.response?.data)}`
+      )
+    }
 
-      status = progress.data.result.status
+    const { result } = infoRes.data || {}
+    if (!result) throw new Error("La API no devolvió datos del track")
+
+    const trackId =
+      result.type === "album" ? result.tracks[0]?.id : result.id
+    if (!trackId) throw new Error("No se pudo obtener el ID del track")
+
+    /* ===== PASO 2: CONVERSIÓN ===== */
+    let convertRes
+    try {
+      convertRes = await axios.get(
+        `https://api.fabdl.com/spotify/mp3-convert-task/${result.gid}/${trackId}`
+      )
+    } catch (e) {
+      throw new Error(
+        `Fallo al iniciar conversión MP3\n` +
+        `Status: ${e.response?.status}\n` +
+        `Respuesta: ${JSON.stringify(e.response?.data)}`
+      )
+    }
+
+    const tid = convertRes.data?.result?.tid
+    if (!tid) throw new Error("La API no devolvió el TID")
+
+    /* ===== PASO 3: PROGRESO ===== */
+    let downloadUrl
+    for (let i = 0; i < 10; i++) {
+      let progressRes
+      try {
+        progressRes = await axios.get(
+          `https://api.fabdl.com/spotify/mp3-convert-progress/${tid}`
+        )
+      } catch (e) {
+        throw new Error(
+          `Error consultando progreso\n` +
+          `Status: ${e.response?.status}\n` +
+          `Respuesta: ${JSON.stringify(e.response?.data)}`
+        )
+      }
+
+      const status = progressRes.data?.result?.status
       if (status === "finished") {
         downloadUrl =
           "https://api.fabdl.com" +
-          progress.data.result.download_url
+          progressRes.data.result.download_url
         break
       }
+
+      if (status === "error")
+        throw new Error("La conversión falló en el servidor")
 
       await new Promise(r => setTimeout(r, 1500))
     }
 
     if (!downloadUrl)
-      throw "❌ No se pudo generar el archivo MP3"
+      throw new Error("Tiempo de espera agotado al convertir el audio")
 
-    const durationMs =
-      result.type === "album"
-        ? result.tracks[0].duration_ms
-        : result.duration_ms
-
-    const duration = new Date(durationMs).toISOString().substr(14, 5)
-
-    await conn.sendMessage(
-      m.chat,
-      {
-        image: { url: result.image },
-        caption:
-`╭─❏ *DESCARGA SPOTIFY 🎵*
-│🎶 *Título:* ${result.name}
-│👤 *Artista:* ${result.artists}
-│⏱ *Duración:* ${duration}
-│🔗 *Link:* ${url}
-╰─────────────❏`,
-      },
-      { quoted: m }
-    )
-
+    /* ===== ENVÍO ===== */
     await conn.sendFile(
       m.chat,
       downloadUrl,
@@ -92,13 +96,14 @@ ${usedPrefix + command} https://open.spotify.com/track/30SdJAyFsYxAMBfJmNNPqI`
       `🎧 ${result.name}`,
       m
     )
-  } catch (e) {
-    console.error(e)
-    m.reply(
-      typeof e === "string"
-        ? e
-        : "❌ Error al descargar desde Spotify"
-    )
+
+  } catch (err) {
+    console.error("SPOTIFY ERROR:", err)
+
+    let msg = "❌ Error desconocido"
+    if (err instanceof Error) msg = `❌ *ERROR SPOTIFY*\n\n${err.message}`
+
+    m.reply(msg)
   }
 }
 
