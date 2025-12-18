@@ -8,7 +8,6 @@ const handler = async (m, { conn, text, command, usedPrefix }) => {
     )
 
   try {
-    /* ================= SCRAPPER ================= */
     const validUrl = /(?:https?:\/\/(web\.|www\.|m\.)?(facebook|fb)\.(com|watch)\S+)?$/
     if (!validUrl.test(text)) throw "❌ URL de Facebook inválida"
 
@@ -59,13 +58,11 @@ const handler = async (m, { conn, text, command, usedPrefix }) => {
     if (!downloads.length)
       throw "❌ No se encontraron enlaces de descarga"
 
-    /* =============== SELECCIÓN ================= */
     const selected =
       downloads.find(v => v.resolution === "HD" && v.format === "mp4") ||
       downloads.find(v => v.format === "mp4") ||
       downloads[0]
 
-    /* ================= RESPUESTA ================= */
     const caption = `
 ╭───────⊷
 │👑 *FACEBOOK*
