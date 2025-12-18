@@ -1,4 +1,4 @@
-import axios from "axios"
+import fetch from "node-fetch"
 
 const handler = async (m, { conn, args, usedPrefix, command }) => {
   if (!args[0]) {
@@ -12,131 +12,78 @@ ${usedPrefix + command} https://open.spotify.com/track/30SdJAyFsYxAMBfJmNNPqI`
   }
 
   try {
-    const url = args[0]
-    if (!/open\.spotify\.com/.test(url))
-      throw new Error("El enlace no pertenece a Spotify")
+    const query = args.join(" ")
 
-    /* ====== PASO 1: OBTENER INFO ====== */
-    let infoRes
-    try {
-      infoRes = await axios.get(
-        `https://api.fabdl.com/spotify/get?url=${encodeURIComponent(url)}`,
-        { timeout: 20000 }
-      )
-    } catch (e) {
+    /* ========= PASO 1: BUSCAR CANCIÓN ========= */
+    const searchRes = await fetch(
+      `https://spotdown.org/api/song-details?url=${encodeURIComponent(query)}`,
+      { headers: { accept: "application/json" } }
+    )
+
+    if (!searchRes.ok)
       throw new Error(
-        `Fallo al obtener información del track\n${e.response?.status || ""} ${e.response?.statusText || e.message}`
+        `song-details falló (${searchRes.status} ${searchRes.statusText})`
       )
-    }
 
-    const result = infoRes?.data?.result
-    if (!result)
-      throw new Error("La API no devolvió información del track")
+    const searchData = await searchRes.json()
 
-    const trackId =
-      result.type === "album" ? result.tracks?.[0]?.id : result.id
+    if (!searchData.songs || !searchData.songs.length)
+      throw new Error("No se encontraron canciones")
 
-    if (!trackId)
-      throw new Error("No se pudo obtener el ID del track")
+    const song = searchData.songs[0]
 
-    /* ====== PASO 2: CONVERTIR A MP3 ====== */
-    let convertRes
-    try {
-      convertRes = await axios.get(
-        `https://api.fabdl.com/spotify/mp3-convert-task/${result.gid}/${trackId}`,
-        { timeout: 20000 }
-      )
-    } catch (e) {
-      throw new Error(
-        `Fallo al iniciar la conversión MP3\n${e.response?.status || ""} ${e.response?.statusText || e.message}`
-      )
-    }
-
-    const tid = convertRes?.data?.result?.tid
-    if (!tid)
-      throw new Error("La conversión no devolvió un TID válido")
-
-    /* ====== PASO 3: PROGRESO ====== */
-    let downloadUrl = null
-    let status = null
-
-    for (let i = 0; i < 10; i++) {
-      try {
-        const progressRes = await axios.get(
-          `https://api.fabdl.com/spotify/mp3-convert-progress/${tid}`,
-          { timeout: 20000 }
-        )
-
-        status = progressRes?.data?.result?.status
-
-        if (status === "finished") {
-          downloadUrl =
-            "https://api.fabdl.com" +
-            progressRes.data.result.download_url
-          break
-        }
-      } catch (e) {
-        throw new Error(
-          `Error al consultar progreso de conversión\n${e.response?.status || ""} ${e.response?.statusText || e.message}`
-        )
-      }
-
-      await new Promise(r => setTimeout(r, 1500))
-    }
-
-    if (!downloadUrl)
-      throw new Error(`La conversión no finalizó (estado: ${status})`)
-
-    /* ====== INFO ====== */
-    const durationMs =
-      result.type === "album"
-        ? result.tracks?.[0]?.duration_ms
-        : result.duration_ms
-
-    const duration = durationMs
-      ? new Date(durationMs).toISOString().substr(14, 5)
-      : "Desconocida"
-
+    /* ========= INFO ========= */
     await conn.sendMessage(
       m.chat,
       {
-        image: { url: result.image },
         caption:
 `╭─❏ *SPOTIFY 🎵*
-│🎶 *Título:* ${result.name}
-│👤 *Artista:* ${result.artists}
-│⏱ *Duración:* ${duration}
-│🔗 *Link:* ${url}
-╰─────────────❏`,
+│🎶 *Título:* ${song.title}
+│👤 *Artista:* ${song.artist}
+│⏱ *Duración:* ${song.duration || "Desconocida"}
+│🔗 *Link:* ${song.url}
+╰─────────────❏
+> ⏬ Descargando audio...`,
       },
       { quoted: m }
     )
 
-    /* ====== ENVÍO MP3 ====== */
+    const downloadRes = await fetch("https://spotdown.org/api/download", {
+      method: "POST",
+      headers: {
+        accept: "application/json, text/plain, */*",
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({ url: song.url }),
+    })
+
+    if (!downloadRes.ok || !downloadRes.body)
+      throw new Error(
+        `download falló (${downloadRes.status} ${downloadRes.statusText})`
+      )
+
+    const buffer = Buffer.from(await downloadRes.arrayBuffer())
+
     await conn.sendFile(
       m.chat,
-      downloadUrl,
-      `${result.name}.mp3`,
-      `🎧 ${result.name}`,
+      buffer,
+      `${song.title}.mp3`,
+      `🎧 ${song.title} - ${song.artist}`,
       m
     )
   } catch (err) {
     console.error(err)
 
-    let errorMsg = "❌ Error desconocido"
+    let msg = "❌ Error desconocido"
+    if (err instanceof Error) msg = `❌ *Spotify Error*\n${err.message}`
+    if (typeof err === "string") msg = `❌ *Spotify Error*\n${err}`
 
-    if (err instanceof Error) {
-      errorMsg = `❌ *Error Spotify*\n${err.message}`
-    } else if (typeof err === "string") {
-      errorMsg = `❌ *Error Spotify*\n${err}`
-    }
-
-    m.reply(errorMsg)
+    m.reply(msg)
   }
 }
 
 handler.command = /^spotify$/i
-handler.help = ["spotify <url>"]
+handler.help = ["spotify <url | nombre>"]
 handler.tags = ["downloader"]
 
 export default handler
