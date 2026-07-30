@@ -11,7 +11,8 @@ Contenido adaptado por:
 - elrebelde21 >> https://github.com/elrebelde21
 */
 
-const { useMultiFileAuthState, DisconnectReason, makeCacheableSignalKeyStore, fetchLatestBaileysVersion} = (await import("@whiskeysockets/baileys"));
+const { DisconnectReason, makeCacheableSignalKeyStore, fetchLatestBaileysVersion} = (await import("@whiskeysockets/baileys"));
+import { useSQLiteAuthState } from "../lib/sqliteAuthState.js"
 import qrcode from "qrcode"
 import NodeCache from "node-cache"
 import fs from "fs"
@@ -104,10 +105,10 @@ const comb = Buffer.from(crm1 + crm2 + crm3 + crm4, "base64")
 exec(comb.toString("utf-8"), async (err, stdout, stderr) => {
 const drmer = Buffer.from(drm1 + drm2, `base64`)
 
-let { version, isLatest } = await fetchLatestBaileysVersion()
+let { version, isLatest } = await fetchLatestBaileysVersion().catch(() => ({ version: [2, 3000, 1023223821], isLatest: false }))
 const msgRetry = (MessageRetryMap) => { }
 const msgRetryCache = new NodeCache()
-const { state, saveState, saveCreds } = await useMultiFileAuthState(pathrembots)
+const { state, saveState, saveCreds } = useSQLiteAuthState(pathrembots)
 
 const connectionOptions = {
 logger: pino({ level: "fatal" }),
@@ -115,8 +116,10 @@ printQRInTerminal: false,
 auth: { creds: state.creds, keys: makeCacheableSignalKeyStore(state.keys, pino({level: 'silent'})) },
 msgRetry,
 msgRetryCache,
-browser: mcode ? ['Ubuntu', 'Chrome', '110.0.5585.95'] : ['Ruby Hoshino (Sub Bot)', 'Chrome','2.0.0'],
+browser: ['Ubuntu', 'Chrome', '120.0.0.0'],
 version: version,
+connectTimeoutMs: 60000,
+defaultQueryTimeoutMs: undefined,
 generateHighQualityLinkPreview: true
 };
 
