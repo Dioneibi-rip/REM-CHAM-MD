@@ -28,10 +28,10 @@ import { Low, JSONFile } from "lowdb";
 import pino from "pino";
 import { mongoDB, mongoDBV2 } from "./lib/mongoDB.js";
 import { SQLiteJSONAdapter } from "./lib/sqliteDB.js";
+import { useSQLiteAuthState } from "./lib/sqliteAuthState.js";
 import store from "./lib/store.js";
 import { Boom } from "@hapi/boom";
 const {
-  useMultiFileAuthState,
   DisconnectReason,
   fetchLatestBaileysVersion,
   MessageRetryMap,
@@ -147,9 +147,7 @@ loadDatabase();
 global.databaseWriteDeferUntil = Date.now() + 120000;
 
 global.authFile = `session`;
-const { state, saveState, saveCreds } = await useMultiFileAuthState(
-  global.authFile,
-);
+const { state, saveState, saveCreds } = useSQLiteAuthState(global.authFile);
 const msgRetryCounterMap = (MessageRetryMap) => {};
 const msgRetryCounterCache = new NodeCache();
 async function getLatestWaWebVersion() {
@@ -198,7 +196,7 @@ const connectionOptions = {
   logger: pino({ level: "silent" }),
   printQRInTerminal: opcion == "1" ? true : false,
   mobile: MethodMobile,
-  browser: ["Mac OS", "Chrome", "120.0.0.0"],
+  browser: ["Ubuntu", "Chrome", "120.0.0.0"],
   auth: {
     creds: state.creds,
     keys: makeCacheableSignalKeyStore(
@@ -216,6 +214,7 @@ const connectionOptions = {
   msgRetryCounterCache,
   msgRetryCounterMap,
   defaultQueryTimeoutMs: undefined,
+  connectTimeoutMs: 60000,
   version,
 };
 
