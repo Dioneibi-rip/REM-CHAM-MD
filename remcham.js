@@ -144,6 +144,7 @@ global.loadDatabase = async function loadDatabase() {
   global.db.chain = chain(global.db.data);
 };
 loadDatabase();
+global.databaseWriteDeferUntil = Date.now() + 120000;
 
 global.authFile = `session`;
 const { state, saveState, saveCreds } = await useMultiFileAuthState(
@@ -369,7 +370,8 @@ conn.isInit = false;
 
 if (!opts["test"]) {
   setInterval(async () => {
-    if (global.db.data) await global.db.write().catch(console.error);
+    const deferDatabaseWrite = !conn?.authState?.creds?.registered && Date.now() < global.databaseWriteDeferUntil;
+    if (global.db.data && !deferDatabaseWrite) await global.db.write().catch(console.error);
     if (opts["autocleartmp"])
       try {
         clearTmp();
@@ -389,7 +391,6 @@ async function clearTmp() {
     readdirSync(dirname).forEach((file) => filename.push(join(dirname, file))),
   );
 
-  //---
   return filename.map((file) => {
     const stats = statSync(file);
     if (stats.isFile() && Date.now() - stats.mtimeMs >= 1000 * 60 * 1)
@@ -413,11 +414,11 @@ async function connectionUpdate(update) {
     global.timestamp.connect = new Date();
   }
 
+  if (connection === "open" || conn?.authState?.creds?.registered) global.databaseWriteDeferUntil = 0;
   if (global.db.data == null) loadDatabase();
-} //-- cu
+}
 
 process.on("uncaughtException", console.error);
-// let strQuot = /(["'])(?:(?=(\\?))\2.)*?\1/
 
 let isInit = true;
 let handler = await import("./handler.js");
