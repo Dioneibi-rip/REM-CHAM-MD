@@ -28,7 +28,7 @@ import { Low, JSONFile } from "lowdb";
 import pino from "pino";
 import { mongoDB, mongoDBV2 } from "./lib/mongoDB.js";
 import { SQLiteJSONAdapter } from "./lib/sqliteDB.js";
-import { useSQLiteAuthState } from "./lib/sqliteAuthState.js";
+import { useOptimizedAuthState, createManagerDatabase } from "./lib/sqliteAuthState.js";
 import store from "./lib/store.js";
 import { Boom } from "@hapi/boom";
 const {
@@ -38,6 +38,7 @@ const {
   makeCacheableSignalKeyStore,
   jidNormalizedUser,
   PHONENUMBER_MCC,
+  proto,
 } = await import("@whiskeysockets/baileys");
 import moment from "moment-timezone";
 import NodeCache from "node-cache";
@@ -147,7 +148,9 @@ loadDatabase();
 global.databaseWriteDeferUntil = Date.now() + 120000;
 
 global.authFile = `session`;
-const { state, saveState, saveCreds } = useSQLiteAuthState(global.authFile);
+global.authCredsFlushers ||= new Set();
+const { state, saveCreds } = await useOptimizedAuthState(`./${global.authFile}`, { dbName: "auth.db", cleanOldFiles: true, sessionId: "main" });
+global.authManagerDb = await createManagerDatabase({ dbPath: `./${global.authFile}/system.db`, tableName: "bot_registry" });
 const msgRetryCounterMap = (MessageRetryMap) => {};
 const msgRetryCounterCache = new NodeCache();
 async function getLatestWaWebVersion() {
@@ -174,11 +177,7 @@ const question = (texto) =>
   new Promise((resolver) => rl.question(texto, resolver));
 
 let opcion;
-if (
-  !fs.existsSync(`./${authFile}/creds.json`) &&
-  !methodCodeQR &&
-  !methodCode
-) {
+if (!methodCodeQR && !methodCode && !state.creds?.registered) {
   while (true) {
     opcion = await question(
       "\n\nꨄ︎ ¿𝙲𝙾𝙼𝙾 𝚀𝚄𝙸𝙴𝚁𝙴𝚂 𝙸𝙽𝙸𝙲𝙸𝙰𝚁 𝚂𝙴𝚂𝙸𝙾𝙽?\n⤷ 1 : 𝙿𝙾𝚁 𝚀𝚁\n⤷ 2 : 𝙼𝙴𝙳𝙸𝙰𝙽𝚃𝙴 𝙲𝙾𝙳𝙸𝙶𝙾\n\n\n",
@@ -205,23 +204,28 @@ const connectionOptions = {
     ),
   },
   markOnlineOnConnect: true,
-  generateHighQualityLinkPreview: true,
+  generateHighQualityLinkPreview: false,
   getMessage: async (clave) => {
     let jid = jidNormalizedUser(clave.remoteJid);
     let msg = await store.loadMessage(jid, clave.id);
-    return msg?.message || "";
+    return msg?.message;
   },
   msgRetryCounterCache,
   msgRetryCounterMap,
-  defaultQueryTimeoutMs: undefined,
-  connectTimeoutMs: 60000,
+  defaultQueryTimeoutMs: 60000,
   version,
+  syncFullHistory: true,
+  shouldSyncHistoryMessage: ({ syncType } = {}) => syncType !== proto.HistorySync.HistorySyncType.FULL,
+  fireInitQueries: true,
+  emitOwnEvents: true,
+  waWebSocketUrl: "wss://web.whatsapp.com/ws/chat",
+  connectTimeoutMs: 20000,
+  keepAliveIntervalMs: 30000,
+  retryRequestDelayMs: 250,
 };
 
-//--
-global.conn = await makeWASocket(connectionOptions);
-
-//Arranque nativo para subbots by - ReyEndymion >> https://github.com/ReyEndymion
+const pairingRequested = !state.creds?.registered && (opcion === "2" || methodCode);
+global.conn = await makeWASocket(connectionOptions, { skipStoreBind: pairingRequested });
 
 global.rutaJadiBot = join(__dirname, './rembots')
 
@@ -382,7 +386,6 @@ if (!opts["test"]) {
 
 if (opts["server"]) (await import("./server.js")).default(global.conn, PORT);
 
-/* Clear */
 async function clearTmp() {
   const tmp = [tmpdir(), join(__dirname, "./tmp")];
   const filename = [];
@@ -540,7 +543,6 @@ Object.freeze(global.reload);
 watch(pluginFolder, global.reload);
 await global.reloadHandler();
 
-// Quick Test
 async function _quickTest() {
   let test = await Promise.all(
     [
@@ -586,7 +588,6 @@ async function _quickTest() {
     gm,
     find,
   });
-  // require('./lib/sticker').support = s
   Object.freeze(global.support);
 
   if (!s.ffmpeg)
