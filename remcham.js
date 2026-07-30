@@ -219,7 +219,7 @@ const connectionOptions = {
 };
 
 //--
-global.conn = makeWASocket(connectionOptions);
+global.conn = await makeWASocket(connectionOptions);
 
 //Arranque nativo para subbots by - ReyEndymion >> https://github.com/ReyEndymion
 
@@ -436,7 +436,7 @@ global.reloadHandler = async function (restatConn) {
       global.conn.ws.close();
     } catch {}
     conn.ev.removeAllListeners();
-    global.conn = makeWASocket(connectionOptions, { chats: oldChats });
+    global.conn = await makeWASocket(connectionOptions, { chats: oldChats });
     isInit = true;
   }
   if (!isInit) {
