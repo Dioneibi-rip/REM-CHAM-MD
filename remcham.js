@@ -27,6 +27,7 @@ import { makeWASocket, protoType, serialize } from "./lib/simple.js";
 import { Low, JSONFile } from "lowdb";
 import pino from "pino";
 import { mongoDB, mongoDBV2 } from "./lib/mongoDB.js";
+import { SQLiteJSONAdapter } from "./lib/sqliteDB.js";
 import store from "./lib/store.js";
 import { Boom } from "@hapi/boom";
 const {
@@ -111,7 +112,7 @@ global.db = new Low(
       ? opts["mongodbv2"]
         ? new mongoDBV2(opts["db"])
         : new mongoDB(opts["db"])
-      : new JSONFile(`${opts._[0] ? opts._[0] + "_" : ""}database.json`),
+      : new SQLiteJSONAdapter(`${opts._[0] ? opts._[0] + "_" : ""}database.sqlite`),
 );
 
 global.DATABASE = global.db;
@@ -150,7 +151,16 @@ const { state, saveState, saveCreds } = await useMultiFileAuthState(
 );
 const msgRetryCounterMap = (MessageRetryMap) => {};
 const msgRetryCounterCache = new NodeCache();
-const { version } = await fetchLatestBaileysVersion();
+async function getLatestWaWebVersion() {
+  try {
+    const latest = await fetchLatestBaileysVersion();
+    if (latest?.version) return latest.version;
+  } catch (error) {
+    console.warn(chalk.yellow(`No se pudo obtener la última versión de WhatsApp Web, usando fallback: ${error.message}`));
+  }
+  return [2, 3000, 1023223821];
+}
+const version = await getLatestWaWebVersion();
 let phoneNumber = global.botNumber;
 
 const methodCodeQR = process.argv.includes("qr");
@@ -187,7 +197,7 @@ const connectionOptions = {
   logger: pino({ level: "silent" }),
   printQRInTerminal: opcion == "1" ? true : false,
   mobile: MethodMobile,
-  browser: ["Ubuntu", "Chrome", "20.0.04"],
+  browser: ["Mac OS", "Chrome", "120.0.0.0"],
   auth: {
     creds: state.creds,
     keys: makeCacheableSignalKeyStore(
@@ -209,7 +219,7 @@ const connectionOptions = {
 };
 
 //--
-global.conn = makeWASocket(connectionOptions);
+global.conn = await makeWASocket(connectionOptions);
 
 //Arranque nativo para subbots by - ReyEndymion >> https://github.com/ReyEndymion
 
@@ -426,7 +436,7 @@ global.reloadHandler = async function (restatConn) {
       global.conn.ws.close();
     } catch {}
     conn.ev.removeAllListeners();
-    global.conn = makeWASocket(connectionOptions, { chats: oldChats });
+    global.conn = await makeWASocket(connectionOptions, { chats: oldChats });
     isInit = true;
   }
   if (!isInit) {
